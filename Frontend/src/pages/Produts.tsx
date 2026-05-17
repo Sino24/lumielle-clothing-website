@@ -1,5 +1,7 @@
+// src/pages/Products.tsx
+
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/PageStyle/Products.css";
 
 interface ColorEntry {
@@ -26,30 +28,25 @@ interface Product {
 
 const ITEMS_PER_PAGE = 8;
 
-function Products() {
 const API_BASE =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:8000";
+  import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+function Products() {
+  const navigate = useNavigate();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [activeCategory, setActiveCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  // ── Fetch Products ─────────────────────────────────────
+  // ── Fetch ───────────────────────────────────────────────────────────────
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch(`${API_BASE}/api/products`);
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch products");
-        }
-
+        if (!res.ok) throw new Error("Failed to fetch products");
         const data = await res.json();
-
         setProducts(data);
       } catch (error) {
         console.error(error);
@@ -57,35 +54,32 @@ const API_BASE =
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
-  // ── Categories ────────────────────────────────────────
-  const categories = [
-    "All",
-    ...new Set(products.map((p) => p.category)),
-  ];
+  // ── Categories ────────────────────────────────────────────────────────
+  const categories = ["All", ...new Set(products.map((p) => p.category))];
 
-  // ── Filter ────────────────────────────────────────────
+  // ── Filter + Pagination ───────────────────────────────────────────────
   const filtered =
     activeCategory === "All"
       ? products
       : products.filter((p) => p.category === activeCategory);
 
-  // ── Pagination ────────────────────────────────────────
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-
   const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
-
-  const paginated = filtered.slice(
-    startIdx,
-    startIdx + ITEMS_PER_PAGE
-  );
+  const paginated = filtered.slice(startIdx, startIdx + ITEMS_PER_PAGE);
 
   const handleCategoryChange = (cat: string) => {
     setActiveCategory(cat);
     setCurrentPage(1);
+  };
+
+  // ── Buy Now ───────────────────────────────────────────────────────────
+  const handleBuyNow = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/products/${product._id}`);
   };
 
   return (
@@ -93,22 +87,14 @@ const API_BASE =
 
       {/* HEADER */}
       <section className="products__header">
-        <p className="products__header-eyebrow">
-          The Collection
-        </p>
-
+        <p className="products__header-eyebrow">The Collection</p>
         <h1 className="products__header-title">
           All <em>Essentials</em>
         </h1>
-
         <p className="products__header-sub">
           Timeless cuts. Considered fabrics. Made to last.
         </p>
-
-        <div
-          className="products__header-rule"
-          aria-hidden="true"
-        />
+        <div className="products__header-rule" aria-hidden="true" />
       </section>
 
       {/* FILTERS */}
@@ -123,51 +109,38 @@ const API_BASE =
             role="tab"
             aria-selected={activeCategory === cat}
             className={`products__filter-btn ${
-              activeCategory === cat
-                ? "products__filter-btn--active"
-                : ""
+              activeCategory === cat ? "products__filter-btn--active" : ""
             }`}
             onClick={() => handleCategoryChange(cat)}
           >
             {cat}
           </button>
         ))}
-
-        <span className="products__filter-count">
-          {filtered.length} items
-        </span>
+        <span className="products__filter-count">{filtered.length} items</span>
       </div>
 
-      {/* PRODUCTS */}
+      {/* GRID */}
       <section className="products__grid-section">
-
         {loading ? (
           <div className="products__empty">
-            <p>Loading products...</p>
+            <div className="products__spin" />
           </div>
         ) : (
           <div className="products__grid">
-
             {paginated.map((product, i) => (
               <article
                 className="products__card"
                 key={product._id}
                 style={{ "--i": i } as React.CSSProperties}
-                onMouseEnter={() =>
-                  setHoveredId(product._id)
-                }
-                onMouseLeave={() =>
-                  setHoveredId(null)
-                }
+                onMouseEnter={() => setHoveredId(product._id)}
+                onMouseLeave={() => setHoveredId(null)}
               >
-
                 {/* IMAGE */}
                 <Link
                   to={`/products/${product._id}`}
                   className="products__card-img-link"
                 >
                   <div className="products__card-img-wrap">
-
                     <img
                       src={product.img}
                       alt={product.name}
@@ -185,6 +158,7 @@ const API_BASE =
                       </span>
                     )}
 
+                    {/* Overlay — Buy Now */}
                     <div
                       className={`products__card-overlay ${
                         hoveredId === product._id
@@ -193,33 +167,31 @@ const API_BASE =
                       }`}
                     >
                       <button
-                        className="products__card-quick-add"
-                        onClick={(e) =>
-                          e.preventDefault()
-                        }
+                        className="products__card-cart-btn"
+                        onClick={(e) => handleBuyNow(e, product)}
                       >
-                        Quick Add
+                        Buy Now
                       </button>
 
-                      <div className="products__card-colors">
-                        {product.colors?.map((color) => (
-                          <span
-                            key={color.hex}
-                            className="products__card-color-dot"
-                            style={{
-                              background: color.hex,
-                            }}
-                            aria-label={color.label}
-                          />
-                        ))}
-                      </div>
+                      {/* Color swatches */}
+                      {product.colors && product.colors.length > 0 && (
+                        <div className="products__card-colors">
+                          {product.colors.map((color) => (
+                            <span
+                              key={color.hex}
+                              className="products__card-color-dot"
+                              style={{ background: color.hex }}
+                              aria-label={color.label}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Link>
 
                 {/* INFO */}
                 <div className="products__card-info">
-
                   <div className="products__card-meta">
                     <span className="products__card-category">
                       {product.category}
@@ -234,11 +206,9 @@ const API_BASE =
                   </Link>
 
                   <div className="products__card-pricing">
-
                     <span className="products__card-price">
                       {product.price}
                     </span>
-
                     {product.originalPrice && (
                       <span className="products__card-original">
                         {product.originalPrice}
@@ -261,37 +231,22 @@ const API_BASE =
 
       {/* PAGINATION */}
       {totalPages > 1 && (
-        <nav
-          className="products__pagination"
-          aria-label="Pagination"
-        >
-
+        <nav className="products__pagination" aria-label="Pagination">
           <button
             className="products__page-btn products__page-btn--arrow"
-            onClick={() =>
-              setCurrentPage((p) =>
-                Math.max(p - 1, 1)
-              )
-            }
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
           >
             ←
           </button>
 
-          {Array.from(
-            { length: totalPages },
-            (_, i) => i + 1
-          ).map((page) => (
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
               className={`products__page-btn ${
-                currentPage === page
-                  ? "products__page-btn--active"
-                  : ""
+                currentPage === page ? "products__page-btn--active" : ""
               }`}
-              onClick={() =>
-                setCurrentPage(page)
-              }
+              onClick={() => setCurrentPage(page)}
             >
               {page}
             </button>
@@ -299,11 +254,7 @@ const API_BASE =
 
           <button
             className="products__page-btn products__page-btn--arrow"
-            onClick={() =>
-              setCurrentPage((p) =>
-                Math.min(p + 1, totalPages)
-              )
-            }
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
             disabled={currentPage === totalPages}
           >
             →
@@ -311,17 +262,13 @@ const API_BASE =
         </nav>
       )}
 
-      {/* BOTTOM */}
+      {/* BOTTOM BANNER */}
       <section className="products__bottom-banner">
         <p className="products__bottom-text">
           Can't decide? &nbsp;
           <em>Let the fabric decide.</em>
         </p>
-
-        <Link
-          className="products__bottom-btn"
-          to="/product"
-        >
+        <Link className="products__bottom-btn" to="/lookbook">
           View Lookbook
         </Link>
       </section>

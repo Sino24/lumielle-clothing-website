@@ -1,7 +1,7 @@
 // src/pages/Home.tsx
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/PageStyle/Home.css";
 
 import heroImage from "../assets/home.png";
@@ -15,14 +15,15 @@ interface Product {
   img: string;
   images: string[];
   category: string;
+  sizes: string[];
+  colors: { label: string; hex: string }[];
 }
 
 const API_BASE =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:8000";
-
+  import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 function Home() {
+  const navigate = useNavigate();
   const [featured, setFeatured] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,6 +37,12 @@ function Home() {
       .catch(() => setLoading(false));
   }, []);
 
+  const handleBuyNow = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/products/${product._id}`);
+  };
+
   return (
     <main className="home">
 
@@ -44,7 +51,7 @@ function Home() {
         <img
           className="home__hero-img"
           src={heroImage}
-          alt="Drip summer collection editorial"
+          alt="Lumielle summer collection editorial"
         />
         <div className="home__hero-overlay" aria-hidden="true" />
 
@@ -55,7 +62,7 @@ function Home() {
             <br />
             confidence.
           </h1>
-          <Link className="home__hero-cta" to="/product">
+          <Link className="home__hero-cta" to="/products">
             Explore the collection &nbsp;→
           </Link>
         </div>
@@ -85,24 +92,37 @@ function Home() {
                 <article className="home__product-card">
                   <div className="home__product-img-wrap">
                     {product.img ? (
-                      <img src={product.img} alt={product.name} loading="lazy" />
+                      <img
+                        src={product.img}
+                        alt={product.name}
+                        loading="lazy"
+                      />
                     ) : (
                       <div className="home__img-placeholder">👕</div>
                     )}
+
                     {product.badge && (
-                      <span className="home__product-badge">{product.badge}</span>
+                      <span className="home__product-badge">
+                        {product.badge}
+                      </span>
                     )}
+
+                    {/* Buy Now button */}
                     <button
-                      className="home__product-quick-add"
-                      onClick={(e) => e.preventDefault()}
+                      className="home__product-cart-btn"
+                      onClick={(e) => handleBuyNow(e, product)}
                     >
-                      Quick Add
+                      Buy Now
                     </button>
                   </div>
 
                   <div className="home__product-info">
-                    <span className="home__product-name">{product.name}</span>
-                    <span className="home__product-price">{product.price}</span>
+                    <span className="home__product-name">
+                      {product.name}
+                    </span>
+                    <span className="home__product-price">
+                      {product.price}
+                    </span>
                   </div>
                 </article>
               </Link>
@@ -118,7 +138,7 @@ function Home() {
           <br />
           Make yours <em>unforgettable.</em>
         </p>
-        <Link className="home__banner-btn" to="/product">
+        <Link className="home__banner-btn" to="/products">
           Shop All
         </Link>
       </section>

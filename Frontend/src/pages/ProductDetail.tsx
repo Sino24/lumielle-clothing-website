@@ -1,3 +1,5 @@
+// src/pages/ProductDetail.tsx
+
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import "../styles/PageStyle/ProductDetail.css";
@@ -26,25 +28,24 @@ interface ProductData {
 
 function ProductDetail() {
   const API_BASE =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:8000";
+    import.meta.env.VITE_API_URL || "http://localhost:8000";
 
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  const [product, setProduct] = useState<ProductData | null>(null);
-  const [related, setRelated] = useState<ProductData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [product, setProduct]   = useState<ProductData | null>(null);
+  const [related, setRelated]   = useState<ProductData[]>([]);
+  const [loading, setLoading]   = useState(true);
 
-  const [activeImg, setActiveImg] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(0);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [qty, setQty] = useState(1);
-  const [openTab, setOpenTab] = useState<"details" | "care">("details");
-  const [addedToCart, setAddedToCart] = useState(false);
-  const [zoomActive, setZoomActive] = useState(false);
-  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const [activeImg,      setActiveImg]      = useState(0);
+  const [selectedColor,  setSelectedColor]  = useState(0);
+  const [selectedSize,   setSelectedSize]   = useState<string | null>(null);
+  const [qty,            setQty]            = useState(1);
+  const [openTab,        setOpenTab]        = useState<"details" | "care">("details");
+  const [addedToCart,    setAddedToCart]    = useState(false);
+  const [zoomActive,     setZoomActive]     = useState(false);
+  const [zoomPos,        setZoomPos]        = useState({ x: 50, y: 50 });
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -57,7 +58,10 @@ function ProductDetail() {
         const allRes = await fetch(`${API_BASE}/api/products`);
         const allProducts = await allRes.json();
         const relatedProducts = allProducts
-          .filter((p: ProductData) => p.category === data.category && p._id !== data._id)
+          .filter(
+            (p: ProductData) =>
+              p.category === data.category && p._id !== data._id
+          )
           .slice(0, 3);
         setRelated(relatedProducts);
       } catch (error) {
@@ -69,25 +73,39 @@ function ProductDetail() {
     fetchProduct();
   }, [id]);
 
-const handleAddToCart = () => {
-  if (!selectedSize || !product) return;
+  // ── Add to Cart ───────────────────────────────────────────────────────
+  const handleAddToCart = () => {
+    if (!selectedSize || !product) return;
 
-  addToCart({
-    _id: product._id,
-    name: product.name,
-    price: product.price,
-    img: product.img,
-    size: selectedSize,
-    quantity: qty,
-  });
+    addToCart({
+      _id:      product._id,
+      name:     product.name,
+      price:    product.price,
+      img:      product.img,
+      size:     selectedSize,
+      quantity: qty,
+    });
 
-  setAddedToCart(true);
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 2200);
+  };
 
-  setTimeout(() => {
-    setAddedToCart(false);
-  }, 2200);
-};
+  // ── Go to Cart ────────────────────────────────────────────────────────
+  const handleGoToCart = () => {
+    if (selectedSize && product) {
+      addToCart({
+        _id:      product._id,
+        name:     product.name,
+        price:    product.price,
+        img:      product.img,
+        size:     selectedSize,
+        quantity: qty,
+      });
+    }
+    navigate("/cart");
+  };
 
+  // ── Zoom ──────────────────────────────────────────────────────────────
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -98,7 +116,7 @@ const handleAddToCart = () => {
   if (loading) {
     return (
       <main className="pd-missing">
-        <p>Loading product...</p>
+        <div className="pd-missing__spin" />
       </main>
     );
   }
@@ -136,7 +154,7 @@ const handleAddToCart = () => {
         {/* ── Gallery ── */}
         <div className="pd__gallery">
 
-          {/* Thumbnail strip */}
+          {/* Thumbnails */}
           <div className="pd__thumbs" role="list">
             {allImages.map((img, i) => (
               <button
@@ -157,7 +175,6 @@ const handleAddToCart = () => {
             onMouseLeave={() => setZoomActive(false)}
             onMouseMove={handleMouseMove}
           >
-            {/* Normal image — always rendered, fades when zoom kicks in */}
             <img
               key={currentImageUrl}
               src={currentImageUrl}
@@ -165,11 +182,6 @@ const handleAddToCart = () => {
               className={`pd__main-img ${zoomActive ? "pd__main-img--faded" : ""}`}
             />
 
-            {/*
-              Zoom overlay — sits on top of the img, fills the entire wrapper,
-              uses background-image so it is ABOVE the img element in stacking order.
-              background-size: 250% gives 2.5× magnification.
-            */}
             <div
               className={`pd__zoom-overlay ${zoomActive ? "pd__zoom-overlay--active" : ""}`}
               style={{
@@ -181,12 +193,18 @@ const handleAddToCart = () => {
             />
 
             {product.badge && (
-              <span className={`pd__badge pd__badge--${product.badge.toLowerCase().replace(/\s+/g, "-")}`}>
+              <span
+                className={`pd__badge pd__badge--${product.badge
+                  .toLowerCase()
+                  .replace(/\s+/g, "-")}`}
+              >
                 {product.badge}
               </span>
             )}
 
-            <span className={`pd__zoom-hint ${zoomActive ? "pd__zoom-hint--hidden" : ""}`}>
+            <span
+              className={`pd__zoom-hint ${zoomActive ? "pd__zoom-hint--hidden" : ""}`}
+            >
               Hover to zoom
             </span>
           </div>
@@ -209,6 +227,7 @@ const handleAddToCart = () => {
           <p className="pd__category">{product.category}</p>
           <h1 className="pd__name">{product.name}</h1>
 
+          {/* Pricing */}
           <div className="pd__pricing">
             <span className="pd__price">{product.price}</span>
             {product.originalPrice && (
@@ -238,13 +257,17 @@ const handleAddToCart = () => {
             <div className="pd__option-group">
               <p className="pd__option-label">
                 Colour —
-                <span className="pd__option-value"> {product.colors[selectedColor]?.label}</span>
+                <span className="pd__option-value">
+                  {" "}{product.colors[selectedColor]?.label}
+                </span>
               </p>
               <div className="pd__colors">
                 {product.colors.map((c, i) => (
                   <button
                     key={i}
-                    className={`pd__color-swatch ${selectedColor === i ? "pd__color-swatch--active" : ""}`}
+                    className={`pd__color-swatch ${
+                      selectedColor === i ? "pd__color-swatch--active" : ""
+                    }`}
                     style={{ background: c.hex }}
                     onClick={() => setSelectedColor(i)}
                     title={c.label}
@@ -260,68 +283,111 @@ const handleAddToCart = () => {
               <div className="pd__size-header">
                 <p className="pd__option-label">
                   Size
-                  {selectedSize && <span className="pd__option-value"> — {selectedSize}</span>}
+                  {selectedSize && (
+                    <span className="pd__option-value"> — {selectedSize}</span>
+                  )}
                 </p>
               </div>
               <div className="pd__sizes">
                 {product.sizes.map((size) => (
                   <button
                     key={size}
-                    className={`pd__size-btn ${selectedSize === size ? "pd__size-btn--active" : ""}`}
+                    className={`pd__size-btn ${
+                      selectedSize === size ? "pd__size-btn--active" : ""
+                    }`}
                     onClick={() => setSelectedSize(size)}
                   >
                     {size}
                   </button>
                 ))}
               </div>
-              {!selectedSize && <p className="pd__size-hint">Please select a size</p>}
+              {!selectedSize && (
+                <p className="pd__size-hint">Please select a size</p>
+              )}
             </div>
           )}
 
-          {/* Actions */}
+          {/* ── Actions ── */}
           <div className="pd__actions">
-            <div className="pd__qty">
-              <button className="pd__qty-btn" onClick={() => setQty((q) => Math.max(1, q - 1))}>−</button>
-              <span className="pd__qty-value">{qty}</span>
-              <button className="pd__qty-btn" onClick={() => setQty((q) => q + 1)}>+</button>
+
+            {/* Row 1: Qty + Add to Cart */}
+            <div className="pd__actions-primary">
+              <div className="pd__qty">
+                <button
+                  className="pd__qty-btn"
+                  onClick={() => setQty((q) => Math.max(1, q - 1))}
+                >
+                  −
+                </button>
+                <span className="pd__qty-value">{qty}</span>
+                <button
+                  className="pd__qty-btn"
+                  onClick={() => setQty((q) => q + 1)}
+                >
+                  +
+                </button>
+              </div>
+
+              <button
+                className={`pd__add-btn ${addedToCart ? "pd__add-btn--success" : ""} ${
+                  !selectedSize ? "pd__add-btn--disabled" : ""
+                }`}
+                onClick={handleAddToCart}
+                disabled={!selectedSize}
+              >
+                {addedToCart ? "✓ Added" : "Add to Cart"}
+              </button>
             </div>
+
+            {/* Row 2: Go to Cart — full width */}
             <button
-              className={`pd__add-btn ${addedToCart ? "pd__add-btn--success" : ""} ${!selectedSize ? "pd__add-btn--disabled" : ""}`}
-              onClick={handleAddToCart}
-              disabled={!selectedSize}
+              className="pd__go-cart-btn"
+              onClick={handleGoToCart}
             >
-              {addedToCart ? "✓ Added to cart" : "Add to Cart"}
+              Go to Cart →
             </button>
+
           </div>
 
           {/* Tabs */}
           <div className="pd__tabs">
             <div className="pd__tab-headers">
               <button
-                className={`pd__tab-btn ${openTab === "details" ? "pd__tab-btn--active" : ""}`}
+                className={`pd__tab-btn ${
+                  openTab === "details" ? "pd__tab-btn--active" : ""
+                }`}
                 onClick={() => setOpenTab("details")}
               >
                 Product Details
               </button>
               <button
-                className={`pd__tab-btn ${openTab === "care" ? "pd__tab-btn--active" : ""}`}
+                className={`pd__tab-btn ${
+                  openTab === "care" ? "pd__tab-btn--active" : ""
+                }`}
                 onClick={() => setOpenTab("care")}
               >
                 Care Instructions
               </button>
             </div>
+
             <div className="pd__tab-content">
               {openTab === "details" && (
                 <ul className="pd__detail-list">
                   {product.details?.map((d, i) => (
-                    <li key={i}><span className="pd__detail-dot">—</span>{d}</li>
+                    <li key={i}>
+                      <span className="pd__detail-dot">—</span>
+                      {d}
+                    </li>
                   ))}
                 </ul>
               )}
               {openTab === "care" && (
                 <ul className="pd__detail-list">
                   {product.careInstructions?.map((c, i) => (
-                    <li key={i}><span className="pd__detail-dot">—</span>{c}</li>
+                    <li key={i}>
+                      <span className="pd__detail-dot">—</span>
+                      {c}
+                    </li>
                   ))}
                 </ul>
               )}
@@ -335,18 +401,27 @@ const handleAddToCart = () => {
       {related.length > 0 && (
         <section className="pd__related">
           <p className="pd__related-eyebrow">You might also like</p>
-          <h2 className="pd__related-title">From the same <em>collection</em></h2>
+          <h2 className="pd__related-title">
+            From the same <em>collection</em>
+          </h2>
           <div className="pd__related-grid">
             {related.map((rp) => (
               <article
                 key={rp._id}
                 className="pd__related-card"
-                onClick={() => { navigate(`/products/${rp._id}`); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                onClick={() => {
+                  navigate(`/products/${rp._id}`);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
               >
                 <div className="pd__related-img-wrap">
                   <img src={rp.img} alt={rp.name} />
                   {rp.badge && (
-                    <span className={`pd__badge pd__badge--${rp.badge.toLowerCase().replace(/\s+/g, "-")}`}>
+                    <span
+                      className={`pd__badge pd__badge--${rp.badge
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}`}
+                    >
                       {rp.badge}
                     </span>
                   )}
@@ -360,6 +435,7 @@ const handleAddToCart = () => {
           </div>
         </section>
       )}
+
     </main>
   );
 }

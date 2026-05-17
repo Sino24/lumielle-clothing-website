@@ -128,22 +128,21 @@
 .pd__thumb:hover img { transform: scale(1.06); }
 .pd__thumb--active   { border-color: var(--ink); }
 
-/* ── Main image wrapper — KEY zoom container ── */
+/* ── Main image wrapper ── */
 .pd__main-img-wrap {
   grid-row: 1;
   grid-column: 2;
-  position: relative;          /* stacking context for children */
+  position: relative;
   border-radius: 10px;
-  overflow: hidden;            /* clips the overlay to the rounded box */
+  overflow: hidden;
   background: var(--surface);
   aspect-ratio: 3 / 4;
   cursor: crosshair;
 }
 
-/* The regular <img> — always rendered underneath */
 .pd__main-img {
   position: relative;
-  z-index: 1;                  /* below the overlay */
+  z-index: 1;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -152,7 +151,6 @@
   animation: img-swap 0.3s var(--ease) both;
 }
 
-/* Fade the real image out so the overlay is fully visible */
 .pd__main-img--faded {
   opacity: 0;
 }
@@ -162,22 +160,22 @@
   to   { opacity: 1; }
 }
 
-/* ── Zoom overlay — sits ON TOP of the img ── */
+/* ── Zoom overlay ── */
 .pd__zoom-overlay {
   position: absolute;
-  inset: 0;                    /* fills the entire wrapper */
-  z-index: 2;                  /* above the real img */
+  inset: 0;
+  z-index: 2;
   opacity: 0;
-  pointer-events: none;        /* don't block mouse events on the wrapper */
+  pointer-events: none;
   transition: opacity 0.1s linear;
-  border-radius: 10px;         /* match parent */
+  border-radius: 10px;
 }
 
 .pd__zoom-overlay--active {
   opacity: 1;
 }
 
-/* Badge — above everything */
+/* Badge */
 .pd__badge {
   position: absolute;
   top: 14px;
@@ -197,7 +195,7 @@
 .pd__badge--sale        { background: var(--badge-sale); }
 .pd__badge--best-seller { background: var(--badge-best); }
 
-/* Zoom hint pill */
+/* Zoom hint */
 .pd__zoom-hint {
   position: absolute;
   bottom: 14px;
@@ -424,7 +422,21 @@
 }
 
 /* ── Actions ─────────────────────────────────────────────────────────────────── */
+/*
+  Layout:
+  ┌──────────────────────────────────┐
+  │  [− qty +]   [  Add to Cart   ]  │  ← primary row
+  │  [        Go to Cart →         ]  │  ← full-width row
+  └──────────────────────────────────┘
+*/
 .pd__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Primary row: qty + add-to-cart side by side */
+.pd__actions-primary {
   display: flex;
   gap: 12px;
   align-items: stretch;
@@ -467,6 +479,7 @@
   line-height: 52px;
 }
 
+/* Add to Cart — fills remaining space in the primary row */
 .pd__add-btn {
   flex: 1;
   height: 52px;
@@ -495,11 +508,34 @@
   background: var(--badge-new) !important;
   border-color: var(--badge-new) !important;
   color: #fff !important;
+  animation: cart-success-pop 0.35s ease;
 }
 
 .pd__add-btn--disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* Go to Cart — spans full width on its own row */
+.pd__go-cart-btn {
+  width: 100%;
+  height: 52px;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.pd__go-cart-btn:hover {
+  background: var(--surface);
+  border-color: var(--ink);
 }
 
 /* ── Tabs ────────────────────────────────────────────────────────────────────── */
@@ -652,6 +688,13 @@
   color: var(--muted);
 }
 
+/* ── Animations ──────────────────────────────────────────────────────────────── */
+@keyframes cart-success-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .pd__layout {
@@ -701,48 +744,35 @@
     order: 3;
   }
 
-  /* No hover on mobile — hide the hint and disable zoom cursor */
+  /* Disable zoom on mobile */
   .pd__zoom-hint { display: none; }
   .pd__main-img-wrap { cursor: default; }
   .pd__main-img--faded { opacity: 1; }
 
   .pd__related-grid { grid-template-columns: repeat(2, 1fr); }
 
-  .pd__actions { flex-direction: column; }
-  .pd__qty { width: fit-content; margin: 0 auto; }
-  .pd__add-btn { width: 100%; }
-}/* ── Add To Cart Success Animation ───────────────────────── */
+  /* Actions: already column layout, just ensure primary row stays side-by-side */
+  .pd__actions-primary {
+    flex-direction: row; /* keep qty + add-to-cart in one row on mobile too */
+  }
 
-.pd__add-btn--success {
-  animation: cart-success-pop 0.35s ease;
+  /* Shrink qty slightly on small screens */
+  .pd__qty-btn { width: 36px; }
+  .pd__qty-value { width: 36px; }
 }
 
-@keyframes cart-success-pop {
-  0% {
-    transform: scale(1);
+@media (max-width: 380px) {
+  /* Very small screens: stack everything */
+  .pd__actions-primary {
+    flex-direction: column;
   }
 
-  50% {
-    transform: scale(1.04);
+  .pd__qty {
+    width: fit-content;
+    margin: 0 auto;
   }
 
-  100% {
-    transform: scale(1);
-  }
-}/* ── Navbar Cart Badge ───────────────────────────────────── */
-
-.navbar__cart-badge {
-  animation: cart-badge-in 0.25s ease;
-}
-
-@keyframes cart-badge-in {
-  from {
-    transform: scale(0);
-    opacity: 0;
-  }
-
-  to {
-    transform: scale(1);
-    opacity: 1;
+  .pd__add-btn {
+    width: 100%;
   }
 }
