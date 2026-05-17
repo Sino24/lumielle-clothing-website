@@ -23,7 +23,10 @@ const BLANK: FormState = {
 };
 
 const AdminAuth: React.FC = () => {
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+ const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:8000";
+
   const navigate = useNavigate();
 
   const [mode, setMode] = useState<Mode>("login");
@@ -69,7 +72,7 @@ const AdminAuth: React.FC = () => {
     setError(null);
 
     const endpoint =
-      mode === "login" ? "/admin/login" : "/admin/signup";
+      mode === "login" ? "/api/admin/login" : "/api/admin/signup";
 
     const body =
       mode === "login"

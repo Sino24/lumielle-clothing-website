@@ -17,14 +17,17 @@ interface Product {
   category: string;
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:8000";
+
 
 function Home() {
   const [featured, setFeatured] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/products`)
+    fetch(`${API_BASE}/api/products`)
       .then((r) => r.json())
       .then((data: Product[]) => {
         setFeatured(data.slice(0, 3));

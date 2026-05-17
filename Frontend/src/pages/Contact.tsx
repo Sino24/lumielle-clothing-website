@@ -11,7 +11,7 @@ interface AboutData {
 type Status = "idle" | "loading" | "success" | "error";
 
 function Contact() {
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
   const [about, setAbout] = useState<AboutData | null>(null);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -19,7 +19,7 @@ function Contact() {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    fetch(`${API_BASE}/about`)
+    fetch(`${API_BASE}/api/about`)
       .then((r) => r.json())
       .then((d) => setAbout(d))
       .catch(() => {});

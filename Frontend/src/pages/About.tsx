@@ -39,12 +39,12 @@ const DEFAULTS: AboutData = {
 };
 
 function About() {
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/";
   const [data, setData] = useState<AboutData>(DEFAULTS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/about`)
+    fetch(`${API_BASE}/api/about`)
       .then((r) => r.json())
       .then((d) => setData({ ...DEFAULTS, ...d }))
       .catch(() => {}) // keep defaults on error

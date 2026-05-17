@@ -25,7 +25,9 @@ interface ProductData {
 }
 
 function ProductDetail() {
-  const API_BASE = "http://localhost:8000/api";
+  const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:8000";
 
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -47,12 +49,12 @@ function ProductDetail() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`${API_BASE}/products/${id}`);
+        const res = await fetch(`${API_BASE}/api/products/${id}`);
         if (!res.ok) throw new Error("Failed to fetch product");
         const data = await res.json();
         setProduct(data);
 
-        const allRes = await fetch(`${API_BASE}/products`);
+        const allRes = await fetch(`${API_BASE}/api/products`);
         const allProducts = await allRes.json();
         const relatedProducts = allProducts
           .filter((p: ProductData) => p.category === data.category && p._id !== data._id)

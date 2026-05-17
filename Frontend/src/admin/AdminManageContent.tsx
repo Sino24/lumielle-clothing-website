@@ -61,7 +61,10 @@ const LOOK_BLANK: Omit<LookEntry, "_id"> = {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 const ContentManage: React.FC = () => {
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:8000";
+
   const token = localStorage.getItem("adminToken") || "";
   const authHeader = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
@@ -101,7 +104,7 @@ const ContentManage: React.FC = () => {
   const fetchContacts = useCallback(async () => {
     setContactLoading(true);
     try {
-      const r = await fetch(`${API_BASE}/contact`, { headers: authHeader });
+      const r = await fetch(`${API_BASE}/api/contact`, { headers: authHeader });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       setContacts(await r.json());
     } catch (e: unknown) { showToast((e as Error).message, "error"); }
@@ -111,7 +114,7 @@ const ContentManage: React.FC = () => {
   const fetchLooks = useCallback(async () => {
     setLookLoading(true);
     try {
-      const r = await fetch(`${API_BASE}/lookbook/all`, { headers: authHeader });
+      const r = await fetch(`${API_BASE}/api/lookbook/all`, { headers: authHeader });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       setLooks(await r.json());
     } catch (e: unknown) { showToast((e as Error).message, "error"); }
@@ -121,7 +124,7 @@ const ContentManage: React.FC = () => {
   const fetchAbout = useCallback(async () => {
     setAboutLoading(true);
     try {
-      const r = await fetch(`${API_BASE}/about`);
+      const r = await fetch(`${API_BASE}/api/about`);
       const d = await r.json();
       setAbout({ ...ABOUT_BLANK, ...d });
     } catch (e: unknown) { showToast((e as Error).message, "error"); }
@@ -133,7 +136,7 @@ const ContentManage: React.FC = () => {
   // ── Contacts ─────────────────────────────────────────────────────────────
   const updateStatus = async (id: string, status: ContactMsg["status"]) => {
     try {
-      await fetch(`${API_BASE}/contact/${id}/status`, {
+      await fetch(`${API_BASE}/api/contact/${id}/status`, {
         method: "PATCH",
         headers: authHeader,
         body: JSON.stringify({ status }),
@@ -145,7 +148,7 @@ const ContentManage: React.FC = () => {
 
   const deleteContact = async (id: string) => {
     try {
-      await fetch(`${API_BASE}/contact/${id}`, { method: "DELETE", headers: authHeader });
+      await fetch(`${API_BASE}/api/contact/${id}`, { method: "DELETE", headers: authHeader });
       setContacts((p) => p.filter((c) => c._id !== id));
       showToast("Message deleted", "success");
     } catch { showToast("Failed to delete", "error"); }
@@ -169,7 +172,7 @@ const ContentManage: React.FC = () => {
     if (!lookForm.imageUrl) { showToast("Image is required", "error"); return; }
     setLookSaving(true);
     try {
-      const url  = editLook ? `${API_BASE}/lookbook/${editLook._id}` : `${API_BASE}/lookbook`;
+      const url  = editLook ? `${API_BASE}/api/lookbook/${editLook._id}` : `${API_BASE}/api/lookbook`;
       const method = editLook ? "PUT" : "POST";
       const r = await fetch(url, { method, headers: authHeader, body: JSON.stringify(lookForm) });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -182,7 +185,7 @@ const ContentManage: React.FC = () => {
 
   const deleteLook = async (id: string) => {
     try {
-      await fetch(`${API_BASE}/lookbook/${id}`, { method: "DELETE", headers: authHeader });
+      await fetch(`${API_BASE}/api/lookbook/${id}`, { method: "DELETE", headers: authHeader });
       setLooks((p) => p.filter((l) => l._id !== id));
       showToast("Look deleted", "success");
     } catch { showToast("Failed to delete", "error"); }
@@ -194,7 +197,7 @@ const ContentManage: React.FC = () => {
     showToast("Uploading…", "info");
     try {
       const fd = new FormData(); fd.append("image", file);
-      const r = await fetch(`${API_BASE}/upload`, { method: "POST", body: fd });
+      const r = await fetch(`${API_BASE}/api/upload`, { method: "POST", body: fd });
       const d = await r.json();
       const url = d.imageUrl ?? d.url ?? d.secure_url ?? "";
       if (!url) throw new Error("No URL returned");
@@ -223,7 +226,7 @@ const ContentManage: React.FC = () => {
   const saveAbout = async () => {
     setAboutSaving(true);
     try {
-      const r = await fetch(`${API_BASE}/about`, {
+      const r = await fetch(`${API_BASE}/api/about`, {
         method: "PUT",
         headers: authHeader,
         body: JSON.stringify(about),
@@ -238,7 +241,7 @@ const ContentManage: React.FC = () => {
     showToast("Uploading…", "info");
     try {
       const fd = new FormData(); fd.append("image", file);
-      const r = await fetch(`${API_BASE}/upload`, { method: "POST", body: fd });
+      const r = await fetch(`${API_BASE}/api/upload`, { method: "POST", body: fd });
       const d = await r.json();
       const url = d.imageUrl ?? d.url ?? d.secure_url ?? "";
       if (!url) throw new Error("No URL returned");

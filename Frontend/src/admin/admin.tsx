@@ -24,10 +24,10 @@ const AdminDashboard: React.FC = () => {
 
   const API_BASE =
     import.meta.env.VITE_API_URL ||
-    "http://localhost:8000/api";
+    "http://localhost:8000";
 
   useEffect(() => {
-    fetch(`${API_BASE}/products`)
+    fetch(`${API_BASE}/api/products`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();

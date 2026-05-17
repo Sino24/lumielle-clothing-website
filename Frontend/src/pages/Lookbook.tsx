@@ -12,13 +12,13 @@ interface LookEntry {
 }
 
 function Lookbook() {
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
   const [looks, setLooks] = useState<LookEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/lookbook`)
+    fetch(`${API_BASE}/api/lookbook`)
       .then((r) => r.json())
       .then((d) => setLooks(Array.isArray(d) ? d : []))
       .catch(() => setLooks([]))

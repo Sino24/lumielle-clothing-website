@@ -268,7 +268,9 @@ const MultiImageField: React.FC<MultiImageFieldProps> = ({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const ProductManage: React.FC = () => {
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+  const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:8000";
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -294,7 +296,7 @@ const ProductManage: React.FC = () => {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await fetch(`${API_BASE}/products`);
+      const r = await fetch(`${API_BASE}/api/products`);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       setProducts(await r.json());
     } catch (e: unknown) {
@@ -380,7 +382,7 @@ const ProductManage: React.FC = () => {
     };
     try {
       const r = await fetch(
-        editId ? `${API_BASE}/products/${editId}` : `${API_BASE}/products`,
+        editId ? `${API_BASE}/api/products/${editId}` : `${API_BASE}/api/products`,
         { method: editId ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }
       );
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -400,7 +402,7 @@ const ProductManage: React.FC = () => {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      const r = await fetch(`${API_BASE}/products/${deleteTarget}`, { method: "DELETE" });
+      const r = await fetch(`${API_BASE}/api/products/${deleteTarget}`, { method: "DELETE" });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       showToast("Product deleted", "success");
       setProducts((prev) => prev.filter((p) => p._id !== deleteTarget));

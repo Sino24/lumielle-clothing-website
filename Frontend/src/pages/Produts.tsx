@@ -27,7 +27,9 @@ interface Product {
 const ITEMS_PER_PAGE = 8;
 
 function Products() {
-  const API_BASE = "http://localhost:8000/api";
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:8000";
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +42,7 @@ function Products() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch(`${API_BASE}/products`);
+        const res = await fetch(`${API_BASE}/api/products`);
 
         if (!res.ok) {
           throw new Error("Failed to fetch products");
