@@ -1,0 +1,340 @@
+/* src/styles/PageStyle/NotFound.css */
+
+/* ── Tokens ────────────────────────────────────────────────────────────────── */
+.nf {
+  --ink:        #111110;
+  --bg:         #faf8f5;
+  --accent:     #c8a97e;
+  --muted:      #9e9085;
+  --surface:    #f0ece6;
+  --dark:       #111110;
+  --dark-text:  #f5f0eb;
+
+  --font-display: "Cormorant Garamond", "Georgia", serif;
+  --font-body:    "Jost", "Helvetica Neue", sans-serif;
+  --ease:         cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Layout ────────────────────────────────────────────────────────────────── */
+.nf {
+  position: relative;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 80px clamp(20px, 6vw, 100px) 60px;
+  font-family: var(--font-body);
+  text-align: center;
+}
+
+/* ── Grain overlay ─────────────────────────────────────────────────────────── */
+.nf__grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Big background 404 ────────────────────────────────────────────────────── */
+.nf__bg-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(180px, 30vw, 380px);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(200, 169, 126, 0.15);
+  letter-spacing: -0.05em;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  z-index: 0;
+  animation: bg-fade-in 1.2s var(--ease) both;
+}
+
+@keyframes bg-fade-in {
+  from { opacity: 0; transform: translate(-50%, -46%); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+/* ── Content ───────────────────────────────────────────────────────────────── */
+.nf__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(20px, 3vw, 28px);
+  max-width: 600px;
+}
+
+/* Eyebrow */
+.nf__eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+  animation: slide-up 0.6s 0.1s var(--ease) both;
+}
+
+/* Title */
+.nf__title {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 10vw, 100px);
+  font-weight: 300;
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+  margin: 0;
+  color: var(--ink);
+  animation: slide-up 0.6s 0.2s var(--ease) both;
+}
+
+.nf__title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+/* Wrong path display */
+.nf__path-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid rgba(200, 169, 126, 0.25);
+  border-radius: 6px;
+  padding: 10px 18px;
+  animation: slide-up 0.6s 0.3s var(--ease) both;
+}
+
+.nf__path-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.nf__path-value {
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  min-width: 4px;
+}
+
+/* Blinking cursor next to path */
+.nf__path-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 1px;
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+  margin-left: 1px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Sub text */
+.nf__sub {
+  font-size: clamp(13px, 1.4vw, 15px);
+  line-height: 1.75;
+  color: var(--muted);
+  margin: 0;
+  max-width: 380px;
+  animation: slide-up 0.6s 0.4s var(--ease) both;
+}
+
+/* ── CTA Buttons ───────────────────────────────────────────────────────────── */
+.nf__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: slide-up 0.6s 0.5s var(--ease) both;
+}
+
+.nf__btn {
+  display: inline-block;
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 14px 36px;
+  border-radius: 100px;
+  transition: background 0.28s var(--ease), color 0.28s var(--ease), border-color 0.28s var(--ease), transform 0.2s var(--ease);
+}
+
+.nf__btn:active {
+  transform: scale(0.97);
+}
+
+.nf__btn--primary {
+  background: var(--ink);
+  color: var(--bg);
+  border: 1px solid var(--ink);
+}
+
+.nf__btn--primary:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.nf__btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid rgba(17, 17, 16, 0.25);
+}
+
+.nf__btn--ghost:hover {
+  border-color: var(--ink);
+  background: var(--surface);
+}
+
+/* ── Quick Links ───────────────────────────────────────────────────────────── */
+.nf__links-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: slide-up 0.6s 0.6s var(--ease) both;
+}
+
+.nf__links-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.nf__links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.nf__link {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+  position: relative;
+}
+
+.nf__link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent);
+  transition: width 0.25s var(--ease);
+}
+
+.nf__link:hover {
+  color: var(--ink);
+}
+
+.nf__link:hover::after {
+  width: 100%;
+}
+
+.nf__dot {
+  color: var(--accent);
+  opacity: 0.5;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ── Footer rule ───────────────────────────────────────────────────────────── */
+.nf__footer-rule {
+  position: absolute;
+  bottom: 28px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 clamp(20px, 6vw, 80px);
+  z-index: 1;
+  animation: slide-up 0.6s 0.7s var(--ease) both;
+}
+
+.nf__footer-rule::before,
+.nf__footer-rule::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(17, 17, 16, 0.1);
+}
+
+.nf__footer-rule span {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
+/* ── Shared entrance animation ─────────────────────────────────────────────── */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .nf__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nf__btn {
+    text-align: center;
+    width: 100%;
+  }
+
+  .nf__path-wrap {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+
+  .nf__footer-rule {
+    bottom: 16px;
+  }
+}

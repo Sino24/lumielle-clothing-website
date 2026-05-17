@@ -1,0 +1,188 @@
+/* src/styles/PageStyle/Lookbook.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+
+.lookbook {
+  --ink:    #111110;
+  --bg:     #faf8f5;
+  --accent: #c8a97e;
+  --muted:  #9e9085;
+  --border: rgba(17,17,16,0.1);
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Jost", sans-serif;
+
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  padding-bottom: 6rem;
+}
+
+/* ── Hero ── */
+.lookbook__hero {
+  padding: clamp(80px, 12vw, 140px) clamp(24px, 8vw, 120px) clamp(48px, 6vw, 80px);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.lookbook__eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 1.25rem;
+}
+
+.lookbook__hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(42px, 7vw, 88px);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 1.25rem;
+  color: var(--ink);
+}
+
+.lookbook__hero h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.lookbook__hero-sub {
+  font-size: 14px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+/* ── Loading / Empty ── */
+.lookbook__loading {
+  display: flex;
+  justify-content: center;
+  padding: 6rem 0;
+}
+
+.lookbook__spin {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: lb-spin 0.8s linear infinite;
+}
+
+@keyframes lb-spin { to { transform: rotate(360deg); } }
+
+.lookbook__empty {
+  text-align: center;
+  padding: 6rem 2rem;
+  font-size: 14px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+/* ── Grid ── */
+.lookbook__grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+  padding: clamp(32px, 5vw, 60px) clamp(16px, 4vw, 60px);
+  auto-rows: 80px;
+}
+
+/* Card layout variants — staggered masonry feel */
+.lookbook__card { grid-column: span 4; }
+.lookbook__card--1 { grid-column: span 5; grid-row: span 6; }
+.lookbook__card--2 { grid-column: span 7; grid-row: span 4; }
+.lookbook__card--3 { grid-column: span 4; grid-row: span 5; }
+
+/* Reset for every 3rd cycle */
+.lookbook__card:nth-child(3n+1) { grid-column: span 5; grid-row: span 6; }
+.lookbook__card:nth-child(3n+2) { grid-column: span 7; grid-row: span 4; }
+.lookbook__card:nth-child(3n)   { grid-column: span 12; grid-row: span 5; }
+
+.lookbook__img-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  overflow: hidden;
+  background: #e8e3db;
+}
+
+.lookbook__img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+
+.lookbook__card:hover .lookbook__img-wrap img {
+  transform: scale(1.05);
+}
+
+/* Hover overlay */
+.lookbook__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(17,17,16,0.6) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: flex-end;
+  padding: 1.5rem;
+}
+
+.lookbook__card:hover .lookbook__overlay {
+  opacity: 1;
+}
+
+.lookbook__caption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lookbook__caption-title {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.lookbook__caption-sub {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .lookbook__grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: auto;
+  }
+
+  .lookbook__card,
+  .lookbook__card--1,
+  .lookbook__card--2,
+  .lookbook__card--3,
+  .lookbook__card:nth-child(3n+1),
+  .lookbook__card:nth-child(3n+2),
+  .lookbook__card:nth-child(3n) {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+
+  .lookbook__img-wrap { min-height: 300px; }
+}
+
+@media (max-width: 540px) {
+  .lookbook__grid { grid-template-columns: 1fr; }
+  .lookbook__img-wrap { min-height: 260px; }
+}

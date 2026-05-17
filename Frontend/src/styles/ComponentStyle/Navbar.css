@@ -1,0 +1,300 @@
+/* src/components/styles/ComponentStyle/Navbar.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+
+:root {
+  --lum-cream: #F5F0E8;
+  --lum-dark: #1A1714;
+  --lum-gold: #C9A96E;
+  --lum-muted: #7A746C;
+  --lum-border: rgba(26, 23, 20, 0.12);
+  --nav-height: 76px;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Jost', sans-serif;
+}
+
+/* ── Shell ─────────────────────────────────────────── */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2.5rem;
+  background: rgba(255, 255, 255, 0.93);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--lum-border);
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+  gap: 1.5rem;
+}
+
+.navbar.scrolled {
+  background: rgba(245, 240, 232, 0.99);
+  box-shadow: 0 1px 28px rgba(26, 23, 20, 0.07);
+}
+
+/* ── Left — Logo + tagline ─────────────────────────── */
+.navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: opacity 0.25s ease;
+}
+
+.navbar__brand:hover {
+  opacity: 0.8;
+}
+
+.navbar__logo-img {
+  height: 7rem;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Vertical divider between image and text */
+.navbar__brand-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--lum-border);
+  flex-shrink: 0;
+}
+
+.navbar__brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.navbar__brand-name {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--lum-dark);
+  line-height: 1;
+}
+
+.navbar__brand-name em {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.navbar__tagline {
+  font-family: var(--font-body);
+  font-size: 0.58rem;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--lum-gold);
+  line-height: 1;
+}
+
+/* ── Center — nav links ────────────────────────────── */
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 2.25rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.navbar__link {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lum-dark);
+  text-decoration: none;
+  position: relative;
+  padding-bottom: 2px;
+  transition: color 0.25s ease;
+  white-space: nowrap;
+}
+
+.navbar__link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--lum-gold);
+  transition: width 0.3s ease;
+}
+
+.navbar__link:hover {
+  color: var(--lum-gold);
+}
+
+.navbar__link:hover::after {
+  width: 100%;
+}
+
+/* ── Right — icon buttons ──────────────────────────── */
+.navbar__icons {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  flex-shrink: 0;
+}
+
+.navbar__icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem;
+  color: var(--lum-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.25s ease, transform 0.2s ease;
+  position: relative;
+}
+
+.navbar__icon-btn:hover {
+  color: var(--lum-gold);
+  transform: scale(1.08);
+}
+
+.navbar__icon-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.5;
+}
+
+.navbar__cart-badge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  background: var(--lum-gold);
+  border-radius: 50%;
+  font-family: var(--font-body);
+  font-size: 0.52rem;
+  font-weight: 500;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Mobile hamburger ──────────────────────────────── */
+.navbar__hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem;
+  flex-shrink: 0;
+}
+
+.navbar__hamburger span {
+  display: block;
+  width: 22px;
+  height: 1px;
+  background: var(--lum-dark);
+  transition: all 0.3s ease;
+}
+
+.navbar__hamburger.open span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+.navbar__hamburger.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.navbar__hamburger.open span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* ── Mobile slide-down menu ────────────────────────── */
+.navbar__mobile-menu {
+  display: none;
+  position: fixed;
+  top: var(--nav-height);
+  left: 0;
+  right: 0;
+  background: var(--lum-cream);
+  border-bottom: 1px solid var(--lum-border);
+  padding: 1.75rem 2rem 2.25rem;
+  flex-direction: column;
+  gap: 0;
+  z-index: 99;
+}
+
+.navbar__mobile-menu.open {
+  display: flex;
+}
+
+.navbar__mobile-link {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: var(--lum-dark);
+  text-decoration: none;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--lum-border);
+  transition: color 0.2s, padding-left 0.2s;
+}
+
+.navbar__mobile-link:last-child {
+  border-bottom: none;
+}
+
+.navbar__mobile-link:hover {
+  color: var(--lum-gold);
+  padding-left: 0.5rem;
+}
+
+/* ── Responsive ────────────────────────────────────── */
+@media (max-width: 768px) {
+  .navbar__links,
+  .navbar__icons {
+    display: none;
+  }
+
+  .navbar__hamburger {
+    display: flex;
+  }
+
+  .navbar__logo-img {
+    height: 40px;
+  }
+
+  .navbar__brand-name {
+    font-size: 1.15rem;
+  }
+
+  .navbar__tagline {
+    font-size: 0.5rem;
+  }
+
+  .navbar__brand-divider {
+    height: 28px;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar {
+    padding: 0 1.25rem;
+  }
+
+  .navbar__brand-divider,
+  .navbar__brand-text {
+    display: none;
+  }
+}
