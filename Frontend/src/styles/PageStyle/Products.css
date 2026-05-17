@@ -227,33 +227,37 @@
 
 /* ── Buy Now button ───────────────────────────────────────────────────────── */
 .products__card-cart-btn {
-  background: var(--color-bg);
-  color: var(--color-ink);
-  border: none;
-  border-radius: 100px;
-  padding: 10px 28px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(26, 23, 20, 0.88);
+  color: #f5f0e8;
   font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
+  text-align: center;
+  padding: 0.9rem;
+  border: none;
   cursor: pointer;
-  transform: translateY(8px);
+  opacity: 0;
+  transform: translateY(6px);
   transition:
-    transform var(--transition),
-    background var(--transition),
-    color var(--transition);
-  white-space: nowrap;
+    opacity 0.28s ease,
+    transform 0.28s ease,
+    background 0.2s ease;
+  z-index: 3;
 }
 
 .products__card-overlay--visible .products__card-cart-btn {
+  opacity: 1;
   transform: translateY(0);
 }
 
-/* Hover — gold accent */
 .products__card-cart-btn:hover {
-  background: var(--color-accent);
-  color: #fff;
+  background: rgba(201, 169, 110, 0.92);
 }
 
 /* Color dots */
