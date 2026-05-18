@@ -1,0 +1,341 @@
+/* src/styles/AdminStyle/AdminManageAbout.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+
+:root {
+  --lum-cream: #F5F0E8;
+  --lum-dark: #1A1714;
+  --lum-gold: #C9A96E;
+  --lum-muted: #7A746C;
+  --lum-border: rgba(26, 23, 20, 0.12);
+  --lum-danger: #C0392B;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Jost', sans-serif;
+}
+
+.aba-page {
+    padding-top: var(--nav-height);
+  min-height: 100vh;
+  background: var(--lum-cream);
+  font-family: var(--font-body);
+}
+
+.aba-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 2.5rem 4rem;
+}
+
+/* ── Page header ── */
+.aba-page-hd {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.aba-page-title {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 300;
+  letter-spacing: 0.03em;
+  color: var(--lum-dark);
+  margin: 0 0 0.2rem;
+}
+
+.aba-page-sub {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--lum-muted);
+  margin: 0;
+}
+
+.aba-page-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ── Buttons ── */
+.aba-btn {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  padding: 0.65rem 1.5rem;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.aba-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.aba-btn:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
+.aba-btn.gold  { background: var(--lum-gold); color: var(--lum-dark); }
+.aba-btn.ghost { background: transparent; border: 1px solid var(--lum-border); color: var(--lum-dark); }
+
+/* ── Form layout ── */
+.aba-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Panel (replaces sections) ── */
+.aba-panel {
+  background: #fff;
+  border: 1px solid var(--lum-border);
+  padding: 1.75rem 2rem;
+}
+
+.aba-panel-title {
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lum-muted);
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--lum-border);
+}
+
+/* ── Grid inside panels ── */
+.aba-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.aba-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.aba-form-full { grid-column: 1 / -1; }
+
+/* ── Labels & inputs ── */
+.aba-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lum-muted);
+}
+
+.aba-input,
+.aba-textarea {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--lum-dark);
+  background: var(--lum-cream);
+  border: 1px solid var(--lum-border);
+  padding: 0.65rem 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.aba-input:focus,
+.aba-textarea:focus { border-color: var(--lum-gold); }
+
+.aba-textarea { min-height: 90px; resize: vertical; }
+
+.aba-input-num  { max-width: 72px; text-align: center; }
+.aba-input-wide { flex: 1; }
+
+/* ── Values rows ── */
+.aba-value-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.aba-rm-btn {
+  background: none;
+  border: none;
+  color: var(--lum-muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.aba-rm-btn:hover { color: var(--lum-danger); }
+
+.aba-add-row-btn {
+  background: none;
+  border: 1px dashed var(--lum-border);
+  color: var(--lum-muted);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  padding: 0.55rem 1rem;
+  width: 100%;
+  transition: border-color 0.2s, color 0.2s;
+  margin-top: 0.25rem;
+}
+
+.aba-add-row-btn:hover { border-color: var(--lum-gold); color: var(--lum-gold); }
+
+/* ── Upload box ── */
+.aba-upload-box {
+  margin-top: 0.75rem;
+  border: 1px dashed var(--lum-border);
+  background: var(--lum-cream);
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.25s, background 0.25s;
+  user-select: none;
+}
+
+.aba-upload-box:hover {
+  border-color: var(--lum-gold);
+  background: rgba(201, 169, 110, 0.04);
+}
+
+.aba-upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1rem;
+  pointer-events: none;
+}
+
+.aba-upload-icon { font-size: 1.4rem; }
+
+.aba-upload-text {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lum-muted);
+}
+
+/* ── Image preview ── */
+.aba-img-preview-wrap {
+  position: relative;
+  margin-top: 0.85rem;
+  display: inline-block;
+}
+
+.aba-img-preview-wrap--portrait .aba-img-preview {
+  width: 120px;
+  height: 160px;
+}
+
+.aba-img-preview {
+  display: block;
+  width: 180px;
+  height: 120px;
+  object-fit: cover;
+  border: 1px solid var(--lum-border);
+}
+
+.aba-preview-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(26, 23, 20, 0.65);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.aba-preview-remove:hover { background: var(--lum-danger); }
+
+/* ── Form footer ── */
+.aba-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+}
+
+/* ── Loading ── */
+.aba-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 6rem 2rem;
+}
+
+.aba-spin {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--lum-border);
+  border-top-color: var(--lum-gold);
+  border-radius: 50%;
+  animation: aba-spin 0.8s linear infinite;
+}
+
+@keyframes aba-spin { to { transform: rotate(360deg); } }
+
+.aba-load-text {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--lum-muted);
+}
+
+/* ── Toasts ── */
+.aba-toast-root {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.aba-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  padding: 0.85rem 1.25rem;
+  background: var(--lum-dark);
+  color: var(--lum-cream);
+  min-width: 240px;
+  box-shadow: 0 8px 32px rgba(26, 23, 20, 0.2);
+  animation: aba-slideIn 0.3s ease;
+}
+
+.aba-toast.success { border-left: 3px solid var(--lum-gold); }
+.aba-toast.error   { border-left: 3px solid var(--lum-danger); }
+.aba-toast.info    { border-left: 3px solid #6c9ec4; }
+
+@keyframes aba-slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .aba-content   { padding: 1.5rem 1.25rem 3rem; }
+  .aba-form-grid { grid-template-columns: 1fr; }
+  .aba-value-row { flex-wrap: wrap; }
+  .aba-page-hd   { flex-direction: column; }
+}
