@@ -179,12 +179,12 @@ function Navbar() {
 
         <Link
           className="navbar__mobile-link"
-          to="/new"
+          to="/contact"
           onClick={() =>
             setMenuOpen(false)
           }
         >
-          New In
+          Contact
         </Link>
 
         <Link
