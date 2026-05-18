@@ -105,51 +105,6 @@ function Navbar() {
         {/* ── Right Icons ─────────────────── */}
         <div className="navbar__icons">
 
-          {/* Search */}
-          <button
-            className="navbar__icon-btn"
-            aria-label="Search"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <circle
-                cx="11"
-                cy="11"
-                r="7"
-              />
-
-              <line
-                x1="16.5"
-                y1="16.5"
-                x2="22"
-                y2="22"
-              />
-            </svg>
-          </button>
-
-          {/* Account */}
-          <button
-            className="navbar__icon-btn"
-            aria-label="My account"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <circle
-                cx="12"
-                cy="8"
-                r="4"
-              />
-
-              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-            </svg>
-          </button>
-
           {/* Cart */}
           <Link
             to="/cart"
