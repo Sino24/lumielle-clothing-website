@@ -175,7 +175,7 @@ function Home() {
           <br />
           Make yours <em>unforgettable.</em>
         </p>
-        <Link className="home__banner-btn" to="/products">
+        <Link className="home__banner-btn" to="/product">
           Shop All
         </Link>
       </section>
