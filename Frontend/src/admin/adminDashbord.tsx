@@ -88,6 +88,12 @@ const AdminDashboard: React.FC = () => {
       icon:   "📬",
       desc:   "View contact messages",
     },
+    {
+      path:   "/admin/hero",
+      label:  "Hero",
+      icon:   "🎬",
+      desc:   "Manage hero section",
+    },
   ];
 
   const isActive = (path: string) => location.pathname === path;

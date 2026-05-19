@@ -63,6 +63,12 @@ app.use(
   require("./routes/aboutRoutes")
 );
 
+// ✅ Hero
+app.use(
+  "/api/hero",
+  require("./routes/heroRoutes")
+);
+
 // ── Health Check ───────────────────────────────────────────
 
 app.get("/", (req, res) => {
@@ -98,6 +104,7 @@ const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log("");
   console.log("🚀 SERVER STARTED");
+
   console.log(
     `🌐 http://localhost:${PORT}`
   );
@@ -124,6 +131,11 @@ app.listen(PORT, () => {
 
   console.log(
     `ℹ️ About      → /api/about`
+  );
+
+  // ✅ Hero route log
+  console.log(
+    `🎯 Hero       → /api/hero`
   );
 
   console.log("");

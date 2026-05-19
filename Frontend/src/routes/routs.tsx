@@ -21,7 +21,7 @@ import AdminManageProduct from "../admin/AdminManageProduct";
 import AdminManageLookbook from "../admin/AdminManageLookbook";
 import AdminManageAbout from "../admin/AdminManageAbout";
 import AdminManageContact from "../admin/AdminManageContact";
-
+import AdminManageHero from "../admin/AdminManageHero";
 /* ───────── Protected Route ───────── */
 import ProtectedRoute from "../components/ProtectedRoute";
 
@@ -75,6 +75,12 @@ export default function AppRoutes() {
         <Route
           path="/admin/contact"
           element={<AdminManageContact />}
+        />
+
+        {/* Hero */}
+        <Route
+          path="/admin/hero"
+          element={<AdminManageHero />}
         />
 
       </Route>

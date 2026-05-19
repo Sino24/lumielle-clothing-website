@@ -4,7 +4,20 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/PageStyle/Home.css";
 
-import heroImage from "../assets/home.png";
+// Local fallback image (used only when no imageUrl from API)
+import heroFallback from "../assets/home.png";
+
+// ── Types ──────────────────────────────────────────────────────────────────
+interface HeroData {
+  eyebrow:        string;
+  titleLine1:     string;
+  titleItalic:    string;
+  titleLine2:     string;
+  ctaText:        string;
+  ctaLink:        string;
+  imageUrl:       string;
+  overlayOpacity: number;
+}
 
 interface Product {
   _id: string;
@@ -19,22 +32,42 @@ interface Product {
   colors: { label: string; hex: string }[];
 }
 
-const API_BASE =
-  import.meta.env.VITE_API_URL || "http://localhost:8000";
+// ── Constants ──────────────────────────────────────────────────────────────
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
+const HERO_DEFAULTS: HeroData = {
+  eyebrow:        "Summer Collection 2026",
+  titleLine1:     "Dressed in",
+  titleItalic:    "quiet",
+  titleLine2:     "confidence.",
+  ctaText:        "Explore the collection",
+  ctaLink:        "/product",
+  imageUrl:       "",
+  overlayOpacity: 58,
+};
+
+// ── Component ──────────────────────────────────────────────────────────────
 function Home() {
   const navigate = useNavigate();
+
+  const [hero,     setHero]     = useState<HeroData>(HERO_DEFAULTS);
   const [featured, setFeatured] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading,  setLoading]  = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/products`)
-      .then((r) => r.json())
-      .then((data: Product[]) => {
-        setFeatured(data.slice(0, 3));
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    // Fetch hero + products in parallel
+    Promise.allSettled([
+      fetch(`${API_BASE}/api/hero`).then((r) => r.json()),
+      fetch(`${API_BASE}/api/products`).then((r) => r.json()),
+    ]).then(([heroRes, productsRes]) => {
+      if (heroRes.status === "fulfilled") {
+        setHero({ ...HERO_DEFAULTS, ...heroRes.value });
+      }
+      if (productsRes.status === "fulfilled" && Array.isArray(productsRes.value)) {
+        setFeatured(productsRes.value.slice(0, 3));
+      }
+      setLoading(false);
+    });
   }, []);
 
   const handleBuyNow = (e: React.MouseEvent, product: Product) => {
@@ -43,32 +76,47 @@ function Home() {
     navigate(`/products/${product._id}`);
   };
 
+  const heroImg     = hero.imageUrl || heroFallback;
+  const overlayVal  = `rgba(26,23,20,${(hero.overlayOpacity / 100).toFixed(2)})`;
+
   return (
     <main className="home">
 
-      {/* ── Hero ── */}
+      {/* ── Hero ──────────────────────────────────────────────── */}
       <section className="home__hero">
         <img
           className="home__hero-img"
-          src={heroImage}
-          alt="Lumielle summer collection editorial"
+          src={heroImg}
+          alt="Lumielle editorial hero"
         />
-        <div className="home__hero-overlay" aria-hidden="true" />
+
+        {/* Dynamic overlay gradient using CSS custom property */}
+        <div
+          className="home__hero-overlay"
+          style={{
+            background: `linear-gradient(to top, ${overlayVal} 0%, rgba(26,23,20,0.08) 55%, transparent 100%)`,
+          }}
+          aria-hidden="true"
+        />
 
         <div className="home__hero-content">
-          <p className="home__hero-eyebrow">Summer Collection 2026</p>
+          {hero.eyebrow && (
+            <p className="home__hero-eyebrow">{hero.eyebrow}</p>
+          )}
+
           <h1 className="home__hero-title">
-            Dressed in <em>quiet</em>
-            <br />
-            confidence.
+            {hero.titleLine1}{" "}
+            {hero.titleItalic && <em>{hero.titleItalic}</em>}
+            {hero.titleLine2  && <><br />{hero.titleLine2}</>}
           </h1>
-          <Link className="home__hero-cta" to="/product">
-            Explore the collection &nbsp;→
+
+          <Link className="home__hero-cta" to={hero.ctaLink || "/product"}>
+            {hero.ctaText}&nbsp;&nbsp;→
           </Link>
         </div>
       </section>
 
-      {/* ── Featured Products ── */}
+      {/* ── Featured Products ──────────────────────────────────── */}
       <section className="home__featured">
         <p className="home__section-label">Curated for you</p>
         <h2 className="home__section-title">
@@ -92,22 +140,15 @@ function Home() {
                 <article className="home__product-card">
                   <div className="home__product-img-wrap">
                     {product.img ? (
-                      <img
-                        src={product.img}
-                        alt={product.name}
-                        loading="lazy"
-                      />
+                      <img src={product.img} alt={product.name} loading="lazy" />
                     ) : (
                       <div className="home__img-placeholder">👕</div>
                     )}
 
                     {product.badge && (
-                      <span className="home__product-badge">
-                        {product.badge}
-                      </span>
+                      <span className="home__product-badge">{product.badge}</span>
                     )}
 
-                    {/* Buy Now button */}
                     <button
                       className="home__product-cart-btn"
                       onClick={(e) => handleBuyNow(e, product)}
@@ -117,12 +158,8 @@ function Home() {
                   </div>
 
                   <div className="home__product-info">
-                    <span className="home__product-name">
-                      {product.name}
-                    </span>
-                    <span className="home__product-price">
-                      {product.price}
-                    </span>
+                    <span className="home__product-name">{product.name}</span>
+                    <span className="home__product-price">{product.price}</span>
                   </div>
                 </article>
               </Link>
@@ -131,7 +168,7 @@ function Home() {
         )}
       </section>
 
-      {/* ── Dark Banner ── */}
+      {/* ── Dark Banner ───────────────────────────────────────── */}
       <section className="home__banner">
         <p className="home__banner-text">
           Every thread tells a story.
