@@ -69,6 +69,11 @@ app.use(
   require("./routes/heroRoutes")
 );
 
+  app.use(
+    "/api/client-projects",
+    require("./routes/clientProjectRoutes")
+  );
+
 // ── Health Check ───────────────────────────────────────────
 
 app.get("/", (req, res) => {

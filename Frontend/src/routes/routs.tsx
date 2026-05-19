@@ -11,6 +11,7 @@ import NotFound from "../pages/NotFount";
 import Lookbook from "../pages/Lookbook";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
+import ClientProjects from "../pages/ClientProjects";
 
 /* ───────── Admin Pages ───────── */
 import AdminLogin from "../admin/AdminLogin";
@@ -22,8 +23,10 @@ import AdminManageLookbook from "../admin/AdminManageLookbook";
 import AdminManageAbout from "../admin/AdminManageAbout";
 import AdminManageContact from "../admin/AdminManageContact";
 import AdminManageHero from "../admin/AdminManageHero";
+import AdminManageClientProjects from "../admin/AdminManageClientProjects";
 /* ───────── Protected Route ───────── */
 import ProtectedRoute from "../components/ProtectedRoute";
+
 
 export default function AppRoutes() {
   return (
@@ -37,6 +40,7 @@ export default function AppRoutes() {
       <Route path="/about" element={<About />} />
       <Route path="/lookbook" element={<Lookbook />} />
       <Route path="/contact" element={<Contact />} />
+     <Route path="/ClientProjects" element={<ClientProjects/>} />
 
       {/* ───────── Admin Login ───────── */}
       <Route
@@ -81,6 +85,12 @@ export default function AppRoutes() {
         <Route
           path="/admin/hero"
           element={<AdminManageHero />}
+        />
+
+        {/* Client Projects */}
+        <Route
+          path="/admin/client-projects"
+          element={<AdminManageClientProjects />}
         />
 
       </Route>

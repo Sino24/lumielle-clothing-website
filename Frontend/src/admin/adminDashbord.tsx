@@ -94,6 +94,12 @@ const AdminDashboard: React.FC = () => {
       icon:   "🎬",
       desc:   "Manage hero section",
     },
+    {
+      path:   "/admin/client-projects",
+      label:  "Client Projects",
+      icon:   "💼",
+      desc:   "Manage client project listings",
+    }
   ];
 
   const isActive = (path: string) => location.pathname === path;

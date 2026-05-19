@@ -95,6 +95,7 @@ function Navbar() {
           <Link className="navbar__link" to="/lookbook">Lookbook</Link>
           <Link className="navbar__link" to="/about">About</Link>
           <Link className="navbar__link" to="/contact">Contact</Link>
+          <Link className="navbar__link" to="/ClientProjects">Client Projects</Link>
         </div>
 
         {/* ── Desktop Search Expand ────────────────── */}
