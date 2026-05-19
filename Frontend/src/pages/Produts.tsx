@@ -1,7 +1,7 @@
 // src/pages/Products.tsx
 
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import "../styles/PageStyle/Products.css";
 
 interface ColorEntry {
@@ -33,6 +33,7 @@ const API_BASE =
 
 function Products() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +41,10 @@ function Products() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  // ── Fetch ───────────────────────────────────────────────────────────────
+  // Search query — driven by URL param ?q=
+  const searchQuery = searchParams.get("q") || "";
+
+  // ── Fetch ──────────────────────────────────────────────────────────────
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -57,21 +61,37 @@ function Products() {
     fetchProducts();
   }, []);
 
+
   // ── Categories ────────────────────────────────────────────────────────
   const categories = ["All", ...new Set(products.map((p) => p.category))];
 
-  // ── Filter + Pagination ───────────────────────────────────────────────
-  const filtered =
-    activeCategory === "All"
-      ? products
-      : products.filter((p) => p.category === activeCategory);
+  // ── Filter: search first, then category ──────────────────────────────
+  const filtered = products
+    .filter((p) => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        p.name.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q)
+      );
+    })
+    .filter((p) =>
+      activeCategory === "All" ? true : p.category === activeCategory
+    );
 
+  // ── Pagination ────────────────────────────────────────────────────────
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginated = filtered.slice(startIdx, startIdx + ITEMS_PER_PAGE);
 
   const handleCategoryChange = (cat: string) => {
     setActiveCategory(cat);
+    setCurrentPage(1);
+  };
+
+  const clearSearch = () => {
+    setSearchParams({});
     setCurrentPage(1);
   };
 
@@ -96,6 +116,25 @@ function Products() {
         </p>
         <div className="products__header-rule" aria-hidden="true" />
       </section>
+
+      {/* ACTIVE SEARCH BANNER */}
+      {searchQuery && (
+        <div className="products__search-banner">
+          <span className="products__search-banner-text">
+            Results for <em>"{searchQuery}"</em>
+            <span className="products__search-banner-count">
+              — {filtered.length} {filtered.length === 1 ? "item" : "items"}
+            </span>
+          </span>
+          <button
+            className="products__search-clear"
+            onClick={clearSearch}
+            aria-label="Clear search"
+          >
+            Clear ×
+          </button>
+        </div>
+      )}
 
       {/* FILTERS */}
       <div
@@ -173,7 +212,6 @@ function Products() {
                         Buy Now
                       </button>
 
-                      {/* Color swatches */}
                       {product.colors && product.colors.length > 0 && (
                         <div className="products__card-colors">
                           {product.colors.map((color) => (
@@ -221,10 +259,20 @@ function Products() {
           </div>
         )}
 
-        {/* EMPTY */}
+        {/* EMPTY STATE */}
         {!loading && paginated.length === 0 && (
           <div className="products__empty">
-            <p>No products found in this category.</p>
+            {searchQuery ? (
+              <>
+                <p className="products__empty-title">No results for "{searchQuery}"</p>
+                <p className="products__empty-sub">Try a different keyword or browse all collections.</p>
+                <button className="products__empty-btn" onClick={clearSearch}>
+                  Browse All
+                </button>
+              </>
+            ) : (
+              <p>No products found in this category.</p>
+            )}
           </div>
         )}
       </section>
@@ -254,7 +302,9 @@ function Products() {
 
           <button
             className="products__page-btn products__page-btn--arrow"
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((p) => Math.min(p + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
           >
             →
