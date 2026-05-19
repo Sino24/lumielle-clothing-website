@@ -11,6 +11,12 @@
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: "Jost", sans-serif;
 
+  /* Card sizing — change these to resize all cards */
+  --card-h: 72vh;
+  --card-w: calc(var(--card-h) * 0.68);  /* portrait 2:3 ratio */
+  --card-gap: 16px;
+  --track-pad: clamp(24px, 8vw, 120px);
+
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
@@ -46,7 +52,7 @@
 
 .lookbook__hero h1 {
   font-family: var(--font-display);
-  font-size: clamp(52px, 8vw, 108px);
+  font-size: clamp(48px, 7vw, 100px);
   font-weight: 300;
   line-height: 0.96;
   letter-spacing: -0.025em;
@@ -106,126 +112,106 @@
 }
 
 /* ─────────────────────────────────────
-   Grid
-   Key fix: NO grid-auto-rows with row
-   spans. Every card sets its own
-   aspect-ratio so photos crop
-   consistently regardless of source.
+   Stage wrapper
 ───────────────────────────────────── */
-.lookbook__grid {
-  display: grid;
-  /* 2 equal columns */
-  grid-template-columns: 1fr 1fr;
-  gap: 3px;
-  padding: 3px;
+.lookbook__stage {
+  position: relative;
+  padding: clamp(40px, 5vw, 64px) 0 clamp(32px, 4vw, 48px);
 }
 
-/* ── Card base ── */
+/* Drag hint */
+.lookbook__hint {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 var(--track-pad);
+  margin-bottom: 1.5rem;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  animation: lb-hint-fade 2s ease 1s both;
+}
+
+@keyframes lb-hint-fade {
+  0%   { opacity: 0; transform: translateX(-8px); }
+  30%  { opacity: 1; transform: translateX(0); }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ─────────────────────────────────────
+   Horizontal scroll track
+───────────────────────────────────── */
+.lookbook__track {
+  display: flex;
+  align-items: center;
+  gap: var(--card-gap);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  padding-bottom: 4px; /* prevents clipping box-shadow */
+
+  /* Hide scrollbar — still scrollable */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.lookbook__track::-webkit-scrollbar { display: none; }
+
+.lookbook__track:active { cursor: grabbing; }
+
+/* Edge spacers — create visual padding
+   without breaking scroll snap */
+.lookbook__spacer {
+  flex-shrink: 0;
+  width: calc(var(--track-pad) - var(--card-gap));
+}
+
+/* ─────────────────────────────────────
+   Card
+───────────────────────────────────── */
 .lookbook__card {
   position: relative;
+  flex-shrink: 0;
+  width: var(--card-w);
+  height: var(--card-h);
+  scroll-snap-align: center;
   overflow: hidden;
+  cursor: pointer;
+  transform: scale(0.94);
+  transition:
+    transform 0.55s cubic-bezier(0.25, 0, 0.1, 1),
+    box-shadow 0.55s ease;
 }
 
+.lookbook__card--active {
+  transform: scale(1);
+  box-shadow: 0 24px 64px rgba(17,17,16,0.18);
+}
 /* ─────────────────────────────────────
-   6-card repeating layout pattern:
-
-   [  big  ][small-top]   ← row A
-            [small-bot]
-   [    wide (2 col)  ]   ← row B
-   [square ][portrait ]   ← row C
-
-───────────────────────────────────── */
-
-/* Card 0 — big portrait, spans 2 rows */
-.lookbook__card--big {
-  grid-column: 1;
-  grid-row: span 2;
-}
-.lookbook__card--big .lookbook__img-wrap {
-  aspect-ratio: 3 / 4;
-}
-
-/* Card 1 — small landscape top */
-.lookbook__card--small-top {
-  grid-column: 2;
-}
-.lookbook__card--small-top .lookbook__img-wrap {
-  aspect-ratio: 4 / 3;
-}
-
-/* Card 2 — small landscape bottom */
-.lookbook__card--small-bot {
-  grid-column: 2;
-}
-.lookbook__card--small-bot .lookbook__img-wrap {
-  aspect-ratio: 4 / 3;
-}
-
-/* Card 3 — full-width cinematic */
-.lookbook__card--wide {
-  grid-column: 1 / -1;
-}
-.lookbook__card--wide .lookbook__img-wrap {
-  aspect-ratio: 21 / 9;
-}
-
-/* Card 4 — square */
-.lookbook__card--square {
-  grid-column: 1;
-}
-.lookbook__card--square .lookbook__img-wrap {
-  aspect-ratio: 1 / 1;
-}
-
-/* Card 5 — portrait */
-.lookbook__card--portrait {
-  grid-column: 2;
-}
-.lookbook__card--portrait .lookbook__img-wrap {
-  aspect-ratio: 3 / 4;
-}
-
-/* ─────────────────────────────────────
-   Image wrap — height driven by
-   aspect-ratio on the wrap itself,
-   NOT by the grid row height.
+   Image
 ───────────────────────────────────── */
 .lookbook__img-wrap {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  background: #e4dfd7;
-}
-
-/* For big card: img-wrap must fill the
-   full height of its 2-row grid area */
-.lookbook__card--big .lookbook__img-wrap {
-  height: 100%;
-  aspect-ratio: unset; /* height:100% takes over */
+  position: absolute;
+  inset: 0;
+  background: #e0dbd3;
 }
 
 .lookbook__img-wrap img {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
   transition: transform 0.9s cubic-bezier(0.25, 0, 0.1, 1);
+  user-select: none;
+  pointer-events: none;
 }
 
-/* For cards that use aspect-ratio,
-   img needs a wrapper trick */
-.lookbook__card:not(.lookbook__card--big) .lookbook__img-wrap {
-  position: relative;
-}
-
-.lookbook__card:not(.lookbook__card--big) .lookbook__img-wrap img {
-  position: absolute;
-}
-
-.lookbook__card:hover .lookbook__img-wrap img {
-  transform: scale(1.05);
+.lookbook__card--active .lookbook__img-wrap img {
+  transform: scale(1.03);
 }
 
 /* ─────────────────────────────────────
@@ -233,55 +219,63 @@
 ───────────────────────────────────── */
 .lookbook__card-index {
   position: absolute;
-  top: 1rem;
-  left: 1.1rem;
+  top: 1.1rem;
+  left: 1.25rem;
   z-index: 3;
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 300;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   color: rgba(255,255,255,0.5);
   mix-blend-mode: screen;
   transition: color 0.3s ease;
   pointer-events: none;
 }
 
-.lookbook__card:hover .lookbook__card-index {
-  color: rgba(255,255,255,0.9);
+.lookbook__card--active .lookbook__card-index {
+  color: rgba(255,255,255,0.85);
 }
 
 /* ─────────────────────────────────────
-   Hover overlay
+   Caption overlay
+   Hidden on inactive, slides up on active
 ───────────────────────────────────── */
 .lookbook__overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(17,17,16,0.7) 0%,
-    rgba(17,17,16,0.15) 45%,
-    transparent 70%
+    rgba(17,17,16,0.68) 0%,
+    rgba(17,17,16,0.1) 45%,
+    transparent 65%
   );
-  opacity: 0;
-  transition: opacity 0.35s ease;
   display: flex;
   align-items: flex-end;
-  padding: clamp(0.85rem, 2vw, 1.75rem);
+  padding: clamp(1rem, 3vw, 2rem);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 
-.lookbook__card:hover .lookbook__overlay {
+.lookbook__card--active .lookbook__overlay {
   opacity: 1;
 }
 
 .lookbook__caption {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
+  transform: translateY(8px);
+  transition: transform 0.45s cubic-bezier(0.25, 0, 0.1, 1);
+}
+
+.lookbook__card--active .lookbook__caption {
+  transform: translateY(0);
 }
 
 .lookbook__caption-title {
   font-family: var(--font-display);
-  font-size: clamp(16px, 2vw, 26px);
+  font-size: clamp(18px, 2vw, 26px);
   font-weight: 300;
   color: #fff;
   letter-spacing: 0.01em;
@@ -296,6 +290,69 @@
 }
 
 /* ─────────────────────────────────────
+   Dot navigation
+───────────────────────────────────── */
+.lookbook__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: clamp(24px, 3vw, 36px);
+}
+
+.lookbook__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--border);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: width 0.35s ease, background 0.35s ease, border-radius 0.35s ease;
+}
+
+.lookbook__dot--active {
+  width: 22px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+/* ─────────────────────────────────────
+   Counter  02 / 08
+───────────────────────────────────── */
+.lookbook__counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.lookbook__counter-current {
+  font-family: var(--font-display);
+  font-size: clamp(13px, 1.4vw, 16px);
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: 0.08em;
+}
+
+.lookbook__counter-sep {
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--muted);
+  opacity: 0.5;
+}
+
+.lookbook__counter-total {
+  font-family: var(--font-display);
+  font-size: clamp(13px, 1.4vw, 16px);
+  font-weight: 300;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+/* ─────────────────────────────────────
    Footer rule
 ───────────────────────────────────── */
 .lookbook__footer-rule {
@@ -304,7 +361,6 @@
   gap: 1.5rem;
   padding: 2.5rem clamp(24px, 7vw, 100px);
   border-top: 1px solid var(--border);
-  margin-top: 3px;
 }
 
 .lookbook__footer-rule::before,
@@ -326,10 +382,12 @@
 /* ─────────────────────────────────────
    Responsive
 ───────────────────────────────────── */
+@media (max-width: 900px) {
+  .lookbook {
+    --card-h: 65vh;
+    --card-w: calc(var(--card-h) * 0.72);
+  }
 
-/* Tablet: keep 2 cols but simplify
-   all cards to uniform 4/3 */
-@media (max-width: 768px) {
   .lookbook__hero-inner {
     flex-direction: column;
     align-items: flex-start;
@@ -340,76 +398,28 @@
     text-align: left;
     max-width: 100%;
   }
-
-  .lookbook__grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
-    padding: 2px;
-  }
-
-  /* Reset all grid placements */
-  .lookbook__card--big,
-  .lookbook__card--small-top,
-  .lookbook__card--small-bot,
-  .lookbook__card--wide,
-  .lookbook__card--square,
-  .lookbook__card--portrait {
-    grid-column: span 1;
-    grid-row: span 1;
-  }
-
-  /* Wide stays full width */
-  .lookbook__card--wide {
-    grid-column: 1 / -1;
-  }
-
-  /* All cards: uniform 4/3 except wide */
-  .lookbook__card--big .lookbook__img-wrap,
-  .lookbook__card--small-top .lookbook__img-wrap,
-  .lookbook__card--small-bot .lookbook__img-wrap,
-  .lookbook__card--square .lookbook__img-wrap,
-  .lookbook__card--portrait .lookbook__img-wrap {
-    aspect-ratio: 4 / 3;
-    height: auto;
-  }
-
-  .lookbook__card--wide .lookbook__img-wrap {
-    aspect-ratio: 16 / 9;
-  }
-
-  /* Fix absolute img inside aspect-ratio wrap */
-  .lookbook__card--big .lookbook__img-wrap img {
-    position: absolute;
-  }
 }
 
-/* Mobile: single column, all 4/3 */
-@media (max-width: 480px) {
-  .lookbook__grid {
-    grid-template-columns: 1fr;
+@media (max-width: 540px) {
+  .lookbook {
+    /* On mobile, card is nearly full screen width */
+    --card-h: 70vh;
+    --card-w: 82vw;
+    --track-pad: 20px;
+    --card-gap: 12px;
   }
 
-  .lookbook__card--wide {
-    grid-column: span 1;
-  }
-
-  .lookbook__card--big .lookbook__img-wrap,
-  .lookbook__card--small-top .lookbook__img-wrap,
-  .lookbook__card--small-bot .lookbook__img-wrap,
-  .lookbook__card--wide .lookbook__img-wrap,
-  .lookbook__card--square .lookbook__img-wrap,
-  .lookbook__card--portrait .lookbook__img-wrap {
-    aspect-ratio: 4 / 3;
-    height: auto;
-  }
-
-  /* Always show captions on touch */
+  /* On mobile always show caption */
   .lookbook__overlay {
     opacity: 1;
     background: linear-gradient(
       to top,
-      rgba(17,17,16,0.5) 0%,
+      rgba(17,17,16,0.55) 0%,
       transparent 50%
     );
+  }
+
+  .lookbook__caption {
+    transform: translateY(0);
   }
 }
