@@ -55,26 +55,31 @@ function Lookbook() {
         <section className="lookbook__grid">
           {looks.map((look, i) => {
             const mod = i % 6;
-            // 6-item repeating pattern: hero, portrait, landscape, portrait, landscape, wide
+            // 6-card repeating layout pattern
+            // 0: big left (3/4)   1: small right top (4/3)
+            // 2: small right bot  3: full width (16/9)
+            // 4: left square      5: right portrait
             const variant =
-              mod === 0 ? "hero" :
-              mod === 1 ? "portrait" :
-              mod === 2 ? "landscape" :
-              mod === 3 ? "portrait" :
-              mod === 4 ? "landscape" : "wide";
+              mod === 0 ? "big" :
+              mod === 1 ? "small-top" :
+              mod === 2 ? "small-bot" :
+              mod === 3 ? "wide" :
+              mod === 4 ? "square" : "portrait";
 
             return (
               <article
                 key={look._id}
                 className={`lookbook__card lookbook__card--${variant}`}
               >
-                {/* Issue number */}
                 <span className="lookbook__card-index">
                   {String(i + 1).padStart(2, "0")}
                 </span>
 
                 <div className="lookbook__img-wrap">
-                  <img src={look.imageUrl} alt={look.title || `Look ${i + 1}`} />
+                  <img
+                    src={look.imageUrl}
+                    alt={look.title || `Look ${i + 1}`}
+                  />
                   <div className="lookbook__overlay">
                     {(look.title || look.subtitle) && (
                       <div className="lookbook__caption">
@@ -90,7 +95,6 @@ function Lookbook() {
         </section>
       )}
 
-      {/* ── Footer rule ── */}
       <div className="lookbook__footer-rule">
         <span>Lumielle · Editorial</span>
       </div>
