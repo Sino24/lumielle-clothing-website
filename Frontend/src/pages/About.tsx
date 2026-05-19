@@ -19,7 +19,6 @@ interface AboutData {
   values: ValueItem[];
 }
 
-// Fallback defaults so page never looks empty
 const DEFAULTS: AboutData = {
   headline: "Crafted for those who wear their light",
   lead: "Lumielle is a modern Indian clothing label focused on timeless silhouettes, premium cotton fabrics, and quiet luxury aesthetics.",
@@ -47,7 +46,7 @@ function About() {
     fetch(`${API_BASE}/api/about`)
       .then((r) => r.json())
       .then((d) => setData({ ...DEFAULTS, ...d }))
-      .catch(() => {}) // keep defaults on error
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [API_BASE]);
 
@@ -62,59 +61,85 @@ function About() {
   return (
     <main className="about">
 
-      {/* Hero */}
+      {/* ── Hero ── */}
       <section className="about__hero">
-        <p className="about__eyebrow">About Lumielle</p>
-        <h1 className="about__title">{data.headline}</h1>
-        <p className="about__lead">{data.lead}</p>
+        <div className="about__hero-inner">
+          <p className="about__eyebrow">About Lumielle</p>
+          <h1 className="about__title">{data.headline}</h1>
+        </div>
+        <div className="about__hero-aside">
+          <div className="about__hero-rule" />
+          <p className="about__lead">{data.lead}</p>
+        </div>
       </section>
 
-      {/* Story */}
+      {/* ── Story ── */}
       <section className="about__story">
+        {/* Left: image */}
+        {data.studioImageUrl ? (
+          <div className="about__story-image">
+            <img src={data.studioImageUrl} alt="Lumielle studio" />
+          </div>
+        ) : (
+          <div className="about__story-image about__story-image--placeholder" />
+        )}
+
+        {/* Right: text */}
         <div className="about__story-content">
           <p className="about__section-tag">Our Story</p>
           <h2>
-            {data.storyHeading.split("\n").map((line, i) => (
-              <span key={i}>{line}{i < data.storyHeading.split("\n").length - 1 && <br />}</span>
+            {data.storyHeading.split("\n").map((line, i, arr) => (
+              <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
             ))}
           </h2>
           {data.storyBody  && <p>{data.storyBody}</p>}
           {data.storyBody2 && <p>{data.storyBody2}</p>}
         </div>
-
-        {data.studioImageUrl && (
-          <div className="about__story-image">
-            <img src={data.studioImageUrl} alt="Lumielle studio" />
-          </div>
-        )}
       </section>
 
-      {/* Values */}
+      {/* ── Values ── */}
       {data.values && data.values.length > 0 && (
         <section className="about__values">
-          {data.values.map((v) => (
-            <div className="about__value-card" key={v.number}>
-              <span>{v.number}</span>
-              <h3>{v.title}</h3>
-              <p>{v.body}</p>
-            </div>
-          ))}
+          <div className="about__values-header">
+            <p className="about__section-tag">What We Stand For</p>
+          </div>
+          <div className="about__values-grid">
+            {data.values.map((v) => (
+              <div className="about__value-card" key={v.number}>
+                <div className="about__value-top">
+                  <span className="about__value-num">{v.number}</span>
+                  <div className="about__value-rule" />
+                </div>
+                <h3>{v.title}</h3>
+                <p>{v.body}</p>
+              </div>
+            ))}
+          </div>
         </section>
       )}
 
-      {/* Founder */}
+      {/* ── Founder ── */}
       <section className="about__founder">
-        {data.founderImageUrl && (
+        <div className="about__founder-content">
+          <p className="about__section-tag">Founder Note</p>
+          {data.founderQuote && (
+            <blockquote className="about__founder-quote">
+              <span className="about__founder-mark">"</span>
+              {data.founderQuote}
+              <span className="about__founder-mark">"</span>
+            </blockquote>
+          )}
+          {data.founderNote && <p className="about__founder-body">{data.founderNote}</p>}
+          <span className="about__founder-sig">— {data.founderName}</span>
+        </div>
+
+        {data.founderImageUrl ? (
           <div className="about__founder-image">
             <img src={data.founderImageUrl} alt="Founder" />
           </div>
+        ) : (
+          <div className="about__founder-image about__founder-image--placeholder" />
         )}
-        <div className="about__founder-content">
-          <p className="about__section-tag">Founder Note</p>
-          {data.founderQuote && <h2>"{data.founderQuote}"</h2>}
-          {data.founderNote  && <p>{data.founderNote}</p>}
-          <span>— {data.founderName}</span>
-        </div>
       </section>
 
     </main>

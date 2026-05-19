@@ -62,7 +62,7 @@ function Home() {
             <br />
             confidence.
           </h1>
-          <Link className="home__hero-cta" to="/products">
+          <Link className="home__hero-cta" to="/product">
             Explore the collection &nbsp;→
           </Link>
         </div>

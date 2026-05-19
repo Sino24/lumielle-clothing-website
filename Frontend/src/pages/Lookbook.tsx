@@ -28,14 +28,21 @@ function Lookbook() {
   return (
     <main className="lookbook">
 
+      {/* ── Hero ── */}
       <section className="lookbook__hero">
-        <p className="lookbook__eyebrow">Editorial</p>
-        <h1>The Lumielle <em>Lookbook</em></h1>
-        <p className="lookbook__hero-sub">
-          Seasonal stories told through fabric, light, and form.
-        </p>
+        <div className="lookbook__hero-inner">
+          <div className="lookbook__hero-text">
+            <p className="lookbook__eyebrow">Editorial · SS 2025</p>
+            <h1>The Lumielle<br /><em>Lookbook</em></h1>
+          </div>
+          <p className="lookbook__hero-sub">
+            Seasonal stories told through<br />fabric, light, and form.
+          </p>
+        </div>
+        <div className="lookbook__hero-rule" />
       </section>
 
+      {/* ── Content ── */}
       {loading ? (
         <div className="lookbook__loading">
           <span className="lookbook__spin" />
@@ -46,26 +53,47 @@ function Lookbook() {
         </div>
       ) : (
         <section className="lookbook__grid">
-          {looks.map((look, i) => (
-            <article
-              key={look._id}
-              className={`lookbook__card lookbook__card--${(i % 3) + 1}`}
-            >
-              <div className="lookbook__img-wrap">
-                <img src={look.imageUrl} alt={look.title || `Look ${i + 1}`} />
-                <div className="lookbook__overlay">
-                  {(look.title || look.subtitle) && (
-                    <div className="lookbook__caption">
-                      {look.title && <span className="lookbook__caption-title">{look.title}</span>}
-                      {look.subtitle && <span className="lookbook__caption-sub">{look.subtitle}</span>}
-                    </div>
-                  )}
+          {looks.map((look, i) => {
+            const mod = i % 6;
+            // 6-item repeating pattern: hero, portrait, landscape, portrait, landscape, wide
+            const variant =
+              mod === 0 ? "hero" :
+              mod === 1 ? "portrait" :
+              mod === 2 ? "landscape" :
+              mod === 3 ? "portrait" :
+              mod === 4 ? "landscape" : "wide";
+
+            return (
+              <article
+                key={look._id}
+                className={`lookbook__card lookbook__card--${variant}`}
+              >
+                {/* Issue number */}
+                <span className="lookbook__card-index">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+
+                <div className="lookbook__img-wrap">
+                  <img src={look.imageUrl} alt={look.title || `Look ${i + 1}`} />
+                  <div className="lookbook__overlay">
+                    {(look.title || look.subtitle) && (
+                      <div className="lookbook__caption">
+                        {look.title    && <span className="lookbook__caption-title">{look.title}</span>}
+                        {look.subtitle && <span className="lookbook__caption-sub">{look.subtitle}</span>}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </section>
       )}
+
+      {/* ── Footer rule ── */}
+      <div className="lookbook__footer-rule">
+        <span>Lumielle · Editorial</span>
+      </div>
     </main>
   );
 }

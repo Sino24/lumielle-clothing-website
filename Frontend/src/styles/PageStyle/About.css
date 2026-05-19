@@ -7,7 +7,7 @@
   --bg:     #faf8f5;
   --accent: #c8a97e;
   --muted:  #9e9085;
-  --surface:#f0ece6;
+  --surface:#ede8e1;
   --border: rgba(17,17,16,0.1);
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: "Jost", sans-serif;
@@ -18,7 +18,7 @@
   min-height: 100vh;
 }
 
-/* Loading state */
+/* ── Loading ── */
 .about--loading {
   display: flex;
   align-items: center;
@@ -27,9 +27,9 @@
 
 .about__spin {
   display: inline-block;
-  width: 32px;
-  height: 32px;
-  border: 2px solid var(--border);
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid var(--border);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: about-spin 0.8s linear infinite;
@@ -37,82 +37,88 @@
 
 @keyframes about-spin { to { transform: rotate(360deg); } }
 
-/* ── Hero ── */
-.about__hero {
-  padding: clamp(80px, 12vw, 140px) clamp(24px, 8vw, 120px) clamp(60px, 8vw, 100px);
-  border-bottom: 1px solid var(--border);
-  max-width: 900px;
-}
-
-.about__eyebrow {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.28em;
+/* ─────────────────────────────────────
+   Shared utilities
+───────────────────────────────────── */
+.about__eyebrow,
+.about__section-tag {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--accent);
   margin: 0 0 1.5rem;
+  display: block;
+}
+
+/* ─────────────────────────────────────
+   Hero — split horizontal layout
+───────────────────────────────────── */
+.about__hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: end;
+  padding: clamp(80px, 11vw, 140px) clamp(24px, 7vw, 100px) clamp(56px, 6vw, 80px);
+  border-bottom: 1px solid var(--border);
+}
+
+.about__hero-inner {
+  display: flex;
+  flex-direction: column;
 }
 
 .about__title {
   font-family: var(--font-display);
-  font-size: clamp(40px, 6vw, 80px);
+  font-size: clamp(38px, 5.5vw, 74px);
   font-weight: 300;
-  line-height: 1.08;
+  line-height: 1.06;
   letter-spacing: -0.02em;
-  margin: 0 0 2rem;
+  margin: 0;
   color: var(--ink);
+}
+
+.about__hero-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding-top: 0.5rem;
+}
+
+.about__hero-rule {
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.6;
 }
 
 .about__lead {
-  font-size: clamp(15px, 1.5vw, 18px);
-  line-height: 1.8;
+  font-size: clamp(13px, 1.3vw, 15px);
+  line-height: 1.9;
   color: var(--muted);
   margin: 0;
-  max-width: 680px;
-  letter-spacing: 0.02em;
-}
-
-/* ── Story ── */
-.about__story {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(40px, 6vw, 100px);
-  padding: clamp(60px, 8vw, 100px) clamp(24px, 8vw, 120px);
-  align-items: center;
-  border-bottom: 1px solid var(--border);
-}
-
-.about__section-tag {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin: 0 0 1.25rem;
-}
-
-.about__story-content h2 {
-  font-family: var(--font-display);
-  font-size: clamp(28px, 3.5vw, 44px);
-  font-weight: 300;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-  margin: 0 0 1.5rem;
-}
-
-.about__story-content p {
-  font-size: 14px;
-  line-height: 1.85;
-  color: var(--muted);
-  margin: 0 0 1rem;
   letter-spacing: 0.03em;
 }
 
+/* ─────────────────────────────────────
+   Story — image left, text right
+   Image is offset-tall for elegance
+───────────────────────────────────── */
+.about__story {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  min-height: clamp(480px, 65vw, 700px);
+  border-bottom: 1px solid var(--border);
+}
+
 .about__story-image {
-  aspect-ratio: 3/4;
+  position: relative;
   overflow: hidden;
   background: var(--surface);
+}
+
+.about__story-image--placeholder {
+  background: linear-gradient(160deg, var(--surface) 0%, #d9d2c8 100%);
 }
 
 .about__story-image img {
@@ -120,70 +126,173 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.6s ease;
+  transition: transform 0.8s cubic-bezier(0.25, 0, 0.1, 1);
 }
 
 .about__story-image:hover img {
   transform: scale(1.04);
 }
 
-/* ── Values ── */
+.about__story-content {
+  padding: clamp(48px, 6vw, 88px) clamp(24px, 6vw, 80px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid var(--border);
+}
+
+.about__story-content h2 {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.5vw, 50px);
+  font-weight: 300;
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0 0 2rem;
+}
+
+.about__story-content p {
+  font-size: 13.5px;
+  line-height: 1.9;
+  color: var(--muted);
+  margin: 0 0 1rem;
+  letter-spacing: 0.03em;
+  max-width: 480px;
+}
+
+.about__story-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* ─────────────────────────────────────
+   Values — horizontal strip with
+   large numerals as decoration
+───────────────────────────────────── */
 .about__values {
+  border-bottom: 1px solid var(--border);
+  padding: clamp(48px, 6vw, 80px) clamp(24px, 7vw, 100px);
+}
+
+.about__values-header {
+  margin-bottom: clamp(32px, 4vw, 52px);
+}
+
+.about__values-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border-bottom: 1px solid var(--border);
+  gap: clamp(32px, 4vw, 64px);
 }
 
 .about__value-card {
-  padding: clamp(40px, 5vw, 72px) clamp(24px, 4vw, 60px);
-  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-.about__value-card:last-child {
-  border-right: none;
+.about__value-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.about__value-card span {
-  display: block;
+.about__value-num {
   font-family: var(--font-display);
-  font-size: clamp(32px, 4vw, 52px);
+  font-size: clamp(38px, 4vw, 56px);
   font-weight: 300;
   color: var(--accent);
-  opacity: 0.5;
-  margin-bottom: 1.25rem;
+  opacity: 0.35;
   line-height: 1;
+  flex-shrink: 0;
+}
+
+.about__value-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 
 .about__value-card h3 {
   font-family: var(--font-display);
-  font-size: clamp(20px, 2vw, 26px);
+  font-size: clamp(20px, 1.8vw, 26px);
   font-weight: 400;
   color: var(--ink);
-  margin: 0 0 0.75rem;
-  letter-spacing: 0.02em;
+  margin: 0 0 0.85rem;
+  letter-spacing: 0.01em;
 }
 
 .about__value-card p {
   font-size: 13px;
-  line-height: 1.8;
+  line-height: 1.85;
   color: var(--muted);
   margin: 0;
   letter-spacing: 0.03em;
 }
 
-/* ── Founder ── */
+/* ─────────────────────────────────────
+   Founder — quote left, image right
+   Large italic pull-quote treatment
+───────────────────────────────────── */
 .about__founder {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(40px, 6vw, 100px);
-  padding: clamp(60px, 8vw, 100px) clamp(24px, 8vw, 120px);
-  align-items: center;
+  grid-template-columns: 7fr 5fr;
+  min-height: clamp(420px, 55vw, 620px);
+}
+
+.about__founder-content {
+  padding: clamp(56px, 7vw, 100px) clamp(24px, 7vw, 100px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid var(--border);
+}
+
+.about__founder-quote {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3.2vw, 44px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.28;
+  color: var(--ink);
+  letter-spacing: 0.005em;
+  margin: 0 0 2rem;
+  position: relative;
+}
+
+.about__founder-mark {
+  font-family: var(--font-display);
+  font-size: 1.4em;
+  color: var(--accent);
+  line-height: 0;
+  vertical-align: -0.15em;
+  margin: 0 0.12em;
+}
+
+.about__founder-body {
+  font-size: 13.5px;
+  line-height: 1.9;
+  color: var(--muted);
+  margin: 0 0 2rem;
+  letter-spacing: 0.03em;
+  max-width: 480px;
+}
+
+.about__founder-sig {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
 .about__founder-image {
-  aspect-ratio: 3/4;
+  position: relative;
   overflow: hidden;
   background: var(--surface);
+}
+
+.about__founder-image--placeholder {
+  background: linear-gradient(200deg, var(--surface) 0%, #cec6bb 100%);
 }
 
 .about__founder-image img {
@@ -191,52 +300,69 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.8s cubic-bezier(0.25, 0, 0.1, 1);
 }
 
-.about__founder-content h2 {
-  font-family: var(--font-display);
-  font-size: clamp(24px, 3vw, 38px);
-  font-weight: 300;
-  font-style: italic;
-  line-height: 1.3;
-  color: var(--ink);
-  letter-spacing: 0.01em;
-  margin: 0 0 1.5rem;
+.about__founder-image:hover img {
+  transform: scale(1.04);
 }
 
-.about__founder-content p {
-  font-size: 14px;
-  line-height: 1.85;
-  color: var(--muted);
-  margin: 0 0 1.5rem;
-  letter-spacing: 0.03em;
-}
+/* ─────────────────────────────────────
+   Responsive
+───────────────────────────────────── */
+@media (max-width: 960px) {
+  .about__hero {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
 
-.about__founder-content span {
-  display: block;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
+  .about__story {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
 
-/* ── Responsive ── */
-@media (max-width: 900px) {
-  .about__story,
+  .about__story-image {
+    aspect-ratio: 4/3;
+    height: auto;
+  }
+
+  .about__story-content {
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .about__values-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
   .about__founder {
     grid-template-columns: 1fr;
+    min-height: auto;
   }
 
-  .about__values {
-    grid-template-columns: 1fr;
-  }
-
-  .about__value-card {
+  .about__founder-content {
     border-right: none;
-    border-bottom: 1px solid var(--border);
+    order: 2;
   }
 
-  .about__value-card:last-child { border-bottom: none; }
+  .about__founder-image {
+    order: 1;
+    aspect-ratio: 4/3;
+    height: auto;
+  }
+}
 
-  .about__founder-image { order: -1; }
+@media (max-width: 540px) {
+  .about__story-image {
+    aspect-ratio: 3/2;
+  }
+
+  .about__founder-image {
+    aspect-ratio: 3/2;
+  }
+
+  .about__founder-quote {
+    font-size: clamp(22px, 6vw, 30px);
+  }
 }
