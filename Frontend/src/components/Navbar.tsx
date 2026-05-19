@@ -93,9 +93,10 @@ function Navbar() {
           <Link className="navbar__link" to="/">Home</Link>
           <Link className="navbar__link" to="/product">Collections</Link>
           <Link className="navbar__link" to="/lookbook">Lookbook</Link>
+           <Link className="navbar__link" to="/ClientProjects">Client Projects</Link>
           <Link className="navbar__link" to="/about">About</Link>
           <Link className="navbar__link" to="/contact">Contact</Link>
-          <Link className="navbar__link" to="/ClientProjects">Client Projects</Link>
+         
         </div>
 
         {/* ── Desktop Search Expand ────────────────── */}
@@ -225,6 +226,7 @@ function Navbar() {
         <Link className="navbar__mobile-link" to="/product" onClick={() => setMenuOpen(false)}>Collections</Link>
         <Link className="navbar__mobile-link" to="/lookbook" onClick={() => setMenuOpen(false)}>Lookbook</Link>
         <Link className="navbar__mobile-link" to="/about" onClick={() => setMenuOpen(false)}>About</Link>
+        <Link className="navbar__mobile-link" to="/ClientProjects" onClick={() => setMenuOpen(false)}>Client Projects</Link>
         <Link className="navbar__mobile-link" to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link>
         <Link className="navbar__mobile-link" to="/cart" onClick={() => setMenuOpen(false)}>
           Cart ({cart.length})
