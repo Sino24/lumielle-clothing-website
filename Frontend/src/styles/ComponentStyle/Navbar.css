@@ -85,12 +85,13 @@
 
 .navbar__brand-name em {
   font-style: normal;
+   font-size: 1.2rem;
   font-weight: 400;
 }
 
 .navbar__tagline {
   font-family: var(--font-body);
-  font-size: 0.58rem;
+  font-size: 0.60rem;
   font-weight: 400;
   letter-spacing: 0.24em;
   text-transform: uppercase;
