@@ -73,7 +73,7 @@ app.use(
     "/api/client-projects",
     require("./routes/clientProjectRoutes")
   );
-
+app.use("/api/ratings", require("./routes/ratingRoutes"));
 // ── Health Check ───────────────────────────────────────────
 
 app.get("/", (req, res) => {

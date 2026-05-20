@@ -7,7 +7,8 @@
   --bg:     #faf8f5;
   --accent: #c8a97e;
   --muted:  #9e9085;
-  --surface:#ede8e1;
+  --surface:#f0ece6;
+  --dark:   #1a1714;
   --border: rgba(17,17,16,0.1);
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: "Jost", sans-serif;
@@ -18,11 +19,113 @@
   min-height: 100vh;
 }
 
-/* ── Loading ── */
-.about--loading {
+/* ─────────────────────────────────────
+   Shared
+───────────────────────────────────── */
+.about__eyebrow,
+.about__section-tag {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 1.25rem;
+  display: block;
+}
+
+/* ─────────────────────────────────────
+   Hero — split layout, mirrors ClientProjects
+   Left:  eyebrow + large title
+   Right: rule + description + stats
+───────────────────────────────────── */
+.about__hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: end;
+  padding: clamp(80px, 11vw, 140px) clamp(24px, 7vw, 100px) clamp(56px, 6vw, 80px);
+  border-bottom: 1px solid var(--border);
+}
+
+.about__hero-left {
+  /* eyebrow + title stack */
+}
+
+.about__hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(42px, 6vw, 84px);
+  font-weight: 300;
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+}
+
+.about__hero-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.about__hero-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding-bottom: 0.5rem;
+}
+
+/* Short gold rule — same as ClientProjects */
+.about__hero-rule {
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.about__hero-desc {
+  font-size: clamp(13px, 1.3vw, 15px);
+  line-height: 1.9;
+  color: var(--muted);
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+
+/* Stats row */
+.about__hero-stats {
+  display: flex;
+  gap: clamp(24px, 3vw, 48px);
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.about__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.about__stat-num {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.5vw, 32px);
+  font-weight: 300;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.about__stat-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ─────────────────────────────────────
+   Loading — sits below hero
+───────────────────────────────────── */
+.about__loading {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: clamp(80px, 14vw, 160px) 0;
 }
 
 .about__spin {
@@ -38,71 +141,7 @@
 @keyframes about-spin { to { transform: rotate(360deg); } }
 
 /* ─────────────────────────────────────
-   Shared utilities
-───────────────────────────────────── */
-.about__eyebrow,
-.about__section-tag {
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin: 0 0 1.5rem;
-  display: block;
-}
-
-/* ─────────────────────────────────────
-   Hero — split horizontal layout
-───────────────────────────────────── */
-.about__hero {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(40px, 6vw, 96px);
-  align-items: end;
-  padding: clamp(80px, 11vw, 140px) clamp(24px, 7vw, 100px) clamp(56px, 6vw, 80px);
-  border-bottom: 1px solid var(--border);
-}
-
-.about__hero-inner {
-  display: flex;
-  flex-direction: column;
-}
-
-.about__title {
-  font-family: var(--font-display);
-  font-size: clamp(38px, 5.5vw, 74px);
-  font-weight: 300;
-  line-height: 1.06;
-  letter-spacing: -0.02em;
-  margin: 0;
-  color: var(--ink);
-}
-
-.about__hero-aside {
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
-  padding-top: 0.5rem;
-}
-
-.about__hero-rule {
-  width: 40px;
-  height: 1px;
-  background: var(--accent);
-  opacity: 0.6;
-}
-
-.about__lead {
-  font-size: clamp(13px, 1.3vw, 15px);
-  line-height: 1.9;
-  color: var(--muted);
-  margin: 0;
-  letter-spacing: 0.03em;
-}
-
-/* ─────────────────────────────────────
    Story — image left, text right
-   Image is offset-tall for elegance
 ───────────────────────────────────── */
 .about__story {
   display: grid;
@@ -165,8 +204,7 @@
 }
 
 /* ─────────────────────────────────────
-   Values — horizontal strip with
-   large numerals as decoration
+   Values
 ───────────────────────────────────── */
 .about__values {
   border-bottom: 1px solid var(--border);
@@ -186,7 +224,6 @@
 .about__value-card {
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 .about__value-top {
@@ -230,8 +267,7 @@
 }
 
 /* ─────────────────────────────────────
-   Founder — quote left, image right
-   Large italic pull-quote treatment
+   Founder
 ───────────────────────────────────── */
 .about__founder {
   display: grid;
@@ -256,7 +292,6 @@
   color: var(--ink);
   letter-spacing: 0.005em;
   margin: 0 0 2rem;
-  position: relative;
 }
 
 .about__founder-mark {
@@ -313,12 +348,18 @@
 @media (max-width: 960px) {
   .about__hero {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 2.5rem;
   }
 
-  .about__story {
+  .about__story,
+  .about__founder {
     grid-template-columns: 1fr;
     min-height: auto;
+  }
+
+  .about__values-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
   }
 
   .about__story-image {
@@ -331,16 +372,6 @@
     border-top: 1px solid var(--border);
   }
 
-  .about__values-grid {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-  }
-
-  .about__founder {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-
   .about__founder-content {
     border-right: none;
     order: 2;
@@ -351,13 +382,15 @@
     aspect-ratio: 4/3;
     height: auto;
   }
+
+  .about__hero-stats {
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
 }
 
-@media (max-width: 540px) {
-  .about__story-image {
-    aspect-ratio: 3/2;
-  }
-
+@media (max-width: 560px) {
+  .about__story-image,
   .about__founder-image {
     aspect-ratio: 3/2;
   }

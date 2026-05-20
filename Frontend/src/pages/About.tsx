@@ -50,97 +50,129 @@ function About() {
       .finally(() => setLoading(false));
   }, [API_BASE]);
 
-  if (loading) {
-    return (
-      <main className="about about--loading">
-        <span className="about__spin" />
-      </main>
-    );
-  }
-
   return (
     <main className="about">
 
-      {/* ── Hero ── */}
+      {/* ─────────────────────────────────────────────────────
+          HERO — hardcoded, always visible, never gated
+          Matches ClientProjects split layout exactly
+      ───────────────────────────────────────────────────── */}
       <section className="about__hero">
-        <div className="about__hero-inner">
-          <p className="about__eyebrow">About Lumielle</p>
-          <h1 className="about__title">{data.headline}</h1>
+        <div className="about__hero-left">
+          <p className="about__eyebrow">Our Story</p>
+          <h1 className="about__hero-title">
+            Worn with<br /><em>intention,</em><br />made with care.
+          </h1>
         </div>
-        <div className="about__hero-aside">
+
+        <div className="about__hero-right">
           <div className="about__hero-rule" />
-          <p className="about__lead">{data.lead}</p>
+          <p className="about__hero-desc">
+            Lumielle is a modern Indian clothing label built on the belief that
+            everyday dressing deserves quiet luxury — premium cotton, timeless
+            silhouettes, and craft that lasts.
+          </p>
+          <div className="about__hero-stats">
+            <div className="about__stat">
+              <span className="about__stat-num">100%</span>
+              <span className="about__stat-label">Pure Cotton</span>
+            </div>
+            <div className="about__stat">
+              <span className="about__stat-num">India</span>
+              <span className="about__stat-label">Made Locally</span>
+            </div>
+            <div className="about__stat">
+              <span className="about__stat-num">∞</span>
+              <span className="about__stat-label">Timeless Style</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── Story ── */}
-      <section className="about__story">
-        {/* Left: image */}
-        {data.studioImageUrl ? (
-          <div className="about__story-image">
-            <img src={data.studioImageUrl} alt="Lumielle studio" />
-          </div>
-        ) : (
-          <div className="about__story-image about__story-image--placeholder" />
-        )}
-
-        {/* Right: text */}
-        <div className="about__story-content">
-          <p className="about__section-tag">Our Story</p>
-          <h2>
-            {data.storyHeading.split("\n").map((line, i, arr) => (
-              <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
-            ))}
-          </h2>
-          {data.storyBody  && <p>{data.storyBody}</p>}
-          {data.storyBody2 && <p>{data.storyBody2}</p>}
+      {/* ─────────────────────────────────────────────────────
+          CONTENT — gated behind loading spinner
+      ───────────────────────────────────────────────────── */}
+      {loading ? (
+        <div className="about__loading">
+          <span className="about__spin" />
         </div>
-      </section>
+      ) : (
+        <>
 
-      {/* ── Values ── */}
-      {data.values && data.values.length > 0 && (
-        <section className="about__values">
-          <div className="about__values-header">
-            <p className="about__section-tag">What We Stand For</p>
-          </div>
-          <div className="about__values-grid">
-            {data.values.map((v) => (
-              <div className="about__value-card" key={v.number}>
-                <div className="about__value-top">
-                  <span className="about__value-num">{v.number}</span>
-                  <div className="about__value-rule" />
-                </div>
-                <h3>{v.title}</h3>
-                <p>{v.body}</p>
+          {/* ── Story ───────────────────────────────────────── */}
+          <section className="about__story">
+            {data.studioImageUrl ? (
+              <div className="about__story-image">
+                <img src={data.studioImageUrl} alt="Lumielle studio" />
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+            ) : (
+              <div className="about__story-image about__story-image--placeholder" />
+            )}
 
-      {/* ── Founder ── */}
-      <section className="about__founder">
-        <div className="about__founder-content">
-          <p className="about__section-tag">Founder Note</p>
-          {data.founderQuote && (
-            <blockquote className="about__founder-quote">
-              <span className="about__founder-mark">"</span>
-              {data.founderQuote}
-              <span className="about__founder-mark">"</span>
-            </blockquote>
+            <div className="about__story-content">
+              <p className="about__section-tag">Our Story</p>
+              <h2>
+                {data.storyHeading.split("\n").map((line, i, arr) => (
+                  <span key={i}>
+                    {line}
+                    {i < arr.length - 1 && <br />}
+                  </span>
+                ))}
+              </h2>
+              {data.storyBody  && <p>{data.storyBody}</p>}
+              {data.storyBody2 && <p>{data.storyBody2}</p>}
+            </div>
+          </section>
+
+          {/* ── Values ──────────────────────────────────────── */}
+          {data.values && data.values.length > 0 && (
+            <section className="about__values">
+              <div className="about__values-header">
+                <p className="about__section-tag">What We Stand For</p>
+              </div>
+              <div className="about__values-grid">
+                {data.values.map((v) => (
+                  <div className="about__value-card" key={v.number}>
+                    <div className="about__value-top">
+                      <span className="about__value-num">{v.number}</span>
+                      <div className="about__value-rule" />
+                    </div>
+                    <h3>{v.title}</h3>
+                    <p>{v.body}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
-          {data.founderNote && <p className="about__founder-body">{data.founderNote}</p>}
-          <span className="about__founder-sig">— {data.founderName}</span>
-        </div>
 
-        {data.founderImageUrl ? (
-          <div className="about__founder-image">
-            <img src={data.founderImageUrl} alt="Founder" />
-          </div>
-        ) : (
-          <div className="about__founder-image about__founder-image--placeholder" />
-        )}
-      </section>
+          {/* ── Founder ─────────────────────────────────────── */}
+          <section className="about__founder">
+            <div className="about__founder-content">
+              <p className="about__section-tag">Founder Note</p>
+              {data.founderQuote && (
+                <blockquote className="about__founder-quote">
+                  <span className="about__founder-mark">"</span>
+                  {data.founderQuote}
+                  <span className="about__founder-mark">"</span>
+                </blockquote>
+              )}
+              {data.founderNote && (
+                <p className="about__founder-body">{data.founderNote}</p>
+              )}
+              <span className="about__founder-sig">— {data.founderName}</span>
+            </div>
+
+            {data.founderImageUrl ? (
+              <div className="about__founder-image">
+                <img src={data.founderImageUrl} alt="Founder" />
+              </div>
+            ) : (
+              <div className="about__founder-image about__founder-image--placeholder" />
+            )}
+          </section>
+
+        </>
+      )}
 
     </main>
   );
