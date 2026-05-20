@@ -28,7 +28,6 @@ function Lookbook() {
       .finally(() => setLoading(false));
   }, [API_BASE]);
 
-  // Track which card is most visible → update active index
   useEffect(() => {
     if (!looks.length) return;
     const track = trackRef.current;
@@ -66,19 +65,23 @@ function Lookbook() {
   return (
     <main className="lookbook">
 
-      {/* ── Hero ── */}
+      {/* ── Hero — split layout ── */}
       <section className="lookbook__hero">
-        <div className="lookbook__hero-inner">
-          <div className="lookbook__hero-text">
-            <p className="lookbook__eyebrow">Editorial · SS 2025</p>
-            <h1>The Lumielle<br /><em>Lookbook</em></h1>
-          </div>
-          <p className="lookbook__hero-sub">
-            Seasonal stories told through<br />fabric, light, and form.
+        <div className="lookbook__hero-left">
+          <p className="lookbook__eyebrow">Editorial · SS 2025</p>
+          <h1 className="lookbook__hero-title">
+            The Lumielle<br /><em>Lookbook</em>
+          </h1>
+        </div>
+        <div className="lookbook__hero-right">
+          <div className="lookbook__hero-rule" />
+          <p className="lookbook__hero-desc">
+            Seasonal stories told through fabric, light, and form.
           </p>
         </div>
-        <div className="lookbook__hero-rule" />
       </section>
+
+      <div className="lookbook__hero-divider" />
 
       {/* ── Content ── */}
       {loading ? (
@@ -92,7 +95,6 @@ function Lookbook() {
       ) : (
         <section className="lookbook__stage">
 
-          {/* Scroll hint */}
           <div className="lookbook__hint">
             <span>Drag to explore</span>
             <svg width="32" height="10" viewBox="0 0 32 10" fill="none">
@@ -100,10 +102,7 @@ function Lookbook() {
             </svg>
           </div>
 
-          {/* Horizontal scroll track */}
           <div className="lookbook__track" ref={trackRef}>
-
-            {/* Left breathing room */}
             <div className="lookbook__spacer" />
 
             {looks.map((look, i) => (
@@ -121,12 +120,10 @@ function Lookbook() {
                   />
                 </div>
 
-                {/* Always-visible index */}
                 <span className="lookbook__card-index">
                   {String(i + 1).padStart(2, "0")}
                 </span>
 
-                {/* Caption — slides up on active */}
                 <div className="lookbook__overlay">
                   <div className="lookbook__caption">
                     {look.title    && <span className="lookbook__caption-title">{look.title}</span>}
@@ -136,11 +133,9 @@ function Lookbook() {
               </article>
             ))}
 
-            {/* Right breathing room */}
             <div className="lookbook__spacer" />
           </div>
 
-          {/* Dot nav */}
           <nav className="lookbook__dots" aria-label="Lookbook navigation">
             {looks.map((_, i) => (
               <button
@@ -152,7 +147,6 @@ function Lookbook() {
             ))}
           </nav>
 
-          {/* Counter */}
           <div className="lookbook__counter">
             <span className="lookbook__counter-current">
               {String(activeIndex + 1).padStart(2, "0")}

@@ -53,10 +53,7 @@ function About() {
   return (
     <main className="about">
 
-      {/* ─────────────────────────────────────────────────────
-          HERO — hardcoded, always visible, never gated
-          Matches ClientProjects split layout exactly
-      ───────────────────────────────────────────────────── */}
+      {/* ── Hero — split layout ── */}
       <section className="about__hero">
         <div className="about__hero-left">
           <p className="about__eyebrow">Our Story</p>
@@ -89,9 +86,7 @@ function About() {
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────────────────
-          CONTENT — gated behind loading spinner
-      ───────────────────────────────────────────────────── */}
+      {/* ── Content — gated behind loading spinner ── */}
       {loading ? (
         <div className="about__loading">
           <span className="about__spin" />
@@ -99,7 +94,7 @@ function About() {
       ) : (
         <>
 
-          {/* ── Story ───────────────────────────────────────── */}
+          {/* ── Story ── */}
           <section className="about__story">
             {data.studioImageUrl ? (
               <div className="about__story-image">
@@ -124,7 +119,7 @@ function About() {
             </div>
           </section>
 
-          {/* ── Values ──────────────────────────────────────── */}
+          {/* ── Values ── */}
           {data.values && data.values.length > 0 && (
             <section className="about__values">
               <div className="about__values-header">
@@ -145,7 +140,7 @@ function About() {
             </section>
           )}
 
-          {/* ── Founder ─────────────────────────────────────── */}
+          {/* ── Founder ── */}
           <section className="about__founder">
             <div className="about__founder-content">
               <p className="about__section-tag">Founder Note</p>

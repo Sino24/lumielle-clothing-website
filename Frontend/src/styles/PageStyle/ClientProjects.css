@@ -1,3 +1,4 @@
+/* src/styles/PageStyle/ClientProjects.css */
 
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
 
@@ -18,9 +19,7 @@
   min-height: 100vh;
 }
 
-/* ─────────────────────────────────────
-   Shared
-───────────────────────────────────── */
+/* ── Shared ── */
 .cp__eyebrow {
   font-size: 9px;
   font-weight: 500;
@@ -37,9 +36,7 @@
   background: linear-gradient(135deg, var(--surface) 0%, #ddd8d0 100%);
 }
 
-/* ─────────────────────────────────────
-   Hero — split layout
-───────────────────────────────────── */
+/* ── Hero — split layout ── */
 .cp__hero {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -114,9 +111,7 @@
   color: var(--muted);
 }
 
-/* ─────────────────────────────────────
-   Filter tags
-───────────────────────────────────── */
+/* ── Filter tags ── */
 .cp__filters {
   display: flex;
   flex-wrap: wrap;
@@ -149,9 +144,7 @@
   color: var(--bg);
 }
 
-/* ─────────────────────────────────────
-   Loading / Empty
-───────────────────────────────────── */
+/* ── Loading / Empty ── */
 .cp__loading {
   display: flex;
   justify-content: center;
@@ -178,9 +171,7 @@
   letter-spacing: 0.1em;
 }
 
-/* ─────────────────────────────────────
-   Content wrapper
-───────────────────────────────────── */
+/* ── Content wrapper ── */
 .cp__content {
   padding: clamp(40px, 5vw, 72px) clamp(24px, 7vw, 100px);
   display: flex;
@@ -188,9 +179,7 @@
   gap: clamp(48px, 6vw, 80px);
 }
 
-/* ─────────────────────────────────────
-   Featured cards — alternating layout
-───────────────────────────────────── */
+/* ── Featured cards ── */
 .cp__featured-row {
   display: flex;
   flex-direction: column;
@@ -293,7 +282,6 @@
   letter-spacing: 0.03em;
 }
 
-/* Tags */
 .cp__tags {
   display: flex;
   flex-wrap: wrap;
@@ -314,7 +302,6 @@
   padding: 3px 8px;
 }
 
-/* Thumbnail strip */
 .cp__thumb-strip {
   display: flex;
   gap: 6px;
@@ -343,9 +330,7 @@
   display: block;
 }
 
-/* ─────────────────────────────────────
-   Regular grid — 3 columns
-───────────────────────────────────── */
+/* ── Regular grid ── */
 .cp__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -416,9 +401,7 @@
   letter-spacing: 0.01em;
 }
 
-/* ─────────────────────────────────────
-   CTA Banner
-───────────────────────────────────── */
+/* ── CTA Banner ── */
 .cp__cta {
   background: var(--dark);
   padding: clamp(56px, 8vw, 100px) clamp(24px, 7vw, 100px);
@@ -470,9 +453,7 @@
   transform: translateY(-1px);
 }
 
-/* ─────────────────────────────────────
-   Lightbox
-───────────────────────────────────── */
+/* ── Lightbox ── */
 .cp__lightbox {
   position: fixed;
   inset: 0;
@@ -617,9 +598,7 @@
   border-radius: 3px;
 }
 
-/* ─────────────────────────────────────
-   Responsive
-───────────────────────────────────── */
+/* ── Responsive ── */
 @media (max-width: 960px) {
   .cp__hero {
     grid-template-columns: 1fr;

@@ -7,6 +7,8 @@
   --bg:     #faf8f5;
   --accent: #c8a97e;
   --muted:  #9e9085;
+  --surface:#f0ece6;
+  --dark:   #1a1714;
   --border: rgba(17,17,16,0.1);
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: "Jost", sans-serif;
@@ -18,34 +20,61 @@
   padding-bottom: 6rem;
 }
 
-/* ── Hero ── */
+/* ── Hero — split layout, matches About / Products / ClientProjects ── */
 .contact__hero {
-  padding: clamp(80px, 12vw, 140px) clamp(24px, 8vw, 120px) clamp(48px, 6vw, 80px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: end;
+  padding: clamp(80px, 11vw, 140px) clamp(24px, 7vw, 100px) clamp(56px, 6vw, 80px);
   border-bottom: 1px solid var(--border);
 }
 
 .contact__eyebrow {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.28em;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--accent);
   margin: 0 0 1.25rem;
+  display: block;
 }
 
-.contact__hero h1 {
+.contact__hero-title {
   font-family: var(--font-display);
-  font-size: clamp(42px, 7vw, 88px);
+  font-size: clamp(42px, 6vw, 84px);
   font-weight: 300;
-  line-height: 1.05;
+  line-height: 1.0;
   letter-spacing: -0.02em;
   margin: 0;
   color: var(--ink);
 }
 
-.contact__hero h1 em {
+.contact__hero-title em {
   font-style: italic;
   color: var(--accent);
+}
+
+.contact__hero-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding-bottom: 0.5rem;
+}
+
+.contact__hero-rule {
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.contact__hero-desc {
+  font-size: clamp(13px, 1.3vw, 15px);
+  line-height: 1.9;
+  color: var(--muted);
+  margin: 0;
+  letter-spacing: 0.03em;
 }
 
 /* ── Layout ── */
@@ -53,7 +82,7 @@
   display: grid;
   grid-template-columns: 1fr 1.6fr;
   gap: clamp(48px, 6vw, 100px);
-  padding: clamp(48px, 6vw, 80px) clamp(24px, 8vw, 120px);
+  padding: clamp(48px, 6vw, 80px) clamp(24px, 7vw, 100px);
   align-items: start;
 }
 
@@ -236,6 +265,13 @@
 @keyframes contact-spin { to { transform: rotate(360deg); } }
 
 /* ── Responsive ── */
+@media (max-width: 960px) {
+  .contact__hero {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
 @media (max-width: 768px) {
   .contact__layout {
     grid-template-columns: 1fr;

@@ -11,9 +11,8 @@
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: "Jost", sans-serif;
 
-  /* Card sizing — change these to resize all cards */
   --card-h: 72vh;
-  --card-w: calc(var(--card-h) * 0.68);  /* portrait 2:3 ratio */
+  --card-w: calc(var(--card-h) * 0.68);
   --card-gap: 16px;
   --track-pad: clamp(24px, 8vw, 120px);
 
@@ -23,22 +22,14 @@
   min-height: 100vh;
 }
 
-/* ─────────────────────────────────────
-   Hero
-───────────────────────────────────── */
+/* ── Hero — split layout ── */
 .lookbook__hero {
-  padding: clamp(72px, 10vw, 130px) clamp(24px, 7vw, 100px) 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: end;
+  padding: clamp(80px, 11vw, 140px) clamp(24px, 7vw, 100px) clamp(56px, 6vw, 80px);
 }
-
-.lookbook__hero-inner {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  padding-bottom: clamp(32px, 4vw, 56px);
-}
-
-.lookbook__hero-text { flex: 1; }
 
 .lookbook__eyebrow {
   font-size: 9px;
@@ -50,41 +41,50 @@
   display: block;
 }
 
-.lookbook__hero h1 {
+.lookbook__hero-title {
   font-family: var(--font-display);
-  font-size: clamp(48px, 7vw, 100px);
+  font-size: clamp(42px, 6vw, 84px);
   font-weight: 300;
-  line-height: 0.96;
-  letter-spacing: -0.025em;
+  line-height: 1.0;
+  letter-spacing: -0.02em;
   margin: 0;
   color: var(--ink);
 }
 
-.lookbook__hero h1 em {
+.lookbook__hero-title em {
   font-style: italic;
   color: var(--accent);
 }
 
-.lookbook__hero-sub {
-  font-size: clamp(12px, 1.2vw, 14px);
-  color: var(--muted);
-  letter-spacing: 0.06em;
-  line-height: 1.75;
-  margin: 0;
-  text-align: right;
-  flex-shrink: 0;
-  max-width: 220px;
+.lookbook__hero-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
   padding-bottom: 0.5rem;
 }
 
 .lookbook__hero-rule {
+  width: 40px;
   height: 1px;
-  background: var(--border);
+  background: var(--accent);
+  opacity: 0.6;
 }
 
-/* ─────────────────────────────────────
-   Loading / Empty
-───────────────────────────────────── */
+.lookbook__hero-desc {
+  font-size: clamp(13px, 1.3vw, 15px);
+  line-height: 1.9;
+  color: var(--muted);
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+
+.lookbook__hero-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 clamp(24px, 7vw, 100px);
+}
+
+/* ── Loading / Empty ── */
 .lookbook__loading {
   display: flex;
   justify-content: center;
@@ -111,15 +111,12 @@
   letter-spacing: 0.1em;
 }
 
-/* ─────────────────────────────────────
-   Stage wrapper
-───────────────────────────────────── */
+/* ── Stage ── */
 .lookbook__stage {
   position: relative;
   padding: clamp(40px, 5vw, 64px) 0 clamp(32px, 4vw, 48px);
 }
 
-/* Drag hint */
 .lookbook__hint {
   display: flex;
   align-items: center;
@@ -140,9 +137,7 @@
   100% { opacity: 0; }
 }
 
-/* ─────────────────────────────────────
-   Horizontal scroll track
-───────────────────────────────────── */
+/* ── Scroll track ── */
 .lookbook__track {
   display: flex;
   align-items: center;
@@ -152,27 +147,20 @@
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   cursor: grab;
-  padding-bottom: 4px; /* prevents clipping box-shadow */
-
-  /* Hide scrollbar — still scrollable */
+  padding-bottom: 4px;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
 .lookbook__track::-webkit-scrollbar { display: none; }
-
 .lookbook__track:active { cursor: grabbing; }
 
-/* Edge spacers — create visual padding
-   without breaking scroll snap */
 .lookbook__spacer {
   flex-shrink: 0;
   width: calc(var(--track-pad) - var(--card-gap));
 }
 
-/* ─────────────────────────────────────
-   Card
-───────────────────────────────────── */
+/* ── Card ── */
 .lookbook__card {
   position: relative;
   flex-shrink: 0;
@@ -191,9 +179,7 @@
   transform: scale(1);
   box-shadow: 0 24px 64px rgba(17,17,16,0.18);
 }
-/* ─────────────────────────────────────
-   Image
-───────────────────────────────────── */
+
 .lookbook__img-wrap {
   position: absolute;
   inset: 0;
@@ -214,9 +200,6 @@
   transform: scale(1.03);
 }
 
-/* ─────────────────────────────────────
-   Index badge
-───────────────────────────────────── */
 .lookbook__card-index {
   position: absolute;
   top: 1.1rem;
@@ -236,10 +219,6 @@
   color: rgba(255,255,255,0.85);
 }
 
-/* ─────────────────────────────────────
-   Caption overlay
-   Hidden on inactive, slides up on active
-───────────────────────────────────── */
 .lookbook__overlay {
   position: absolute;
   inset: 0;
@@ -257,9 +236,7 @@
   pointer-events: none;
 }
 
-.lookbook__card--active .lookbook__overlay {
-  opacity: 1;
-}
+.lookbook__card--active .lookbook__overlay { opacity: 1; }
 
 .lookbook__caption {
   display: flex;
@@ -269,9 +246,7 @@
   transition: transform 0.45s cubic-bezier(0.25, 0, 0.1, 1);
 }
 
-.lookbook__card--active .lookbook__caption {
-  transform: translateY(0);
-}
+.lookbook__card--active .lookbook__caption { transform: translateY(0); }
 
 .lookbook__caption-title {
   font-family: var(--font-display);
@@ -289,9 +264,7 @@
   color: rgba(255,255,255,0.65);
 }
 
-/* ─────────────────────────────────────
-   Dot navigation
-───────────────────────────────────── */
+/* ── Dot nav ── */
 .lookbook__dots {
   display: flex;
   align-items: center;
@@ -317,9 +290,7 @@
   background: var(--accent);
 }
 
-/* ─────────────────────────────────────
-   Counter  02 / 08
-───────────────────────────────────── */
+/* ── Counter ── */
 .lookbook__counter {
   display: flex;
   align-items: center;
@@ -352,9 +323,7 @@
   letter-spacing: 0.08em;
 }
 
-/* ─────────────────────────────────────
-   Footer rule
-───────────────────────────────────── */
+/* ── Footer rule ── */
 .lookbook__footer-rule {
   display: flex;
   align-items: center;
@@ -379,37 +348,27 @@
   white-space: nowrap;
 }
 
-/* ─────────────────────────────────────
-   Responsive
-───────────────────────────────────── */
-@media (max-width: 900px) {
+/* ── Responsive ── */
+@media (max-width: 960px) {
+  .lookbook__hero {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
   .lookbook {
     --card-h: 65vh;
     --card-w: calc(var(--card-h) * 0.72);
-  }
-
-  .lookbook__hero-inner {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
-  }
-
-  .lookbook__hero-sub {
-    text-align: left;
-    max-width: 100%;
   }
 }
 
 @media (max-width: 540px) {
   .lookbook {
-    /* On mobile, card is nearly full screen width */
     --card-h: 70vh;
     --card-w: 82vw;
     --track-pad: 20px;
     --card-gap: 12px;
   }
 
-  /* On mobile always show caption */
   .lookbook__overlay {
     opacity: 1;
     background: linear-gradient(
@@ -419,7 +378,5 @@
     );
   }
 
-  .lookbook__caption {
-    transform: translateY(0);
-  }
+  .lookbook__caption { transform: translateY(0); }
 }

@@ -1,3 +1,4 @@
+// src/pages/ClientProjects.tsx
 
 import { useEffect, useState } from "react";
 import "../styles/PageStyle/ClientProjects.css";
@@ -32,7 +33,6 @@ function ClientProjects() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Close lightbox on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") setLightbox(null);
@@ -48,7 +48,6 @@ function ClientProjects() {
     return () => window.removeEventListener("keydown", handler);
   }, [lightbox]);
 
-  // Collect unique tags
   const allTags = [ALL_TAG, ...Array.from(new Set(projects.flatMap((p) => p.tags).filter(Boolean)))];
 
   const filtered = activeTag === ALL_TAG
@@ -71,7 +70,7 @@ function ClientProjects() {
   return (
     <main className="cp">
 
-      {/* ── Hero ── */}
+      {/* ── Hero — split layout ── */}
       <section className="cp__hero">
         <div className="cp__hero-left">
           <p className="cp__eyebrow">Custom Work</p>
@@ -125,7 +124,6 @@ function ClientProjects() {
       ) : (
         <section className="cp__content">
 
-          {/* Featured row */}
           {featured.length > 0 && (
             <div className="cp__featured-row">
               {featured.map((project, i) => {
@@ -175,7 +173,6 @@ function ClientProjects() {
             </div>
           )}
 
-          {/* Regular grid */}
           {regular.length > 0 && (
             <div className="cp__grid">
               {regular.map((project, i) => {

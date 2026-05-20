@@ -56,9 +56,20 @@ function Contact() {
   return (
     <main className="contact">
 
+      {/* ── Hero — split layout ── */}
       <section className="contact__hero">
-        <p className="contact__eyebrow">Contact</p>
-        <h1>Let's start a<em> conversation</em></h1>
+        <div className="contact__hero-left">
+          <p className="contact__eyebrow">Contact</p>
+          <h1 className="contact__hero-title">
+            Let's start a<br /><em>conversation</em>
+          </h1>
+        </div>
+        <div className="contact__hero-right">
+          <div className="contact__hero-rule" />
+          <p className="contact__hero-desc">
+            For orders, collaborations, or support, feel free to reach out.
+          </p>
+        </div>
       </section>
 
       <div className="contact__layout">

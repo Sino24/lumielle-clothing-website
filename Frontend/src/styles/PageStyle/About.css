@@ -19,9 +19,7 @@
   min-height: 100vh;
 }
 
-/* ─────────────────────────────────────
-   Shared
-───────────────────────────────────── */
+/* ── Shared ── */
 .about__eyebrow,
 .about__section-tag {
   font-size: 9px;
@@ -33,11 +31,7 @@
   display: block;
 }
 
-/* ─────────────────────────────────────
-   Hero — split layout, mirrors ClientProjects
-   Left:  eyebrow + large title
-   Right: rule + description + stats
-───────────────────────────────────── */
+/* ── Hero — split layout ── */
 .about__hero {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -45,10 +39,6 @@
   align-items: end;
   padding: clamp(80px, 11vw, 140px) clamp(24px, 7vw, 100px) clamp(56px, 6vw, 80px);
   border-bottom: 1px solid var(--border);
-}
-
-.about__hero-left {
-  /* eyebrow + title stack */
 }
 
 .about__hero-title {
@@ -73,7 +63,6 @@
   padding-bottom: 0.5rem;
 }
 
-/* Short gold rule — same as ClientProjects */
 .about__hero-rule {
   width: 40px;
   height: 1px;
@@ -89,7 +78,6 @@
   letter-spacing: 0.03em;
 }
 
-/* Stats row */
 .about__hero-stats {
   display: flex;
   gap: clamp(24px, 3vw, 48px);
@@ -118,9 +106,7 @@
   color: var(--muted);
 }
 
-/* ─────────────────────────────────────
-   Loading — sits below hero
-───────────────────────────────────── */
+/* ── Loading ── */
 .about__loading {
   display: flex;
   align-items: center;
@@ -140,9 +126,7 @@
 
 @keyframes about-spin { to { transform: rotate(360deg); } }
 
-/* ─────────────────────────────────────
-   Story — image left, text right
-───────────────────────────────────── */
+/* ── Story ── */
 .about__story {
   display: grid;
   grid-template-columns: 5fr 7fr;
@@ -203,9 +187,7 @@
   margin-bottom: 0;
 }
 
-/* ─────────────────────────────────────
-   Values
-───────────────────────────────────── */
+/* ── Values ── */
 .about__values {
   border-bottom: 1px solid var(--border);
   padding: clamp(48px, 6vw, 80px) clamp(24px, 7vw, 100px);
@@ -266,9 +248,7 @@
   letter-spacing: 0.03em;
 }
 
-/* ─────────────────────────────────────
-   Founder
-───────────────────────────────────── */
+/* ── Founder ── */
 .about__founder {
   display: grid;
   grid-template-columns: 7fr 5fr;
@@ -342,9 +322,7 @@
   transform: scale(1.04);
 }
 
-/* ─────────────────────────────────────
-   Responsive
-───────────────────────────────────── */
+/* ── Responsive ── */
 @media (max-width: 960px) {
   .about__hero {
     grid-template-columns: 1fr;
