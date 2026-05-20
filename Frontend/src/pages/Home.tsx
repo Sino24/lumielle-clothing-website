@@ -96,46 +96,39 @@ function Home() {
           aria-hidden="true"
         />
 
-        {/* Split layout — mirrors all other page heroes */}
-<div className="home__hero-content">
+        {/* Hero content — title top, rule+desc+cta bottom */}
+        <div className="home__hero-content">
 
-  <div className="home__hero-left">
+          {/* ── TOP: eyebrow + title ── */}
+          <div className="home__hero-top">
+            <p className="home__hero-eyebrow">{hero.eyebrow}</p>
+            <h1 className="home__hero-title">
+              {hero.titleLine1}{" "}
+              {hero.titleItalic && <em>{hero.titleItalic}</em>}
+              {hero.titleLine2 && (
+                <>
+                  <br />
+                  {hero.titleLine2}
+                </>
+              )}
+            </h1>
+          </div>
 
-    <p className="home__hero-eyebrow">
-      {hero.eyebrow}
-    </p>
+          {/* ── BOTTOM: rule + description + CTA ── */}
+          <div className="home__hero-bottom">
+            <div className="home__hero-rule" />
+            <p className="home__hero-desc">
+              Timeless cuts. Considered fabrics. Made to last.
+            </p>
+            <Link
+              className="home__hero-cta"
+              to={hero.ctaLink || "/product"}
+            >
+              {hero.ctaText}&nbsp;&nbsp;→
+            </Link>
+          </div>
 
-    <h1 className="home__hero-title">
-      {hero.titleLine1}{" "}
-      {hero.titleItalic && <em>{hero.titleItalic}</em>}
-      {hero.titleLine2 && (
-        <>
-          <br />
-          {hero.titleLine2}
-        </>
-      )}
-    </h1>
-
-    <div className="home__hero-right">
-
-      <div className="home__hero-rule" />
-
-      <p className="home__hero-desc">
-        Timeless cuts. Considered fabrics. Made to last.
-      </p>
-
-      <Link
-        className="home__hero-cta"
-        to={hero.ctaLink || "/product"}
-      >
-        {hero.ctaText}&nbsp;&nbsp;→
-      </Link>
-
-    </div>
-
-  </div>
-
-</div>
+        </div>
       </section>
 
       {/* ── Featured Products ── */}
