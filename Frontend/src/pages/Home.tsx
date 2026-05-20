@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/PageStyle/Home.css";
 
-// Local fallback image (used only when no imageUrl from API)
 import heroFallback from "../assets/home.png";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -55,7 +54,6 @@ function Home() {
   const [loading,  setLoading]  = useState(true);
 
   useEffect(() => {
-    // Fetch hero + products in parallel
     Promise.allSettled([
       fetch(`${API_BASE}/api/hero`).then((r) => r.json()),
       fetch(`${API_BASE}/api/products`).then((r) => r.json()),
@@ -76,13 +74,13 @@ function Home() {
     navigate(`/products/${product._id}`);
   };
 
-  const heroImg     = hero.imageUrl || heroFallback;
-  const overlayVal  = `rgba(26,23,20,${(hero.overlayOpacity / 100).toFixed(2)})`;
+  const heroImg    = hero.imageUrl || heroFallback;
+  const overlayVal = `rgba(26,23,20,${(hero.overlayOpacity / 100).toFixed(2)})`;
 
   return (
     <main className="home">
 
-      {/* ── Hero ──────────────────────────────────────────────── */}
+      {/* ── Hero ── */}
       <section className="home__hero">
         <img
           className="home__hero-img"
@@ -90,7 +88,6 @@ function Home() {
           alt="Lumielle editorial hero"
         />
 
-        {/* Dynamic overlay gradient using CSS custom property */}
         <div
           className="home__hero-overlay"
           style={{
@@ -99,24 +96,49 @@ function Home() {
           aria-hidden="true"
         />
 
-        <div className="home__hero-content">
-          {hero.eyebrow && (
-            <p className="home__hero-eyebrow">{hero.eyebrow}</p>
-          )}
+        {/* Split layout — mirrors all other page heroes */}
+<div className="home__hero-content">
 
-          <h1 className="home__hero-title">
-            {hero.titleLine1}{" "}
-            {hero.titleItalic && <em>{hero.titleItalic}</em>}
-            {hero.titleLine2  && <><br />{hero.titleLine2}</>}
-          </h1>
+  <div className="home__hero-left">
 
-          <Link className="home__hero-cta" to={hero.ctaLink || "/product"}>
-            {hero.ctaText}&nbsp;&nbsp;→
-          </Link>
-        </div>
+    <p className="home__hero-eyebrow">
+      {hero.eyebrow}
+    </p>
+
+    <h1 className="home__hero-title">
+      {hero.titleLine1}{" "}
+      {hero.titleItalic && <em>{hero.titleItalic}</em>}
+      {hero.titleLine2 && (
+        <>
+          <br />
+          {hero.titleLine2}
+        </>
+      )}
+    </h1>
+
+    <div className="home__hero-right">
+
+      <div className="home__hero-rule" />
+
+      <p className="home__hero-desc">
+        Timeless cuts. Considered fabrics. Made to last.
+      </p>
+
+      <Link
+        className="home__hero-cta"
+        to={hero.ctaLink || "/product"}
+      >
+        {hero.ctaText}&nbsp;&nbsp;→
+      </Link>
+
+    </div>
+
+  </div>
+
+</div>
       </section>
 
-      {/* ── Featured Products ──────────────────────────────────── */}
+      {/* ── Featured Products ── */}
       <section className="home__featured">
         <p className="home__section-label">Curated for you</p>
         <h2 className="home__section-title">
@@ -168,7 +190,7 @@ function Home() {
         )}
       </section>
 
-      {/* ── Dark Banner ───────────────────────────────────────── */}
+      {/* ── Dark Banner ── */}
       <section className="home__banner">
         <p className="home__banner-text">
           Every thread tells a story.
