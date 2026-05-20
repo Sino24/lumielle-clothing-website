@@ -81,7 +81,8 @@
 .lookbook__hero-divider {
   height: 1px;
   background: var(--border);
-  margin: 0 clamp(24px, 7vw, 100px);
+margin: 0;
+width: 100%;
 }
 
 /* ── Loading / Empty ── */
