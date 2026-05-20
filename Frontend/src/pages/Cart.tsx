@@ -23,7 +23,6 @@ function Cart() {
       message += `Price: ${item.price}%0A%0A`;
     });
     message += `Total: ₹${total.toLocaleString("en-IN")}%0A%0A`;
-    message += "Please share:%0AName:%0APhone:%0AAddress:";
     window.open(`https://wa.me/+918590109684?text=${message}`, "_blank");
   };
 
