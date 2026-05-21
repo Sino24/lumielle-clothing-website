@@ -60,16 +60,9 @@ const sections = [
       "Any approved design or specification changes after production commencement may result in additional charges.",
     ],
   },
+ 
   {
     id: "07",
-    title: "Intellectual Property",
-    body: [
-      "All content on this website — including text, images, graphics, logos, and design elements — is the property of Lumielle and is protected under applicable intellectual property laws.",
-      "You may not reproduce, distribute, or use any content from this website without prior written permission from Lumielle.",
-    ],
-  },
-  {
-    id: "08",
     title: "Privacy",
     body: [
       "By using our website, you consent to the collection and use of your personal information as described in our Privacy Policy.",
@@ -78,22 +71,16 @@ const sections = [
     ],
   },
   {
-    id: "09",
+    id: "08",
     title: "Limitation of Liability",
     body: [
       "Lumielle shall not be liable for any indirect, incidental, or consequential damages arising from the use of our website or products.",
       "Our total liability to you for any claim arising out of a purchase shall not exceed the amount you paid for that specific order.",
     ],
   },
+ 
   {
-    id: "10",
-    title: "Governing Law",
-    body: [
-      "These Terms and Conditions are governed by and construed in accordance with the laws of India. Any disputes shall be subject to the exclusive jurisdiction of the courts of Kerala, India.",
-    ],
-  },
-  {
-    id: "11",
+    id: "09",
     title: "Changes to Terms",
     body: [
       "Lumielle reserves the right to update or modify these Terms and Conditions at any time without prior notice. The updated terms will be effective upon posting to this website.",
@@ -101,7 +88,7 @@ const sections = [
     ],
   },
   {
-    id: "12",
+    id: "10",
     title: "Contact",
     body: [
       "If you have any questions about these Terms and Conditions, please contact us at lumiecart@gmail.com or through the contact form on our website.",
