@@ -1,0 +1,236 @@
+/* src/components/TermsPopup.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+
+/* ─────────────────────────────────────
+   Backdrop
+───────────────────────────────────── */
+.tp-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17,17,16,0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 998;
+  animation: tp-fade-in 0.35s ease both;
+}
+
+.tp-backdrop--out {
+  animation: tp-fade-out 0.4s ease both;
+}
+
+/* ─────────────────────────────────────
+   Popup — slides up from bottom
+───────────────────────────────────── */
+.tp {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+
+  display: flex;
+  background: #faf8f5;
+  border-top: 1px solid rgba(17,17,16,0.1);
+  box-shadow: 0 -24px 64px rgba(17,17,16,0.15);
+
+  animation: tp-slide-up 0.45s cubic-bezier(0.25, 0, 0.1, 1) both;
+}
+
+.tp--out {
+  animation: tp-slide-down 0.4s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+/* Left accent bar */
+.tp__bar {
+  width: 4px;
+  background: #c8a97e;
+  flex-shrink: 0;
+}
+
+/* Inner content */
+.tp__inner {
+  flex: 1;
+  padding: clamp(24px, 3vw, 40px) clamp(24px, 5vw, 64px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Brand mark */
+.tp__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tp__brand-name {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: #111110;
+}
+
+.tp__brand-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #c8a97e;
+  flex-shrink: 0;
+}
+
+.tp__brand-tag {
+  font-family: "Jost", sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #9e9085;
+}
+
+/* Title */
+.tp__title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: #111110;
+  margin: 0;
+}
+
+.tp__title em {
+  font-style: italic;
+  color: #c8a97e;
+}
+
+/* Points list */
+.tp__points {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.tp__points li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.85rem;
+  font-family: "Jost", sans-serif;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: #9e9085;
+  letter-spacing: 0.02em;
+}
+
+.tp__point-num {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: #c8a97e;
+  opacity: 0.7;
+  flex-shrink: 0;
+  min-width: 20px;
+}
+
+.tp__points strong {
+  font-weight: 500;
+  color: #7a2020;
+}
+
+/* Actions */
+.tp__actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.tp__accept-btn {
+  font-family: "Jost", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: #111110;
+  color: #faf8f5;
+  border: none;
+  padding: 0.85rem 2rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.tp__accept-btn:hover {
+  background: #c8a97e;
+  transform: translateY(-1px);
+}
+
+.tp__accept-btn:active {
+  transform: translateY(0);
+}
+
+.tp__read-link {
+  font-family: "Jost", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #9e9085;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(158,144,133,0.4);
+  padding-bottom: 2px;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.tp__read-link:hover {
+  color: #111110;
+  border-color: #111110;
+}
+
+/* ─────────────────────────────────────
+   Animations
+───────────────────────────────────── */
+@keyframes tp-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes tp-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes tp-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes tp-slide-down {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(100%); opacity: 0; }
+}
+
+/* ─────────────────────────────────────
+   Responsive
+───────────────────────────────────── */
+@media (max-width: 640px) {
+  .tp__inner {
+    padding: 1.5rem 1.25rem;
+    gap: 1rem;
+  }
+
+  .tp__actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .tp__accept-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

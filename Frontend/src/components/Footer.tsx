@@ -47,7 +47,7 @@ function Footer() {
         <div>
           <p className="footer__col-title">Help</p>
           <ul className="footer__col-links">
-            <li><Link to="/shipping">Shipping & Returns</Link></li>
+            <li><Link to="/terms">Terms And Conditions</Link></li>
             <li><Link to="/sizing">Size Guide</Link></li>
             <li><Link to="/faq">FAQ</Link></li>
             <li><Link to="/contact">Contact Us</Link></li>

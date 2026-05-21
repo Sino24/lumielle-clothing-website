@@ -12,7 +12,7 @@ import Lookbook from "../pages/Lookbook";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
 import ClientProjects from "../pages/ClientProjects";
-
+import TermsAndConditions from "../pages/TermsAndConditions";
 /* ───────── Admin Pages ───────── */
 import AdminLogin from "../admin/AdminLogin";
 import Admin from "../admin/adminDashbord";
@@ -28,6 +28,7 @@ import AdminManageClientProjects from "../admin/AdminManageClientProjects";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -41,6 +42,7 @@ export default function AppRoutes() {
       <Route path="/lookbook" element={<Lookbook />} />
       <Route path="/contact" element={<Contact />} />
      <Route path="/ClientProjects" element={<ClientProjects/>} />
+     <Route path="/terms" element={<TermsAndConditions />} />
 
       {/* ───────── Admin Login ───────── */}
       <Route
