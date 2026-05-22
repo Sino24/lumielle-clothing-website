@@ -28,25 +28,22 @@ interface ProductData {
 }
 
 function ProductDetail() {
-  const API_BASE =
-    import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  const [product, setProduct]   = useState<ProductData | null>(null);
-  const [related, setRelated]   = useState<ProductData[]>([]);
-  const [loading, setLoading]   = useState(true);
+  const [product, setProduct] = useState<ProductData | null>(null);
+  const [related, setRelated] = useState<ProductData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [activeImg,      setActiveImg]      = useState(0);
-  const [selectedColor,  setSelectedColor]  = useState(0);
-  const [selectedSize,   setSelectedSize]   = useState<string | null>(null);
-  const [qty,            setQty]            = useState(1);
-  const [openTab,        setOpenTab]        = useState<"details" | "care">("details");
-  const [addedToCart,    setAddedToCart]    = useState(false);
-  const [zoomActive,     setZoomActive]     = useState(false);
-  const [zoomPos,        setZoomPos]        = useState({ x: 50, y: 50 });
+  const [activeImg, setActiveImg] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(0);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [qty, setQty] = useState(1);
+  const [openTab, setOpenTab] = useState<"details" | "care">("details");
+  const [addedToCart, setAddedToCart] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -74,51 +71,35 @@ function ProductDetail() {
     fetchProduct();
   }, [id]);
 
-  // ── Add to Cart ───────────────────────────────────────────────────────
   const handleAddToCart = () => {
     if (!selectedSize || !product) return;
-
     addToCart({
-      _id:      product._id,
-      name:     product.name,
-      price:    product.price,
-      img:      product.img,
-      size:     selectedSize,
+      _id: product._id,
+      name: product.name,
+      price: product.price,
+      img: product.img,
+      size: selectedSize,
       quantity: qty,
     });
-
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2200);
   };
 
-  // ── Go to Cart ────────────────────────────────────────────────────────
   const handleGoToCart = () => {
     if (selectedSize && product) {
       addToCart({
-        _id:      product._id,
-        name:     product.name,
-        price:    product.price,
-        img:      product.img,
-        size:     selectedSize,
+        _id: product._id,
+        name: product.name,
+        price: product.price,
+        img: product.img,
+        size: selectedSize,
         quantity: qty,
       });
     }
     navigate("/cart");
   };
 
-  // ── Zoom ──────────────────────────────────────────────────────────────
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setZoomPos({ x, y });
-  };
-
-  if (loading) {
-    return (
-  <PageSkeleton />
-    );
-  }
+  if (loading) return <PageSkeleton />;
 
   if (!product) {
     return (
@@ -153,44 +134,14 @@ function ProductDetail() {
         {/* ── Gallery ── */}
         <div className="pd__gallery">
 
-          {/* Thumbnails */}
-          <div className="pd__thumbs" role="list">
-            {allImages.map((img, i) => (
-              <button
-                key={i}
-                role="listitem"
-                className={`pd__thumb ${activeImg === i ? "pd__thumb--active" : ""}`}
-                onClick={() => { setActiveImg(i); setZoomActive(false); }}
-              >
-                <img src={img} alt={`${product.name} view ${i + 1}`} />
-              </button>
-            ))}
-          </div>
-
-          {/* Main image + zoom */}
-          <div
-            className="pd__main-img-wrap"
-            onMouseEnter={() => setZoomActive(true)}
-            onMouseLeave={() => setZoomActive(false)}
-            onMouseMove={handleMouseMove}
-          >
+          {/* Main image */}
+          <div className="pd__main-img-wrap">
             <img
               key={currentImageUrl}
               src={currentImageUrl}
               alt={product.name}
-              className={`pd__main-img ${zoomActive ? "pd__main-img--faded" : ""}`}
+              className="pd__main-img"
             />
-
-            <div
-              className={`pd__zoom-overlay ${zoomActive ? "pd__zoom-overlay--active" : ""}`}
-              style={{
-                backgroundImage: `url("${currentImageUrl}")`,
-                backgroundSize: "250%",
-                backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
-                backgroundRepeat: "no-repeat",
-              }}
-            />
-
             {product.badge && (
               <span
                 className={`pd__badge pd__badge--${product.badge
@@ -200,24 +151,36 @@ function ProductDetail() {
                 {product.badge}
               </span>
             )}
-
-            <span
-              className={`pd__zoom-hint ${zoomActive ? "pd__zoom-hint--hidden" : ""}`}
-            >
-              Hover to zoom
-            </span>
           </div>
+
+          {/* Thumbnails — horizontal scroll on mobile */}
+          {allImages.length > 1 && (
+            <div className="pd__thumbs" role="list">
+              {allImages.map((img, i) => (
+                <button
+                  key={i}
+                  role="listitem"
+                  className={`pd__thumb ${activeImg === i ? "pd__thumb--active" : ""}`}
+                  onClick={() => setActiveImg(i)}
+                >
+                  <img src={img} alt={`${product.name} view ${i + 1}`} />
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Mobile dots */}
-          <div className="pd__dots">
-            {allImages.map((_, i) => (
-              <button
-                key={i}
-                className={`pd__dot ${activeImg === i ? "pd__dot--active" : ""}`}
-                onClick={() => setActiveImg(i)}
-              />
-            ))}
-          </div>
+          {allImages.length > 1 && (
+            <div className="pd__dots" aria-hidden="true">
+              {allImages.map((_, i) => (
+                <button
+                  key={i}
+                  className={`pd__dot ${activeImg === i ? "pd__dot--active" : ""}`}
+                  onClick={() => setActiveImg(i)}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* ── Info panel ── */}
@@ -264,12 +227,11 @@ function ProductDetail() {
                 {product.colors.map((c, i) => (
                   <button
                     key={i}
-                    className={`pd__color-swatch ${
-                      selectedColor === i ? "pd__color-swatch--active" : ""
-                    }`}
+                    className={`pd__color-swatch ${selectedColor === i ? "pd__color-swatch--active" : ""}`}
                     style={{ background: c.hex }}
                     onClick={() => setSelectedColor(i)}
                     title={c.label}
+                    aria-label={c.label}
                   />
                 ))}
               </div>
@@ -279,21 +241,17 @@ function ProductDetail() {
           {/* Sizes */}
           {product.sizes && product.sizes.length > 0 && (
             <div className="pd__option-group">
-              <div className="pd__size-header">
-                <p className="pd__option-label">
-                  Size
-                  {selectedSize && (
-                    <span className="pd__option-value"> — {selectedSize}</span>
-                  )}
-                </p>
-              </div>
+              <p className="pd__option-label">
+                Size
+                {selectedSize && (
+                  <span className="pd__option-value"> — {selectedSize}</span>
+                )}
+              </p>
               <div className="pd__sizes">
                 {product.sizes.map((size) => (
                   <button
                     key={size}
-                    className={`pd__size-btn ${
-                      selectedSize === size ? "pd__size-btn--active" : ""
-                    }`}
+                    className={`pd__size-btn ${selectedSize === size ? "pd__size-btn--active" : ""}`}
                     onClick={() => setSelectedSize(size)}
                   >
                     {size}
@@ -308,13 +266,12 @@ function ProductDetail() {
 
           {/* ── Actions ── */}
           <div className="pd__actions">
-
-            {/* Row 1: Qty + Add to Cart */}
             <div className="pd__actions-primary">
               <div className="pd__qty">
                 <button
                   className="pd__qty-btn"
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
+                  aria-label="Decrease quantity"
                 >
                   −
                 </button>
@@ -322,15 +279,14 @@ function ProductDetail() {
                 <button
                   className="pd__qty-btn"
                   onClick={() => setQty((q) => q + 1)}
+                  aria-label="Increase quantity"
                 >
                   +
                 </button>
               </div>
 
               <button
-                className={`pd__add-btn ${addedToCart ? "pd__add-btn--success" : ""} ${
-                  !selectedSize ? "pd__add-btn--disabled" : ""
-                }`}
+                className={`pd__add-btn ${addedToCart ? "pd__add-btn--success" : ""} ${!selectedSize ? "pd__add-btn--disabled" : ""}`}
                 onClick={handleAddToCart}
                 disabled={!selectedSize}
               >
@@ -338,37 +294,27 @@ function ProductDetail() {
               </button>
             </div>
 
-            {/* Row 2: Go to Cart — full width */}
-            <button
-              className="pd__go-cart-btn"
-              onClick={handleGoToCart}
-            >
+            <button className="pd__go-cart-btn" onClick={handleGoToCart}>
               Go to Cart →
             </button>
-
           </div>
 
           {/* Tabs */}
           <div className="pd__tabs">
             <div className="pd__tab-headers">
               <button
-                className={`pd__tab-btn ${
-                  openTab === "details" ? "pd__tab-btn--active" : ""
-                }`}
+                className={`pd__tab-btn ${openTab === "details" ? "pd__tab-btn--active" : ""}`}
                 onClick={() => setOpenTab("details")}
               >
                 Product Details
               </button>
               <button
-                className={`pd__tab-btn ${
-                  openTab === "care" ? "pd__tab-btn--active" : ""
-                }`}
+                className={`pd__tab-btn ${openTab === "care" ? "pd__tab-btn--active" : ""}`}
                 onClick={() => setOpenTab("care")}
               >
                 Care Instructions
               </button>
             </div>
-
             <div className="pd__tab-content">
               {openTab === "details" && (
                 <ul className="pd__detail-list">
