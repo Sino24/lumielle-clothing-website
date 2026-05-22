@@ -17,14 +17,20 @@
   --font-body:    "Jost", "Helvetica Neue", sans-serif;
   --ease:         cubic-bezier(0.4, 0, 0.2, 1);
   --transition:   0.28s var(--ease);
+
+  /* ⬇ Set this to match your navbar height exactly */
+  --navbar-height: 64px;
 }
 
 /* ── Base ────────────────────────────────────────────────────────────────────── */
 .pd {
+margin-top: calc(var(--navbar-height) / 2);
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
   min-height: 100vh;
+  /* Push content below fixed navbar */
+  padding-top: var(--navbar-height);
   padding-bottom: clamp(60px, 10vw, 120px);
   animation: page-in 0.5s var(--ease) both;
 }
@@ -37,6 +43,7 @@
 /* ── Missing ─────────────────────────────────────────────────────────────────── */
 .pd-missing {
   min-height: 60vh;
+  padding-top: var(--navbar-height);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -57,7 +64,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: clamp(16px, 3vw, 36px) clamp(16px, 6vw, 80px) 0;
+  padding: clamp(16px, 3vw, 28px) clamp(16px, 6vw, 80px) 0;
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -76,7 +83,6 @@
 .pd__breadcrumb span[aria-current="page"] {
   color: var(--ink);
   font-weight: 500;
-  /* truncate long names on mobile */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -86,9 +92,10 @@
 /* ── Layout ──────────────────────────────────────────────────────────────────── */
 .pd__layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(32px, 5vw, 80px);
-  padding: clamp(24px, 4vw, 52px) clamp(16px, 6vw, 80px);
+  /* Gallery ~45%, info panel ~55% — uses full available width */
+  grid-template-columns: 45fr 55fr;
+  gap: clamp(24px, 3vw, 48px);
+  padding: clamp(20px, 3vw, 40px) clamp(24px, 5vw, 64px);
   align-items: start;
 }
 
@@ -96,12 +103,12 @@
 .pd__gallery {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   position: sticky;
-  top: 80px;
+  top: calc(var(--navbar-height) + 16px);
 }
 
-/* Main image */
+/* Main image — fills the gallery column naturally */
 .pd__main-img-wrap {
   position: relative;
   border-radius: 10px;
@@ -144,11 +151,11 @@
 .pd__badge--sale        { background: var(--badge-sale); }
 .pd__badge--best-seller { background: var(--badge-best); }
 
-/* Thumbnails — horizontal row below main image */
+/* Thumbnails */
 .pd__thumbs {
   display: flex;
   flex-direction: row;
-  gap: 8px;
+  gap: 6px;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -158,8 +165,8 @@
 .pd__thumbs::-webkit-scrollbar { display: none; }
 
 .pd__thumb {
-  width: 64px;
-  height: 78px;
+  width: 56px;
+  height: 68px;
   flex-shrink: 0;
   border: 1.5px solid transparent;
   border-radius: 6px;
@@ -207,7 +214,7 @@
 .pd__info {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
   animation: slide-up 0.5s 0.1s var(--ease) both;
 }
 
@@ -227,7 +234,7 @@
 
 .pd__name {
   font-family: var(--font-display);
-  font-size: clamp(28px, 4vw, 52px);
+  font-size: clamp(26px, 3vw, 42px);
   font-weight: 300;
   line-height: 1.1;
   letter-spacing: -0.02em;
@@ -243,7 +250,7 @@
 
 .pd__price {
   font-family: var(--font-display);
-  font-size: clamp(22px, 3vw, 32px);
+  font-size: clamp(20px, 2.4vw, 28px);
   font-weight: 500;
   color: var(--ink);
   letter-spacing: -0.01em;
@@ -276,11 +283,11 @@
   width: 100%;
   height: 1px;
   background: var(--border);
-  margin: 4px 0;
+  margin: 2px 0;
 }
 
 .pd__description {
-  font-size: clamp(13px, 1.3vw, 15px);
+  font-size: clamp(13px, 1.2vw, 14px);
   line-height: 1.8;
   color: #4a4540;
   margin: 0;
@@ -314,8 +321,8 @@
 }
 
 .pd__color-swatch {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 2px solid transparent;
   outline: 2px solid transparent;
@@ -338,9 +345,9 @@
 }
 
 .pd__size-btn {
-  min-width: 48px;
-  height: 44px;
-  padding: 0 14px;
+  min-width: 44px;
+  height: 42px;
+  padding: 0 12px;
   border: 1px solid var(--border);
   border-radius: 4px;
   background: transparent;
@@ -400,8 +407,8 @@
 }
 
 .pd__qty-btn {
-  width: 40px;
-  height: 52px;
+  width: 38px;
+  height: 48px;
   background: transparent;
   border: none;
   font-size: 18px;
@@ -417,19 +424,19 @@
 .pd__qty-btn:hover { background: var(--surface); }
 
 .pd__qty-value {
-  width: 40px;
+  width: 36px;
   text-align: center;
   font-size: 14px;
   font-weight: 500;
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
-  height: 52px;
-  line-height: 52px;
+  height: 48px;
+  line-height: 48px;
 }
 
 .pd__add-btn {
   flex: 1;
-  height: 52px;
+  height: 48px;
   background: var(--ink);
   color: var(--bg);
   border: 1px solid var(--ink);
@@ -464,7 +471,7 @@
 
 .pd__go-cart-btn {
   width: 100%;
-  height: 52px;
+  height: 48px;
   background: transparent;
   color: var(--ink);
   border: 1px solid var(--border);
@@ -497,7 +504,7 @@
 
 .pd__tab-btn {
   flex: 1;
-  padding: 14px 12px;
+  padding: 13px 12px;
   background: transparent;
   border: none;
   font-family: var(--font-body);
@@ -521,7 +528,7 @@
 }
 
 .pd__tab-content {
-  padding: 20px;
+  padding: 18px;
   animation: fade-in 0.25s var(--ease);
 }
 
@@ -555,7 +562,7 @@
 
 /* ── Related ─────────────────────────────────────────────────────────────────── */
 .pd__related {
-  padding: clamp(48px, 8vw, 80px) clamp(16px, 6vw, 80px) 0;
+  padding: clamp(40px, 6vw, 72px) clamp(24px, 5vw, 64px) 0;
   text-align: center;
 }
 
@@ -570,9 +577,9 @@
 
 .pd__related-title {
   font-family: var(--font-display);
-  font-size: clamp(26px, 4vw, 44px);
+  font-size: clamp(22px, 3vw, 36px);
   font-weight: 300;
-  margin: 0 0 36px;
+  margin: 0 0 28px;
   letter-spacing: -0.02em;
 }
 
@@ -581,17 +588,19 @@
   color: var(--accent);
 }
 
+/* ← Smaller related grid: fixed max-width cards centred in row */
 .pd__related-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: clamp(12px, 2vw, 28px);
+  grid-template-columns: repeat(3, minmax(0, 220px));
+  gap: clamp(12px, 2vw, 20px);
+  justify-content: center;
 }
 
 .pd__related-card {
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   text-align: left;
 }
 
@@ -616,20 +625,20 @@
 .pd__related-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   padding: 0 2px;
 }
 
 .pd__related-name {
   font-family: var(--font-display);
-  font-size: clamp(14px, 1.4vw, 18px);
+  font-size: clamp(13px, 1.2vw, 16px);
   font-weight: 400;
   color: var(--ink);
   line-height: 1.2;
 }
 
 .pd__related-price {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--muted);
 }
@@ -640,92 +649,94 @@
 @media (max-width: 900px) {
   .pd__layout {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 20px;
   }
 
   .pd__gallery {
     position: static;
   }
 
-  .pd__related-grid { grid-template-columns: repeat(2, 1fr); }
+  .pd__related-grid {
+    grid-template-columns: repeat(2, minmax(0, 200px));
+  }
 }
 
 /* Mobile */
 @media (max-width: 600px) {
+  /* Navbar height on mobile (adjust if yours differs) */
+  .pd, .pd-missing {
+    --navbar-height: 56px;
+  }
+
   .pd__layout {
-    padding: 16px 16px 0;
-    gap: 20px;
+    padding: 14px 16px 0;
+    gap: 16px;
+    max-width: 100%;
   }
 
   .pd__breadcrumb {
-    padding: 14px 16px 0;
+    padding: 12px 16px 0;
   }
 
-  /* Gallery: stacked, full bleed image */
   .pd__gallery {
-    gap: 10px;
+    gap: 8px;
   }
 
   .pd__main-img-wrap {
     border-radius: 8px;
   }
 
-  /* Thumbs: small horizontal strip */
   .pd__thumbs {
-    gap: 6px;
+    gap: 5px;
   }
 
   .pd__thumb {
-    width: 52px;
-    height: 64px;
+    width: 48px;
+    height: 60px;
     border-radius: 5px;
   }
 
-  /* Show dots, hide thumbs when only 1 image (dots also hidden via conditional render) */
   .pd__dots {
     display: flex;
   }
 
-  /* Info panel */
   .pd__info {
-    gap: 16px;
+    gap: 14px;
   }
 
   .pd__name {
-    font-size: clamp(26px, 7vw, 36px);
+    font-size: clamp(24px, 7vw, 34px);
   }
 
   .pd__price {
-    font-size: 22px;
+    font-size: 20px;
   }
 
-  /* Keep qty + add-to-cart on one row */
   .pd__actions-primary {
     flex-direction: row;
   }
 
   .pd__qty-btn {
-    width: 38px;
-  }
-
-  .pd__qty-value {
     width: 36px;
   }
 
-  /* Tabs: smaller padding */
+  .pd__qty-value {
+    width: 34px;
+  }
+
   .pd__tab-btn {
-    padding: 12px 8px;
+    padding: 11px 8px;
     font-size: 10px;
     letter-spacing: 0.08em;
   }
 
   .pd__tab-content {
-    padding: 16px;
+    padding: 14px;
   }
 
-  /* Related: 2 column on mobile */
   .pd__related {
-    padding: 40px 16px 0;
+    padding: 36px 16px 0;
+    max-width: 100%;
   }
 
   .pd__related-grid {
@@ -738,7 +749,7 @@
   }
 
   .pd__related-price {
-    font-size: 12px;
+    font-size: 11px;
   }
 }
 

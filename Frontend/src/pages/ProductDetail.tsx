@@ -34,18 +34,24 @@ function ProductDetail() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  const [product, setProduct] = useState<ProductData | null>(null);
-  const [related, setRelated] = useState<ProductData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [product, setProduct]       = useState<ProductData | null>(null);
+  const [related, setRelated]       = useState<ProductData[]>([]);
+  const [loading, setLoading]       = useState(true);
 
-  const [activeImg, setActiveImg] = useState(0);
+  const [activeImg, setActiveImg]         = useState(0);
   const [selectedColor, setSelectedColor] = useState(0);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [qty, setQty] = useState(1);
-  const [openTab, setOpenTab] = useState<"details" | "care">("details");
-  const [addedToCart, setAddedToCart] = useState(false);
+  const [selectedSize, setSelectedSize]   = useState<string | null>(null);
+  const [qty, setQty]                     = useState(1);
+  const [openTab, setOpenTab]             = useState<"details" | "care">("details");
+  const [addedToCart, setAddedToCart]     = useState(false);
 
   useEffect(() => {
+    setActiveImg(0);
+    setSelectedColor(0);
+    setSelectedSize(null);
+    setQty(1);
+    setLoading(true);
+
     const fetchProduct = async () => {
       try {
         const res = await fetch(`${API_BASE}/api/products/${id}`);
@@ -117,10 +123,19 @@ function ProductDetail() {
 
   const currentImageUrl = allImages[activeImg];
 
+  /* Compute saving amount safely */
+  const savingAmount = (() => {
+    if (!product.originalPrice) return null;
+    const orig = parseInt(product.originalPrice.replace(/[₹,\s]/g, ""), 10);
+    const curr = parseInt(product.price.replace(/[₹,\s]/g, ""), 10);
+    if (isNaN(orig) || isNaN(curr)) return null;
+    return (orig - curr).toLocaleString("en-IN");
+  })();
+
   return (
     <main className="pd">
 
-      {/* Breadcrumb */}
+      {/* ── Breadcrumb ── */}
       <nav className="pd__breadcrumb" aria-label="Breadcrumb">
         <Link to="/">Home</Link>
         <span aria-hidden="true">·</span>
@@ -131,7 +146,7 @@ function ProductDetail() {
 
       <div className="pd__layout">
 
-        {/* ── Gallery ── */}
+        {/* ────────────────── Gallery ────────────────── */}
         <div className="pd__gallery">
 
           {/* Main image */}
@@ -153,7 +168,7 @@ function ProductDetail() {
             )}
           </div>
 
-          {/* Thumbnails — horizontal scroll on mobile */}
+          {/* Thumbnails */}
           {allImages.length > 1 && (
             <div className="pd__thumbs" role="list">
               {allImages.map((img, i) => (
@@ -162,6 +177,7 @@ function ProductDetail() {
                   role="listitem"
                   className={`pd__thumb ${activeImg === i ? "pd__thumb--active" : ""}`}
                   onClick={() => setActiveImg(i)}
+                  aria-label={`View image ${i + 1}`}
                 >
                   <img src={img} alt={`${product.name} view ${i + 1}`} />
                 </button>
@@ -169,7 +185,7 @@ function ProductDetail() {
             </div>
           )}
 
-          {/* Mobile dots */}
+          {/* Mobile dot indicators */}
           {allImages.length > 1 && (
             <div className="pd__dots" aria-hidden="true">
               {allImages.map((_, i) => (
@@ -183,7 +199,7 @@ function ProductDetail() {
           )}
         </div>
 
-        {/* ── Info panel ── */}
+        {/* ────────────────── Info panel ────────────────── */}
         <div className="pd__info">
 
           <p className="pd__category">{product.category}</p>
@@ -195,13 +211,9 @@ function ProductDetail() {
             {product.originalPrice && (
               <>
                 <span className="pd__original">{product.originalPrice}</span>
-                <span className="pd__saving">
-                  Save ₹
-                  {(
-                    parseInt(product.originalPrice.replace(/[₹,]/g, "")) -
-                    parseInt(product.price.replace(/[₹,]/g, ""))
-                  ).toLocaleString("en-IN")}
-                </span>
+                {savingAmount && (
+                  <span className="pd__saving">Save ₹{savingAmount}</span>
+                )}
               </>
             )}
           </div>
@@ -259,14 +271,16 @@ function ProductDetail() {
                 ))}
               </div>
               {!selectedSize && (
-                <p className="pd__size-hint">Please select a size</p>
+                <p className="pd__size-hint">Please select a size to continue</p>
               )}
             </div>
           )}
 
-          {/* ── Actions ── */}
+          {/* Actions */}
           <div className="pd__actions">
             <div className="pd__actions-primary">
+
+              {/* Quantity */}
               <div className="pd__qty">
                 <button
                   className="pd__qty-btn"
@@ -286,11 +300,13 @@ function ProductDetail() {
               </div>
 
               <button
-                className={`pd__add-btn ${addedToCart ? "pd__add-btn--success" : ""} ${!selectedSize ? "pd__add-btn--disabled" : ""}`}
+                className={`pd__add-btn ${
+                  addedToCart ? "pd__add-btn--success" : ""
+                } ${!selectedSize ? "pd__add-btn--disabled" : ""}`}
                 onClick={handleAddToCart}
                 disabled={!selectedSize}
               >
-                {addedToCart ? "✓ Added" : "Add to Cart"}
+                {addedToCart ? "✓ Added to Cart" : "Add to Cart"}
               </button>
             </div>
 
@@ -315,6 +331,7 @@ function ProductDetail() {
                 Care Instructions
               </button>
             </div>
+
             <div className="pd__tab-content">
               {openTab === "details" && (
                 <ul className="pd__detail-list">
@@ -339,13 +356,13 @@ function ProductDetail() {
             </div>
           </div>
 
-        </div>
-      </div>
+        </div>{/* end pd__info */}
+      </div>{/* end pd__layout */}
 
-      {/* Related */}
+      {/* ── Related products ── */}
       {related.length > 0 && (
         <section className="pd__related">
-          <p className="pd__related-eyebrow">You might also like</p>
+          <span className="pd__related-eyebrow">You might also like</span>
           <h2 className="pd__related-title">
             From the same <em>collection</em>
           </h2>
