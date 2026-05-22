@@ -40,7 +40,7 @@ async function uploadToCloudinary(
   const formData = new FormData();
   formData.append("image", file);
 
-  const response = await fetch(`${apiBase}/upload`, {
+  const response = await fetch(`${apiBase}/api/upload`, {
     method: "POST",
     body: formData,
   });
