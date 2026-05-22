@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import "../styles/PageStyle/Products.css";
+import { PageSkeleton } from "../components/SkeletonLoader";
 
 interface ColorEntry {
   label: string;
@@ -163,9 +164,7 @@ function Products() {
       {/* ── Grid ── */}
       <section className="products__grid-section">
         {loading ? (
-          <div className="products__loading">
-            <div className="products__spin" />
-          </div>
+         <PageSkeleton />
         ) : (
           <div className="products__grid">
             {paginated.map((product, i) => (

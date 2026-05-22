@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import "../styles/PageStyle/Lookbook.css";
+import { PageSkeleton } from "../components/SkeletonLoader";
 
 interface LookEntry {
   _id: string;
@@ -85,9 +86,7 @@ function Lookbook() {
 
       {/* ── Content ── */}
       {loading ? (
-        <div className="lookbook__loading">
-          <span className="lookbook__spin" />
-        </div>
+       <PageSkeleton />
       ) : looks.length === 0 ? (
         <div className="lookbook__empty">
           <p>No looks published yet. Check back soon.</p>

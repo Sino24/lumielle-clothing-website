@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import "../styles/PageStyle/ProductDetail.css";
 import { useCart } from "../context/CartContext";
+import { PageSkeleton } from "../components/SkeletonLoader";
 
 interface ColorEntry {
   label: string;
@@ -115,9 +116,7 @@ function ProductDetail() {
 
   if (loading) {
     return (
-      <main className="pd-missing">
-        <div className="pd-missing__spin" />
-      </main>
+  <PageSkeleton />
     );
   }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import "../styles/PageStyle/ClientProjects.css";
+import { PageSkeleton } from "../components/SkeletonLoader";
 
 interface ClientProject {
   _id: string;
@@ -20,10 +21,10 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 const ALL_TAG = "All";
 
 function ClientProjects() {
-  const [projects, setProjects]         = useState<ClientProject[]>([]);
-  const [loading, setLoading]           = useState(true);
-  const [activeTag, setActiveTag]       = useState(ALL_TAG);
-  const [lightbox, setLightbox]         = useState<{ project: ClientProject; imgIndex: number } | null>(null);
+  const [projects, setProjects] = useState<ClientProject[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [activeTag, setActiveTag] = useState(ALL_TAG);
+  const [lightbox, setLightbox] = useState<{ project: ClientProject; imgIndex: number } | null>(null);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/client-projects`)
@@ -54,8 +55,8 @@ function ClientProjects() {
     ? projects
     : projects.filter((p) => p.tags.includes(activeTag));
 
-  const featured  = filtered.filter((p) => p.isFeatured);
-  const regular   = filtered.filter((p) => !p.isFeatured);
+  const featured = filtered.filter((p) => p.isFeatured);
+  const regular  = filtered.filter((p) => !p.isFeatured);
 
   const openLightbox = (project: ClientProject, imgIndex = 0) => {
     setLightbox({ project, imgIndex });
@@ -66,6 +67,8 @@ function ClientProjects() {
     setLightbox(null);
     document.body.style.overflow = "";
   };
+
+  if (loading) return <PageSkeleton />;
 
   return (
     <main className="cp">
@@ -102,7 +105,7 @@ function ClientProjects() {
       </section>
 
       {/* ── Filter tags ── */}
-      {!loading && allTags.length > 1 && (
+      {allTags.length > 1 && (
         <div className="cp__filters">
           {allTags.map((tag) => (
             <button
@@ -117,9 +120,7 @@ function ClientProjects() {
       )}
 
       {/* ── Content ── */}
-      {loading ? (
-        <div className="cp__loading"><span className="cp__spin" /></div>
-      ) : filtered.length === 0 ? (
+      {filtered.length === 0 ? (
         <div className="cp__empty"><p>No projects found.</p></div>
       ) : (
         <section className="cp__content">

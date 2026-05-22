@@ -1,0 +1,108 @@
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.sk {
+  background: linear-gradient(
+    90deg,
+    #f0ece6 25%,
+    #faf8f5 50%,
+    #f0ece6 75%
+  );
+  background-size: 600px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* ── Shared bone sizes ── */
+.sk-eyebrow  { height: 8px;  width: 28%; }
+.sk-h1-a     { height: 52px; width: 65%; }
+.sk-h1-b     { height: 52px; width: 48%; }
+.sk-rule     { height: 1px;  width: 40px; }
+.sk-p        { height: 10px; width: 100%; }
+.sk-p-80     { width: 80%; }
+.sk-p-60     { width: 60%; }
+.sk-tag      { height: 9px;  width: 36%; }
+.sk-name     { height: 14px; width: 70%; }
+.sk-price    { height: 12px; width: 28%; }
+.sk-card-img { aspect-ratio: 3/4; border-radius: 8px; }
+
+/* ── PageSkeleton ── */
+.sk-page {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(40px, 6vw, 72px);
+  padding: clamp(80px, 11vw, 140px) clamp(24px, 7vw, 100px) clamp(56px, 6vw, 80px);
+}
+
+.sk-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: end;
+}
+
+.sk-hero-left  { display: flex; flex-direction: column; gap: 14px; }
+.sk-hero-right { display: flex; flex-direction: column; gap: 12px; padding-top: 0.5rem; }
+
+.sk-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(32px, 5vw, 64px);
+  align-items: center;
+}
+
+.sk-body-img   { aspect-ratio: 4/5; border-radius: 4px; }
+.sk-body-lines { display: flex; flex-direction: column; gap: 12px; }
+
+.sk-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--grid-gap, 24px);
+}
+
+.sk-card-block { display: flex; flex-direction: column; gap: 10px; }
+.sk-card-face  { aspect-ratio: 3/4; border-radius: 8px; }
+
+/* ── ProductsSkeleton ── */
+.sk-products-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--grid-gap, 24px);
+}
+
+.sk-card { display: flex; flex-direction: column; gap: 10px; }
+
+/* ── LookbookSkeleton ── */
+.sk-lookbook-track {
+  display: flex;
+  gap: 16px;
+  padding: 0 clamp(24px, 8vw, 120px);
+  overflow: hidden;
+}
+
+.sk-look-card {
+  flex-shrink: 0;
+  width: calc(72vh * 0.68);
+  height: 72vh;
+  border-radius: 4px;
+}
+
+.sk-look-card:nth-child(2) { opacity: 0.7; }
+.sk-look-card:nth-child(3) { opacity: 0.45; }
+.sk-look-card:nth-child(4) { opacity: 0.2; }
+
+/* ── Responsive ── */
+@media (max-width: 960px) {
+  .sk-hero           { grid-template-columns: 1fr; }
+  .sk-body           { grid-template-columns: 1fr; }
+  .sk-cards          { grid-template-columns: repeat(2, 1fr); }
+  .sk-products-grid  { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .sk-page          { padding: 80px 16px 48px; }
+  .sk-cards         { gap: 12px; }
+  .sk-products-grid { gap: 12px; }
+}

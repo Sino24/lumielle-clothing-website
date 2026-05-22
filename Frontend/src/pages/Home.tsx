@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "../styles/PageStyle/Home.css";
 
 import heroFallback from "../assets/home.png";
+import { ProductsSkeleton } from "../components/SkeletonLoader";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface HeroData {
@@ -139,9 +140,7 @@ function Home() {
         </h2>
 
         {loading ? (
-          <div className="home__loading">
-            <div className="home__spin" />
-          </div>
+           <ProductsSkeleton />
         ) : featured.length === 0 ? (
           <div className="home__empty">No products found.</div>
         ) : (

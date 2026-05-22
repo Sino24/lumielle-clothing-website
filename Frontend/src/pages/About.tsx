@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import "../styles/PageStyle/About.css";
+import { PageSkeleton } from "../components/SkeletonLoader";
 
 interface ValueItem { number: string; title: string; body: string; }
 
@@ -88,9 +89,7 @@ function About() {
 
       {/* ── Content — gated behind loading spinner ── */}
       {loading ? (
-        <div className="about__loading">
-          <span className="about__spin" />
-        </div>
+        <PageSkeleton />
       ) : (
         <>
 
