@@ -53,6 +53,7 @@
 }
 
 .navbar__logo-img {
+  margin-top: 6px;
   height: 7rem;
   width: auto;
   object-fit: contain;
