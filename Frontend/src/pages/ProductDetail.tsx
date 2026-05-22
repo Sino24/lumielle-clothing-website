@@ -1,6 +1,6 @@
 // src/pages/ProductDetail.tsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import "../styles/PageStyle/ProductDetail.css";
 import { useCart } from "../context/CartContext";
@@ -27,16 +27,20 @@ interface ProductData {
   img: string;
 }
 
+// Three explicit states — no ambiguity between "loading" and "not found"
+type PageState = "loading" | "found" | "notfound";
+
 function ProductDetail() {
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { id }     = useParams<{ id: string }>();
+  const navigate   = useNavigate();
   const { addToCart } = useCart();
 
-  const [product, setProduct]       = useState<ProductData | null>(null);
-  const [related, setRelated]       = useState<ProductData[]>([]);
-  const [loading, setLoading]       = useState(true);
+  // ── Single state enum drives the render — no race between booleans ──
+  const [pageState, setPageState]         = useState<PageState>("loading");
+  const [product, setProduct]             = useState<ProductData | null>(null);
+  const [related, setRelated]             = useState<ProductData[]>([]);
 
   const [activeImg, setActiveImg]         = useState(0);
   const [selectedColor, setSelectedColor] = useState(0);
@@ -46,38 +50,62 @@ function ProductDetail() {
   const [addedToCart, setAddedToCart]     = useState(false);
 
   useEffect(() => {
+    if (!id) {
+      setPageState("notfound");
+      return;
+    }
+
+    // ── Reset UI and set loading FIRST — before any async work ──
+    setPageState("loading");
     setActiveImg(0);
     setSelectedColor(0);
     setSelectedSize(null);
     setQty(1);
-    setLoading(true);
+
+    const controller = new AbortController();
 
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/products/${id}`);
-        if (!res.ok) throw new Error("Failed to fetch product");
-        const data = await res.json();
-        setProduct(data);
+        const res = await fetch(`${API_BASE}/api/products/${id}`, {
+          signal: controller.signal,
+        });
 
-        const allRes = await fetch(`${API_BASE}/api/products`);
-        const allProducts = await allRes.json();
+        if (!res.ok) {
+          setPageState("notfound");
+          return;
+        }
+
+        const data: ProductData = await res.json();
+
+        const allRes = await fetch(`${API_BASE}/api/products`, {
+          signal: controller.signal,
+        });
+        const allProducts: ProductData[] = await allRes.json();
+
         const relatedProducts = allProducts
-          .filter(
-            (p: ProductData) =>
-              p.category === data.category && p._id !== data._id
-          )
+          .filter((p) => p.category === data.category && p._id !== data._id)
           .slice(0, 3);
+
+        // Set product + related together, then flip state to "found"
+        // so the component never renders product content with stale/null data
+        setProduct(data);
         setRelated(relatedProducts);
-      } catch (error) {
+        setPageState("found");
+
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === "AbortError") return;
         console.error(error);
-      } finally {
-        setLoading(false);
+        setPageState("notfound");
       }
     };
-    fetchProduct();
-  }, [id]);
 
-  const handleAddToCart = () => {
+    fetchProduct();
+
+    return () => controller.abort();
+  }, [id, API_BASE]);
+
+  // ── Handlers defined before early returns (rules of hooks) ──
+  const handleAddToCart = useCallback(() => {
     if (!selectedSize || !product) return;
     addToCart({
       _id: product._id,
@@ -89,9 +117,9 @@ function ProductDetail() {
     });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2200);
-  };
+  }, [selectedSize, product, qty, addToCart]);
 
-  const handleGoToCart = () => {
+  const handleGoToCart = useCallback(() => {
     if (selectedSize && product) {
       addToCart({
         _id: product._id,
@@ -103,11 +131,12 @@ function ProductDetail() {
       });
     }
     navigate("/cart");
-  };
+  }, [selectedSize, product, qty, addToCart, navigate]);
 
-  if (loading) return <PageSkeleton />;
+  // ── Render guards — ordered by the single enum, no boolean conflicts ──
+  if (pageState === "loading") return <PageSkeleton />;
 
-  if (!product) {
+  if (pageState === "notfound" || !product) {
     return (
       <main className="pd-missing">
         <p>Product not found.</p>
@@ -116,6 +145,8 @@ function ProductDetail() {
     );
   }
 
+  // pageState === "found" && product is guaranteed non-null below
+
   const allImages =
     product.images && product.images.length > 0
       ? [product.img, ...product.images]
@@ -123,7 +154,6 @@ function ProductDetail() {
 
   const currentImageUrl = allImages[activeImg];
 
-  /* Compute saving amount safely */
   const savingAmount = (() => {
     if (!product.originalPrice) return null;
     const orig = parseInt(product.originalPrice.replace(/[₹,\s]/g, ""), 10);
@@ -139,17 +169,15 @@ function ProductDetail() {
       <nav className="pd__breadcrumb" aria-label="Breadcrumb">
         <Link to="/">Home</Link>
         <span aria-hidden="true">·</span>
-        <Link to="/products">Collection</Link>
+        <Link to="/product">Collection</Link>
         <span aria-hidden="true">·</span>
         <span aria-current="page">{product.name}</span>
       </nav>
 
       <div className="pd__layout">
 
-        {/* ────────────────── Gallery ────────────────── */}
+        {/* ── Gallery ── */}
         <div className="pd__gallery">
-
-          {/* Main image */}
           <div className="pd__main-img-wrap">
             <img
               key={currentImageUrl}
@@ -168,7 +196,6 @@ function ProductDetail() {
             )}
           </div>
 
-          {/* Thumbnails */}
           {allImages.length > 1 && (
             <div className="pd__thumbs" role="list">
               {allImages.map((img, i) => (
@@ -185,7 +212,6 @@ function ProductDetail() {
             </div>
           )}
 
-          {/* Mobile dot indicators */}
           {allImages.length > 1 && (
             <div className="pd__dots" aria-hidden="true">
               {allImages.map((_, i) => (
@@ -199,13 +225,12 @@ function ProductDetail() {
           )}
         </div>
 
-        {/* ────────────────── Info panel ────────────────── */}
+        {/* ── Info panel ── */}
         <div className="pd__info">
 
           <p className="pd__category">{product.category}</p>
           <h1 className="pd__name">{product.name}</h1>
 
-          {/* Pricing */}
           <div className="pd__pricing">
             <span className="pd__price">{product.price}</span>
             {product.originalPrice && (
@@ -226,7 +251,6 @@ function ProductDetail() {
 
           <p className="pd__description">{product.description}</p>
 
-          {/* Colors */}
           {product.colors && product.colors.length > 0 && (
             <div className="pd__option-group">
               <p className="pd__option-label">
@@ -239,7 +263,9 @@ function ProductDetail() {
                 {product.colors.map((c, i) => (
                   <button
                     key={i}
-                    className={`pd__color-swatch ${selectedColor === i ? "pd__color-swatch--active" : ""}`}
+                    className={`pd__color-swatch ${
+                      selectedColor === i ? "pd__color-swatch--active" : ""
+                    }`}
                     style={{ background: c.hex }}
                     onClick={() => setSelectedColor(i)}
                     title={c.label}
@@ -250,7 +276,6 @@ function ProductDetail() {
             </div>
           )}
 
-          {/* Sizes */}
           {product.sizes && product.sizes.length > 0 && (
             <div className="pd__option-group">
               <p className="pd__option-label">
@@ -263,7 +288,9 @@ function ProductDetail() {
                 {product.sizes.map((size) => (
                   <button
                     key={size}
-                    className={`pd__size-btn ${selectedSize === size ? "pd__size-btn--active" : ""}`}
+                    className={`pd__size-btn ${
+                      selectedSize === size ? "pd__size-btn--active" : ""
+                    }`}
                     onClick={() => setSelectedSize(size)}
                   >
                     {size}
@@ -276,11 +303,8 @@ function ProductDetail() {
             </div>
           )}
 
-          {/* Actions */}
           <div className="pd__actions">
             <div className="pd__actions-primary">
-
-              {/* Quantity */}
               <div className="pd__qty">
                 <button
                   className="pd__qty-btn"
@@ -315,17 +339,20 @@ function ProductDetail() {
             </button>
           </div>
 
-          {/* Tabs */}
           <div className="pd__tabs">
             <div className="pd__tab-headers">
               <button
-                className={`pd__tab-btn ${openTab === "details" ? "pd__tab-btn--active" : ""}`}
+                className={`pd__tab-btn ${
+                  openTab === "details" ? "pd__tab-btn--active" : ""
+                }`}
                 onClick={() => setOpenTab("details")}
               >
                 Product Details
               </button>
               <button
-                className={`pd__tab-btn ${openTab === "care" ? "pd__tab-btn--active" : ""}`}
+                className={`pd__tab-btn ${
+                  openTab === "care" ? "pd__tab-btn--active" : ""
+                }`}
                 onClick={() => setOpenTab("care")}
               >
                 Care Instructions
@@ -356,10 +383,10 @@ function ProductDetail() {
             </div>
           </div>
 
-        </div>{/* end pd__info */}
-      </div>{/* end pd__layout */}
+        </div>
+      </div>
 
-      {/* ── Related products ── */}
+      {/* ── Related ── */}
       {related.length > 0 && (
         <section className="pd__related">
           <span className="pd__related-eyebrow">You might also like</span>

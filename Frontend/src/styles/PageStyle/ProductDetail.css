@@ -24,7 +24,7 @@
 
 /* ── Base ────────────────────────────────────────────────────────────────────── */
 .pd {
-margin-top: calc(var(--navbar-height) / 2);
+margin-top: calc(var(--navbar-height) /4);
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
