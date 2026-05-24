@@ -260,7 +260,7 @@
 .products__card-img-wrap {
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius-md);
+  
   background: var(--color-surface);
   aspect-ratio: 3 / 4;
 }
@@ -282,7 +282,6 @@
   top: 12px;
   left: 12px;
   padding: 4px 10px;
-  border-radius: 2px;
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.14em;
