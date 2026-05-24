@@ -68,12 +68,10 @@ function ClientProjects() {
     document.body.style.overflow = "";
   };
 
-  if (loading) return <PageSkeleton />;
-
   return (
     <main className="cp">
 
-      {/* ── Hero — split layout ── */}
+      {/* ── Hero — always visible, never affected by loading ── */}
       <section className="cp__hero">
         <div className="cp__hero-left">
           <p className="cp__eyebrow">Custom Work</p>
@@ -104,118 +102,125 @@ function ClientProjects() {
         </div>
       </section>
 
-      {/* ── Filter tags ── */}
-      {allTags.length > 1 && (
-        <div className="cp__filters">
-          {allTags.map((tag) => (
-            <button
-              key={tag}
-              className={`cp__filter-btn ${activeTag === tag ? "cp__filter-btn--active" : ""}`}
-              onClick={() => setActiveTag(tag)}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* ── Content ── */}
-      {filtered.length === 0 ? (
-        <div className="cp__empty"><p>No projects found.</p></div>
+      {/* ── Skeleton shown below hero while loading ── */}
+      {loading ? (
+        <PageSkeleton />
       ) : (
-        <section className="cp__content">
-
-          {featured.length > 0 && (
-            <div className="cp__featured-row">
-              {featured.map((project, i) => {
-                const allImgs = [project.coverImage, ...project.images].filter(Boolean);
-                return (
-                  <article
-                    key={project._id}
-                    className={`cp__featured-card ${i % 2 === 0 ? "cp__featured-card--left" : "cp__featured-card--right"}`}
-                    style={{ animationDelay: `${i * 0.1}s` }}
-                  >
-                    <div className="cp__featured-img-wrap" onClick={() => openLightbox(project)}>
-                      {project.coverImage
-                        ? <img src={project.coverImage} alt={project.clientName} />
-                        : <div className="cp__img-placeholder" />
-                      }
-                      <div className="cp__featured-badge">Featured</div>
-                      {allImgs.length > 1 && (
-                        <div className="cp__img-count">+{allImgs.length - 1}</div>
-                      )}
-                    </div>
-                    <div className="cp__featured-info">
-                      {project.category && <p className="cp__card-category">{project.category}</p>}
-                      <h2 className="cp__featured-name">{project.clientName}</h2>
-                      {project.description && <p className="cp__featured-desc">{project.description}</p>}
-                      {project.tags.length > 0 && (
-                        <div className="cp__tags">
-                          {project.tags.map((t) => <span key={t} className="cp__tag">{t}</span>)}
-                        </div>
-                      )}
-                      {allImgs.length > 1 && (
-                        <div className="cp__thumb-strip">
-                          {allImgs.slice(0, 4).map((img, idx) => (
-                            <button
-                              key={idx}
-                              className="cp__thumb"
-                              onClick={() => openLightbox(project, idx)}
-                            >
-                              <img src={img} alt={`${project.clientName} ${idx + 1}`} />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
+        <>
+          {/* ── Filter tags ── */}
+          {allTags.length > 1 && (
+            <div className="cp__filters">
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  className={`cp__filter-btn ${activeTag === tag ? "cp__filter-btn--active" : ""}`}
+                  onClick={() => setActiveTag(tag)}
+                >
+                  {tag}
+                </button>
+              ))}
             </div>
           )}
 
-          {regular.length > 0 && (
-            <div className="cp__grid">
-              {regular.map((project, i) => {
-                const allImgs = [project.coverImage, ...project.images].filter(Boolean);
-                return (
-                  <article
-                    key={project._id}
-                    className="cp__card"
-                    style={{ animationDelay: `${i * 0.07}s` }}
-                    onClick={() => openLightbox(project)}
-                  >
-                    <div className="cp__card-img-wrap">
-                      {project.coverImage
-                        ? <img src={project.coverImage} alt={project.clientName} />
-                        : <div className="cp__img-placeholder" />
-                      }
-                      <div className="cp__card-overlay">
-                        <span className="cp__card-view">View Project</span>
-                      </div>
-                      {allImgs.length > 1 && (
-                        <div className="cp__img-count">+{allImgs.length - 1}</div>
-                      )}
-                    </div>
-                    <div className="cp__card-info">
-                      {project.category && <p className="cp__card-category">{project.category}</p>}
-                      <h3 className="cp__card-name">{project.clientName}</h3>
-                      {project.tags.length > 0 && (
-                        <div className="cp__tags cp__tags--small">
-                          {project.tags.slice(0, 2).map((t) => <span key={t} className="cp__tag">{t}</span>)}
-                        </div>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
+          {/* ── Content ── */}
+          {filtered.length === 0 ? (
+            <div className="cp__empty"><p>No projects found.</p></div>
+          ) : (
+            <section className="cp__content">
 
-        </section>
+              {featured.length > 0 && (
+                <div className="cp__featured-row">
+                  {featured.map((project, i) => {
+                    const allImgs = [project.coverImage, ...project.images].filter(Boolean);
+                    return (
+                      <article
+                        key={project._id}
+                        className={`cp__featured-card ${i % 2 === 0 ? "cp__featured-card--left" : "cp__featured-card--right"}`}
+                        style={{ animationDelay: `${i * 0.1}s` }}
+                      >
+                        <div className="cp__featured-img-wrap" onClick={() => openLightbox(project)}>
+                          {project.coverImage
+                            ? <img src={project.coverImage} alt={project.clientName} />
+                            : <div className="cp__img-placeholder" />
+                          }
+                          <div className="cp__featured-badge">Featured</div>
+                          {allImgs.length > 1 && (
+                            <div className="cp__img-count">+{allImgs.length - 1}</div>
+                          )}
+                        </div>
+                        <div className="cp__featured-info">
+                          {project.category && <p className="cp__card-category">{project.category}</p>}
+                          <h2 className="cp__featured-name">{project.clientName}</h2>
+                          {project.description && <p className="cp__featured-desc">{project.description}</p>}
+                          {project.tags.length > 0 && (
+                            <div className="cp__tags">
+                              {project.tags.map((t) => <span key={t} className="cp__tag">{t}</span>)}
+                            </div>
+                          )}
+                          {allImgs.length > 1 && (
+                            <div className="cp__thumb-strip">
+                              {allImgs.slice(0, 4).map((img, idx) => (
+                                <button
+                                  key={idx}
+                                  className="cp__thumb"
+                                  onClick={() => openLightbox(project, idx)}
+                                >
+                                  <img src={img} alt={`${project.clientName} ${idx + 1}`} />
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+
+              {regular.length > 0 && (
+                <div className="cp__grid">
+                  {regular.map((project, i) => {
+                    const allImgs = [project.coverImage, ...project.images].filter(Boolean);
+                    return (
+                      <article
+                        key={project._id}
+                        className="cp__card"
+                        style={{ animationDelay: `${i * 0.07}s` }}
+                        onClick={() => openLightbox(project)}
+                      >
+                        <div className="cp__card-img-wrap">
+                          {project.coverImage
+                            ? <img src={project.coverImage} alt={project.clientName} />
+                            : <div className="cp__img-placeholder" />
+                          }
+                          <div className="cp__card-overlay">
+                            <span className="cp__card-view">View Project</span>
+                          </div>
+                          {allImgs.length > 1 && (
+                            <div className="cp__img-count">+{allImgs.length - 1}</div>
+                          )}
+                        </div>
+                        <div className="cp__card-info">
+                          {project.category && <p className="cp__card-category">{project.category}</p>}
+                          <h3 className="cp__card-name">{project.clientName}</h3>
+                          {project.tags.length > 0 && (
+                            <div className="cp__tags cp__tags--small">
+                              {project.tags.slice(0, 2).map((t) => <span key={t} className="cp__tag">{t}</span>)}
+                            </div>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+
+            </section>
+          )}
+        </>
       )}
 
-      {/* ── CTA Banner ── */}
+      {/* ── CTA Banner — always visible ── */}
       <section className="cp__cta">
         <div className="cp__cta-inner">
           <p className="cp__eyebrow">Start a Project</p>
