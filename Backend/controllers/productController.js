@@ -1,19 +1,35 @@
 const Product = require("../models/Product");
 
 
-// GET ALL PRODUCTS
+// GET PRODUCTS WITH SEARCH
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const { q } = req.query;
 
+    let query = {};
+
+    if (q && q.trim()) {
+      // Split query into individual words and match each one
+      const words = q.trim().split(/\s+/);
+
+      const wordConditions = words.map((word) => ({
+        $or: [
+          { name: { $regex: word, $options: "i" } },
+          { category: { $regex: word, $options: "i" } },
+          { description: { $regex: word, $options: "i" } },
+        ],
+      }));
+
+      // Product must match ALL words (AND logic)
+      query = { $and: wordConditions };
+    }
+
+    const products = await Product.find(query);
     res.json(products);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 };
-
 
 // GET SINGLE PRODUCT
 const getProductById = async (req, res) => {

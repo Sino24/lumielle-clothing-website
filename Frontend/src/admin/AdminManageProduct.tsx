@@ -33,32 +33,108 @@ const BLANK: Omit<Product, "_id" | "createdAt"> = {
 };
 
 // ─── Image Upload Helper ──────────────────────────────────────────────────────
-async function uploadToCloudinary(
-  file: File,
-  apiBase: string
-): Promise<string> {
+async function uploadToCloudinary(file: File, apiBase: string): Promise<string> {
   const formData = new FormData();
   formData.append("image", file);
-
-  const response = await fetch(`${apiBase}/api/upload`, {
-    method: "POST",
-    body: formData,
-  });
-
+  const response = await fetch(`${apiBase}/api/upload`, { method: "POST", body: formData });
   if (!response.ok) {
     const text = await response.text();
     throw new Error(`Upload failed: ${response.status} – ${text}`);
   }
-
   const data = await response.json();
-
-  // Support common response shapes: { imageUrl }, { url }, { secure_url }
   const url = data.imageUrl ?? data.url ?? data.secure_url ?? "";
   if (!url) throw new Error("Server did not return an image URL");
   return url as string;
 }
 
-// ─── Sub-component: ImageField ────────────────────────────────────────────────
+// ─── CategorySelect ───────────────────────────────────────────────────────────
+interface CategorySelectProps {
+  value: string;
+  existingCategories: string[];
+  onChange: (val: string) => void;
+}
+
+const CategorySelect: React.FC<CategorySelectProps> = ({
+  value, existingCategories, onChange,
+}) => {
+  const [mode, setMode] = useState<"select" | "new">(
+    // If the current value is already in the list (or empty), use select mode
+    value === "" || existingCategories.includes(value) ? "select" : "new"
+  );
+  const [newVal, setNewVal] = useState(mode === "new" ? value : "");
+  const newInputRef = useRef<HTMLInputElement>(null);
+
+  // Switch to new mode and focus the input
+  const switchToNew = () => {
+    setMode("new");
+    setNewVal("");
+    onChange("");
+    setTimeout(() => newInputRef.current?.focus(), 50);
+  };
+
+  // Switch back to select mode
+  const switchToSelect = () => {
+    setMode("select");
+    setNewVal("");
+    onChange("");
+  };
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const v = e.target.value;
+    if (v === "__new__") {
+      switchToNew();
+    } else {
+      onChange(v);
+    }
+  };
+
+  const handleNewChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewVal(e.target.value);
+    onChange(e.target.value);
+  };
+
+  if (mode === "new") {
+    return (
+      <div className="pm-cat-new-wrap">
+        <input
+          ref={newInputRef}
+          className="pm-input pm-cat-new-input"
+          placeholder="Type new category name…"
+          value={newVal}
+          onChange={handleNewChange}
+        />
+        {existingCategories.length > 0 && (
+          <button
+            type="button"
+            className="pm-cat-back-btn"
+            onClick={switchToSelect}
+            title="Pick from existing categories"
+          >
+            ← Existing
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="pm-cat-select-wrap">
+      <select
+        className="pm-input pm-cat-select"
+        value={value}
+        onChange={handleSelectChange}
+      >
+        <option value="">— Select a category —</option>
+        {existingCategories.map((c) => (
+          <option key={c} value={c}>{c}</option>
+        ))}
+        <option value="__new__">＋ Add new category…</option>
+      </select>
+    </div>
+  );
+};
+
+// ─── ImageField ───────────────────────────────────────────────────────────────
 interface ImageFieldProps {
   label: string;
   required?: boolean;
@@ -104,8 +180,6 @@ const ImageField: React.FC<ImageFieldProps> = ({
       <label className="pm-label">
         {label} {required && <span className="pm-req">*</span>}
       </label>
-
-      {/* Manual URL input */}
       <input
         className="pm-input"
         placeholder={placeholder ?? "Paste image URL (https://…)"}
@@ -113,8 +187,6 @@ const ImageField: React.FC<ImageFieldProps> = ({
         onChange={(e) => onChange(e.target.value)}
         disabled={uploading}
       />
-
-      {/* Upload drop zone */}
       <div
         className={`pm-upload-box${uploading ? " uploading" : ""}`}
         onDrop={handleDrop}
@@ -126,10 +198,7 @@ const ImageField: React.FC<ImageFieldProps> = ({
           type="file"
           accept="image/*"
           hidden
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleFile(file);
-          }}
+          onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFile(file); }}
         />
         <div className="pm-upload-content">
           {uploading
@@ -138,8 +207,6 @@ const ImageField: React.FC<ImageFieldProps> = ({
           }
         </div>
       </div>
-
-      {/* Preview */}
       {value && (
         <div className="pm-upload-preview">
           <img src={value} alt="Preview" onError={(e) => (e.currentTarget.style.display = "none")} />
@@ -154,7 +221,7 @@ const ImageField: React.FC<ImageFieldProps> = ({
   );
 };
 
-// ─── Sub-component: MultiImageField ──────────────────────────────────────────
+// ─── MultiImageField ──────────────────────────────────────────────────────────
 interface MultiImageFieldProps {
   images: string[];
   onChange: (images: string[]) => void;
@@ -172,36 +239,25 @@ const MultiImageField: React.FC<MultiImageFieldProps> = ({
   const handleFiles = async (files: FileList) => {
     const imageFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
     if (!imageFiles.length) return;
-
     setUploading(true);
     setUploadingCount(imageFiles.length);
     showToast(`Uploading ${imageFiles.length} image(s)…`, "info");
-
     const results: string[] = [];
     let failed = 0;
-
     for (const file of imageFiles) {
-      try {
-        const url = await uploadToCloudinary(file, apiBase);
-        results.push(url);
-      } catch {
-        failed++;
-      }
+      try { results.push(await uploadToCloudinary(file, apiBase)); }
+      catch { failed++; }
     }
-
     if (results.length) onChange([...images, ...results]);
     if (failed) showToast(`${failed} image(s) failed to upload`, "error");
     else showToast(`${results.length} image(s) uploaded!`, "success");
-
     setUploading(false);
     setUploadingCount(0);
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const setUrl = (i: number, v: string) => {
-    const a = [...images]; a[i] = v; onChange(a);
-  };
-  const addRow = () => onChange([...images, ""]);
+  const setUrl    = (i: number, v: string) => { const a = [...images]; a[i] = v; onChange(a); };
+  const addRow    = () => onChange([...images, ""]);
   const removeRow = (i: number) => onChange(images.filter((_, j) => j !== i));
 
   const handleDrop = (e: React.DragEvent) => {
@@ -212,8 +268,6 @@ const MultiImageField: React.FC<MultiImageFieldProps> = ({
   return (
     <div className="pm-form-section">
       <div className="pm-section-title">Additional Images (Gallery)</div>
-
-      {/* Existing rows */}
       {images.map((img, i) => (
         <div className="pm-img-row" key={i}>
           <div className="pm-img-preview">
@@ -230,8 +284,6 @@ const MultiImageField: React.FC<MultiImageFieldProps> = ({
           <button className="pm-rm-btn" onClick={() => removeRow(i)}>✕</button>
         </div>
       ))}
-
-      {/* Bulk upload zone */}
       <div
         className={`pm-upload-box pm-upload-multi${uploading ? " uploading" : ""}`}
         onDrop={handleDrop}
@@ -248,19 +300,11 @@ const MultiImageField: React.FC<MultiImageFieldProps> = ({
         />
         <div className="pm-upload-content">
           {uploading
-            ? <>
-                <span className="pm-upload-spinner" />
-                <span className="pm-upload-text">Uploading {uploadingCount} image(s)…</span>
-              </>
-            : <>
-                <span className="pm-upload-icon">🖼️</span>
-                <span className="pm-upload-text">Select multiple images from gallery</span>
-                <span className="pm-upload-hint">Or drag & drop · Ctrl+click to select many</span>
-              </>
+            ? <><span className="pm-upload-spinner" /><span className="pm-upload-text">Uploading {uploadingCount} image(s)…</span></>
+            : <><span className="pm-upload-icon">🖼️</span><span className="pm-upload-text">Select multiple images from gallery</span><span className="pm-upload-hint">Or drag & drop · Ctrl+click to select many</span></>
           }
         </div>
       </div>
-
       <button className="pm-add-row-btn" onClick={addRow}>+ Add URL manually</button>
     </div>
   );
@@ -268,21 +312,19 @@ const MultiImageField: React.FC<MultiImageFieldProps> = ({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const ProductManage: React.FC = () => {
-  const API_BASE =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:8000";
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [saving,  setSaving]    = useState(false);
-  const [search,  setSearch]    = useState("");
+  const [products,  setProducts]  = useState<Product[]>([]);
+  const [loading,   setLoading]   = useState(true);
+  const [saving,    setSaving]    = useState(false);
+  const [search,    setSearch]    = useState("");
   const [catFilter, setCatFilter] = useState("all");
-  const [modalOpen,  setModalOpen]  = useState(false);
-  const [editId,     setEditId]     = useState<string | null>(null);
-  const [form,       setForm]       = useState({ ...BLANK });
+  const [modalOpen,    setModalOpen]    = useState(false);
+  const [editId,       setEditId]       = useState<string | null>(null);
+  const [form,         setForm]         = useState({ ...BLANK });
   const [confirmOpen,  setConfirmOpen]  = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toasts,    setToasts]    = useState<Toast[]>([]);
   const [sizeInput, setSizeInput] = useState("");
   const [mainImgUploading, setMainImgUploading] = useState(false);
   const toastId = useRef(0);
@@ -308,7 +350,9 @@ const ProductManage: React.FC = () => {
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
-  const categories = ["all", ...Array.from(new Set(products.map((p) => p.category)))];
+  // Derive unique categories from existing products
+  const existingCategories = Array.from(new Set(products.map((p) => p.category).filter(Boolean)));
+  const filterCategories   = ["all", ...existingCategories];
 
   const filtered = products.filter((p) => {
     const q = search.toLowerCase();
@@ -330,7 +374,8 @@ const ProductManage: React.FC = () => {
     setForm({
       name: p.name, price: p.price, originalPrice: p.originalPrice || "",
       badge: p.badge || "", img: p.img, images: [...(p.images || [])],
-      category: p.category, colors: p.colors ? p.colors.map((c) => ({ ...c })) : [],
+      category: p.category,
+      colors: p.colors ? p.colors.map((c) => ({ ...c })) : [],
       sizes: [...(p.sizes || [])], description: p.description,
       details: [...(p.details || [])], careInstructions: [...(p.careInstructions || [])],
     });
@@ -427,7 +472,7 @@ const ProductManage: React.FC = () => {
           </div>
           <div className="pm-page-actions">
             <button className="pm-btn ghost" onClick={fetchProducts}>🔄 Refresh</button>
-            <button className="pm-btn gold" onClick={openAdd}>+ Add Product</button>
+            <button className="pm-btn gold"  onClick={openAdd}>+ Add Product</button>
           </div>
         </div>
 
@@ -446,7 +491,7 @@ const ProductManage: React.FC = () => {
             value={catFilter}
             onChange={(e) => setCatFilter(e.target.value)}
           >
-            {categories.map((c) => (
+            {filterCategories.map((c) => (
               <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>
             ))}
           </select>
@@ -484,7 +529,7 @@ const ProductManage: React.FC = () => {
                     : <div className="pm-img-placeholder">👕</div>}
                   {p.badge && <div className="pm-card-badge">{p.badge}</div>}
                   <div className="pm-card-overlay">
-                    <button className="pm-ov-btn" title="Edit" onClick={() => openEdit(p)}>✏️</button>
+                    <button className="pm-ov-btn"     title="Edit"   onClick={() => openEdit(p)}>✏️</button>
                     <button className="pm-ov-btn del" title="Delete" onClick={() => confirmDelete(p._id)}>🗑️</button>
                   </div>
                 </div>
@@ -534,35 +579,76 @@ const ProductManage: React.FC = () => {
 
               <div className="pm-form-group">
                 <label className="pm-label">Name <span className="pm-req">*</span></label>
-                <input className="pm-input" placeholder="e.g. Classic Linen Shirt" value={form.name} onChange={(e) => setF("name", e.target.value)} />
+                <input
+                  className="pm-input"
+                  placeholder="e.g. Classic Linen Shirt"
+                  value={form.name}
+                  onChange={(e) => setF("name", e.target.value)}
+                />
               </div>
 
+              {/* ── Category with dropdown + new option ── */}
               <div className="pm-form-group">
-                <label className="pm-label">Category <span className="pm-req">*</span></label>
-                <input className="pm-input" placeholder="e.g. Shirts, Hoodies…" value={form.category} onChange={(e) => setF("category", e.target.value)} />
+                <label className="pm-label">
+                  Category <span className="pm-req">*</span>
+                </label>
+                <CategorySelect
+                  value={form.category}
+                  existingCategories={existingCategories}
+                  onChange={(val) => setF("category", val)}
+                />
+                {/* Show the resolved value as a pill when something is selected */}
+                {form.category && (
+                  <div className="pm-cat-preview">
+                    <span className="pm-cat-pill">{form.category}</span>
+                    {existingCategories.includes(form.category)
+                      ? <span className="pm-cat-hint existing">existing</span>
+                      : <span className="pm-cat-hint new-cat">new category</span>
+                    }
+                  </div>
+                )}
               </div>
 
               <div className="pm-form-group">
                 <label className="pm-label">Price <span className="pm-req">*</span></label>
-                <input className="pm-input" placeholder="₹1,299" value={form.price} onChange={(e) => setF("price", e.target.value)} />
+                <input
+                  className="pm-input"
+                  placeholder="₹1,299"
+                  value={form.price}
+                  onChange={(e) => setF("price", e.target.value)}
+                />
               </div>
 
               <div className="pm-form-group">
                 <label className="pm-label">Original Price</label>
-                <input className="pm-input" placeholder="₹1,999 (strike-through)" value={form.originalPrice} onChange={(e) => setF("originalPrice", e.target.value)} />
+                <input
+                  className="pm-input"
+                  placeholder="₹1,999 (strike-through)"
+                  value={form.originalPrice}
+                  onChange={(e) => setF("originalPrice", e.target.value)}
+                />
               </div>
 
               <div className="pm-form-group">
                 <label className="pm-label">Badge</label>
-                <input className="pm-input" placeholder="SALE, NEW, HOT…" value={form.badge} onChange={(e) => setF("badge", e.target.value)} />
+                <input
+                  className="pm-input"
+                  placeholder="SALE, NEW, HOT…"
+                  value={form.badge}
+                  onChange={(e) => setF("badge", e.target.value)}
+                />
               </div>
 
               <div className="pm-form-group pm-form-full">
                 <label className="pm-label">Description <span className="pm-req">*</span></label>
-                <textarea className="pm-textarea" placeholder="Product description…" value={form.description} onChange={(e) => setF("description", e.target.value)} />
+                <textarea
+                  className="pm-textarea"
+                  placeholder="Product description…"
+                  value={form.description}
+                  onChange={(e) => setF("description", e.target.value)}
+                />
               </div>
 
-              {/* Main Image — full width */}
               <div className="pm-form-full">
                 <ImageField
                   label="Main Product Image"
@@ -576,7 +662,6 @@ const ProductManage: React.FC = () => {
                 />
               </div>
 
-              {/* Gallery / Additional Images */}
               <MultiImageField
                 images={form.images}
                 onChange={(imgs) => setF("images", imgs)}
@@ -609,7 +694,13 @@ const ProductManage: React.FC = () => {
                       {s}<span className="pm-chip-x" onClick={() => removeSize(s)}>✕</span>
                     </span>
                   ))}
-                  <input className="pm-tag-input" placeholder="Type size + Enter" value={sizeInput} onChange={(e) => setSizeInput(e.target.value)} onKeyDown={addSize} />
+                  <input
+                    className="pm-tag-input"
+                    placeholder="Type size + Enter"
+                    value={sizeInput}
+                    onChange={(e) => setSizeInput(e.target.value)}
+                    onKeyDown={addSize}
+                  />
                 </div>
                 <div className="pm-hint">Press Enter or comma to add a size</div>
               </div>
@@ -665,7 +756,7 @@ const ProductManage: React.FC = () => {
             </div>
           </div>
           <div className="pm-modal-ft">
-            <button className="pm-btn ghost" onClick={() => setConfirmOpen(false)}>Cancel</button>
+            <button className="pm-btn ghost"  onClick={() => setConfirmOpen(false)}>Cancel</button>
             <button className="pm-btn danger" onClick={handleDelete}>Yes, Delete</button>
           </div>
         </div>

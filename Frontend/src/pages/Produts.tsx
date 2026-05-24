@@ -42,10 +42,16 @@ function Products() {
 
   const searchQuery = searchParams.get("q") ?? "";
 
+  // ── Fetch: re-runs whenever searchQuery changes ──────────────────
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/api/products`);
+        const url = searchQuery
+          ? `${API_BASE}/api/products?q=${encodeURIComponent(searchQuery)}`
+          : `${API_BASE}/api/products`;
+
+        const res = await fetch(url);
         if (!res.ok) throw new Error("Failed to fetch products");
         const data: Product[] = await res.json();
         setProducts(data);
@@ -55,29 +61,27 @@ function Products() {
         setLoading(false);
       }
     };
-    fetchProducts();
-  }, []);
 
+    fetchProducts();
+  }, [searchQuery]);
+
+  // Reset to page 1 whenever search or category changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, activeCategory]);
+
+  // ── Categories derived from current results ───────────────────────
   const categories = useMemo(
     () => ["All", ...new Set(products.map((p) => p.category))],
     [products]
   );
 
+  // ── Client-side category filter only (search is done by backend) ──
   const filtered = useMemo(() => {
-    return products
-      .filter((p) => {
-        if (!searchQuery) return true;
-        const q = searchQuery.toLowerCase();
-        return (
-          p.name.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          (p.description?.toLowerCase().includes(q) ?? false)
-        );
-      })
-      .filter((p) =>
-        activeCategory === "All" ? true : p.category === activeCategory
-      );
-  }, [products, searchQuery, activeCategory]);
+    return products.filter((p) =>
+      activeCategory === "All" ? true : p.category === activeCategory
+    );
+  }, [products, activeCategory]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const safePage = Math.min(currentPage, totalPages || 1);
@@ -91,6 +95,7 @@ function Products() {
 
   const clearSearch = () => {
     setSearchParams({});
+    setActiveCategory("All");
     setCurrentPage(1);
   };
 
@@ -103,7 +108,7 @@ function Products() {
   return (
     <main className="products">
 
-      {/* ── Hero — split layout ── */}
+      {/* ── Hero ── */}
       <section className="products__hero">
         <div className="products__hero-left">
           <p className="products__eyebrow">The Collection</p>
@@ -164,7 +169,7 @@ function Products() {
       {/* ── Grid ── */}
       <section className="products__grid-section">
         {loading ? (
-         <PageSkeleton />
+          <PageSkeleton />
         ) : (
           <div className="products__grid">
             {paginated.map((product, i) => (

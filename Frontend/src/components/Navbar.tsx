@@ -20,37 +20,55 @@ function Navbar() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
 
+  // Scroll listener
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Focus input when search opens
+  // Focus desktop input when search opens
   useEffect(() => {
     if (searchOpen) {
       searchInputRef.current?.focus();
     }
   }, [searchOpen]);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = query.trim();
-    if (trimmed) {
-      navigate(`/product?q=${encodeURIComponent(trimmed)}`);
-      setSearchOpen(false);
-      setMenuOpen(false);
+  // Focus mobile input when menu opens
+  useEffect(() => {
+    if (menuOpen) {
+      setTimeout(() => mobileSearchInputRef.current?.focus(), 100);
     }
+  }, [menuOpen]);
+
+  // Close mobile menu on resize to desktop
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth > 768) {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const submitSearch = (q: string) => {
+    const trimmed = q.trim();
+    if (!trimmed) return;
+    navigate(`/product?q=${encodeURIComponent(trimmed)}`);
+    setSearchOpen(false);
+    setMenuOpen(false);
+    setQuery("");
+  };
+
+  const handleDesktopSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitSearch(query);
   };
 
   const handleMobileSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = query.trim();
-    if (trimmed) {
-      navigate(`/product?q=${encodeURIComponent(trimmed)}`);
-      setMenuOpen(false);
-      setQuery("");
-    }
+    submitSearch(query);
   };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
@@ -60,11 +78,18 @@ function Navbar() {
     }
   };
 
+  const closeMenu = () => setMenuOpen(false);
+
+  const toggleSearch = () => {
+    setSearchOpen((v) => !v);
+    if (searchOpen) setQuery("");
+  };
+
   return (
     <>
       <nav className={`navbar${scrolled ? " scrolled" : ""}`}>
 
-        {/* ── Brand ───────────────────────────────── */}
+        {/* ── Brand ── */}
         <Link
           className="navbar__brand"
           to="/"
@@ -75,9 +100,7 @@ function Navbar() {
             src={logo}
             alt="Lumielle logo"
           />
-
           <div className="navbar__brand-divider" aria-hidden="true" />
-
           <div className="navbar__brand-text">
             <span className="navbar__brand-name">
               <em>wear your light</em>
@@ -88,21 +111,20 @@ function Navbar() {
           </div>
         </Link>
 
-        {/* ── Desktop Links ────────────────────────── */}
+        {/* ── Desktop Links ── */}
         <div className={`navbar__links${searchOpen ? " navbar__links--hidden" : ""}`}>
           <Link className="navbar__link" to="/">Home</Link>
           <Link className="navbar__link" to="/product">Collections</Link>
           <Link className="navbar__link" to="/lookbook">Lookbook</Link>
-           <Link className="navbar__link" to="/ClientProjects">Client Projects</Link>
+          <Link className="navbar__link" to="/ClientProjects">Client Projects</Link>
           <Link className="navbar__link" to="/about">About</Link>
           <Link className="navbar__link" to="/contact">Contact</Link>
-         
         </div>
 
-        {/* ── Desktop Search Expand ────────────────── */}
+        {/* ── Desktop Search Expand ── */}
         <form
           className={`navbar__search-form${searchOpen ? " navbar__search-form--open" : ""}`}
-          onSubmit={handleSearchSubmit}
+          onSubmit={handleDesktopSearchSubmit}
           role="search"
         >
           <input
@@ -117,26 +139,21 @@ function Navbar() {
           />
         </form>
 
-        {/* ── Right Icons ──────────────────────────── */}
+        {/* ── Right Icons ── */}
         <div className="navbar__icons">
 
           {/* Search toggle */}
           <button
             className="navbar__icon-btn"
             aria-label={searchOpen ? "Close search" : "Open search"}
-            onClick={() => {
-              setSearchOpen((v) => !v);
-              if (searchOpen) setQuery("");
-            }}
+            onClick={toggleSearch}
           >
             {searchOpen ? (
-              /* Close (X) icon */
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             ) : (
-              /* Search icon */
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -155,7 +172,6 @@ function Navbar() {
               <line x1="3" y1="6" x2="21" y2="6" />
               <path d="M16 10a4 4 0 0 1-8 0" />
             </svg>
-
             {cart.length > 0 && (
               <span className="navbar__cart-badge" aria-hidden="true">
                 {cart.length}
@@ -164,7 +180,7 @@ function Navbar() {
           </Link>
         </div>
 
-        {/* ── Mobile Hamburger ─────────────────────── */}
+        {/* ── Mobile Hamburger ── */}
         <button
           className={`navbar__hamburger${menuOpen ? " open" : ""}`}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -177,7 +193,7 @@ function Navbar() {
         </button>
       </nav>
 
-      {/* ── Mobile Menu ──────────────────────────────── */}
+      {/* ── Mobile Menu ── */}
       <div
         className={`navbar__mobile-menu${menuOpen ? " open" : ""}`}
         aria-hidden={!menuOpen}
@@ -222,14 +238,38 @@ function Navbar() {
           </div>
         </form>
 
-        <Link className="navbar__mobile-link" to="/" onClick={() => setMenuOpen(false)}>Home</Link>
-        <Link className="navbar__mobile-link" to="/product" onClick={() => setMenuOpen(false)}>Collections</Link>
-        <Link className="navbar__mobile-link" to="/lookbook" onClick={() => setMenuOpen(false)}>Lookbook</Link>
-        <Link className="navbar__mobile-link" to="/about" onClick={() => setMenuOpen(false)}>About</Link>
-        <Link className="navbar__mobile-link" to="/ClientProjects" onClick={() => setMenuOpen(false)}>Client Projects</Link>
-        <Link className="navbar__mobile-link" to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link>
-        <Link className="navbar__mobile-link" to="/cart" onClick={() => setMenuOpen(false)}>
-          Cart ({cart.length})
+        {/* Mobile Nav Links */}
+        <Link className="navbar__mobile-link" to="/" onClick={closeMenu}>
+          Home
+        </Link>
+        <Link className="navbar__mobile-link" to="/product" onClick={closeMenu}>
+          Collections
+        </Link>
+        <Link className="navbar__mobile-link" to="/lookbook" onClick={closeMenu}>
+          Lookbook
+        </Link>
+        <Link className="navbar__mobile-link" to="/ClientProjects" onClick={closeMenu}>
+          Client Projects
+        </Link>
+        <Link className="navbar__mobile-link" to="/about" onClick={closeMenu}>
+          About
+        </Link>
+        <Link className="navbar__mobile-link" to="/contact" onClick={closeMenu}>
+          Contact
+        </Link>
+
+        {/* Mobile Cart Link */}
+        <Link
+          className="navbar__mobile-link navbar__mobile-cart"
+          to="/cart"
+          onClick={closeMenu}
+        >
+          <span>Cart</span>
+          {cart.length > 0 && (
+            <span className="navbar__mobile-cart-count">
+              {cart.length}
+            </span>
+          )}
         </Link>
       </div>
     </>

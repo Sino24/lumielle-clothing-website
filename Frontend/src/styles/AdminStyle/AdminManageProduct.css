@@ -3,19 +3,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
 
 :root {
-  --lum-cream: #F5F0E8;
-  --lum-dark: #1A1714;
-  --lum-gold: #C9A96E;
-  --lum-muted: #7A746C;
+  --lum-cream:  #F5F0E8;
+  --lum-dark:   #1A1714;
+  --lum-gold:   #C9A96E;
+  --lum-muted:  #7A746C;
   --lum-border: rgba(26, 23, 20, 0.12);
   --lum-danger: #C0392B;
+  --lum-surface:#EAE4D8;
   --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-body: 'Jost', sans-serif;
+  --font-body:    'Jost', sans-serif;
 }
 
 .pm-page {
   min-height: 100vh;
-  padding-top: var(--nav-height);
   background: var(--lum-cream);
   font-family: var(--font-body);
 }
@@ -188,7 +188,7 @@
   position: relative;
   aspect-ratio: 3/4;
   overflow: hidden;
-  background: #EAE4D8;
+  background: var(--lum-surface);
 }
 
 .pm-card-img-wrap img {
@@ -251,7 +251,7 @@
   transition: background 0.15s, transform 0.15s;
 }
 
-.pm-ov-btn:hover { background: #fff; transform: scale(1.1); }
+.pm-ov-btn:hover     { background: #fff; transform: scale(1.1); }
 .pm-ov-btn.del:hover { background: #ffeaea; }
 
 .pm-card-body { padding: 1rem; flex: 1; }
@@ -356,6 +356,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .pm-modal-title {
@@ -422,6 +423,91 @@
 .pm-input:disabled { opacity: 0.55; cursor: not-allowed; }
 .pm-textarea { min-height: 90px; resize: vertical; }
 
+/* ── Category select ── */
+.pm-cat-select-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* Style the native select to match pm-input exactly */
+.pm-cat-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.2rem !important; /* room for arrow */
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A746C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-color: #fff;
+}
+
+.pm-cat-select:focus { border-color: var(--lum-gold); }
+
+/* "Add new" row inside the select stands out */
+.pm-cat-select option[value="__new__"] {
+  color: var(--lum-gold);
+  font-weight: 500;
+}
+
+/* New-category free-text row */
+.pm-cat-new-wrap {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.pm-cat-new-input {
+  flex: 1;
+}
+
+.pm-cat-back-btn {
+  flex-shrink: 0;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--lum-border);
+  color: var(--lum-muted);
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s;
+  height: 100%;
+}
+
+.pm-cat-back-btn:hover {
+  border-color: var(--lum-gold);
+  color: var(--lum-gold);
+}
+
+/* Selected category preview pill */
+.pm-cat-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.pm-cat-pill {
+  display: inline-block;
+  background: var(--lum-dark);
+  color: var(--lum-cream);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+}
+
+.pm-cat-hint {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.pm-cat-hint.existing { color: var(--lum-muted); }
+.pm-cat-hint.new-cat  { color: var(--lum-gold); }
+
 /* ── Form sections ── */
 .pm-form-section { grid-column: 1 / -1; }
 
@@ -445,7 +531,7 @@
 .pm-img-preview {
   width: 42px;
   height: 42px;
-  background: #EAE4D8;
+  background: var(--lum-surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -520,6 +606,7 @@
 
 .pm-add-row-btn:hover { border-color: var(--lum-gold); color: var(--lum-gold); }
 
+/* Tags / size chips */
 .pm-tags-wrap {
   display: flex;
   flex-wrap: wrap;
@@ -579,12 +666,17 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 /* ── Confirm modal ── */
 .pm-confirm-modal { max-width: 420px; }
 
-.pm-confirm-ico  { font-size: 2.5rem; text-align: center; margin-bottom: 1rem; }
+.pm-confirm-ico {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
 
 .pm-confirm-title {
   font-family: var(--font-display);
@@ -637,7 +729,7 @@
   to   { opacity: 1; transform: translateX(0); }
 }
 
-/* ── Upload Box ── */
+/* ── Upload box ── */
 .pm-upload-box {
   margin-top: 0.8rem;
   border: 1px dashed var(--lum-border);
@@ -656,10 +748,7 @@
   background: rgba(201,169,110,0.04);
 }
 
-/* taller zone for gallery / multi-upload */
-.pm-upload-multi {
-  min-height: 120px;
-}
+.pm-upload-multi { min-height: 120px; }
 
 .pm-upload-box.uploading {
   border-color: var(--lum-gold);
@@ -677,23 +766,22 @@
   pointer-events: none;
 }
 
-.pm-upload-icon  { font-size: 1.5rem; }
+.pm-upload-icon { font-size: 1.5rem; }
 
-.pm-upload-text  {
+.pm-upload-text {
   font-size: 0.72rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--lum-muted);
 }
 
-.pm-upload-hint  {
+.pm-upload-hint {
   font-size: 0.62rem;
   letter-spacing: 0.08em;
   color: var(--lum-muted);
   opacity: 0.7;
 }
 
-/* Spinner inside upload box */
 .pm-upload-spinner {
   display: inline-block;
   width: 22px;
@@ -704,7 +792,7 @@
   animation: pm-spin 0.75s linear infinite;
 }
 
-/* ── Upload Preview (single image) ── */
+/* ── Upload preview ── */
 .pm-upload-preview {
   position: relative;
   margin-top: 0.85rem;
@@ -712,7 +800,7 @@
   height: 180px;
   overflow: hidden;
   border: 1px solid var(--lum-border);
-  background: #EAE4D8;
+  background: var(--lum-surface);
 }
 
 .pm-upload-preview img {
@@ -722,7 +810,6 @@
   display: block;
 }
 
-/* Remove button overlaid on preview */
 .pm-preview-remove {
   position: absolute;
   top: 4px;
@@ -745,8 +832,10 @@
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .pm-content { padding: 1.5rem 1.25rem 3rem; }
-  .pm-form-grid { grid-template-columns: 1fr; }
-  .pm-color-row { flex-wrap: wrap; }
+  .pm-content       { padding: 1.5rem 1.25rem 3rem; }
+  .pm-form-grid     { grid-template-columns: 1fr; }
+  .pm-color-row     { flex-wrap: wrap; }
   .pm-upload-preview { width: 100px; height: 130px; }
+  .pm-cat-new-wrap  { flex-direction: column; align-items: stretch; }
+  .pm-cat-back-btn  { width: 100%; text-align: center; }
 }
