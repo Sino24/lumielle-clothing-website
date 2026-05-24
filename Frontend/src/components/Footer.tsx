@@ -25,10 +25,9 @@ function Footer() {
         <div>
           <p className="footer__col-title">Shop</p>
           <ul className="footer__col-links">
-            <li><Link to="/new">New In</Link></li>
             <li><Link to="/product">Collections</Link></li>
             <li><Link to="/sale">Sale</Link></li>
-            <li><Link to="/gift-cards">Gift Cards</Link></li>
+      
           </ul>
         </div>
 
@@ -37,9 +36,7 @@ function Footer() {
           <p className="footer__col-title">Info</p>
           <ul className="footer__col-links">
             <li><Link to="/about">Our Story</Link></li>
-            <li><Link to="/sustainability">Sustainability</Link></li>
-            <li><Link to="/careers">Careers</Link></li>
-            <li><Link to="/press">Press</Link></li>
+              <li><Link to="/terms">Terms And Conditions</Link></li>
           </ul>
         </div>
 
@@ -47,9 +44,8 @@ function Footer() {
         <div>
           <p className="footer__col-title">Help</p>
           <ul className="footer__col-links">
-            <li><Link to="/terms">Terms And Conditions</Link></li>
+    
             <li><Link to="/sizing">Size Guide</Link></li>
-            <li><Link to="/faq">FAQ</Link></li>
             <li><Link to="/contact">Contact Us</Link></li>
           </ul>
         </div>

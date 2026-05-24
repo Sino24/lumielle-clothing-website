@@ -63,13 +63,13 @@
 
 .footer__newsletter input {
   flex: 1;
-  background: transparent;
+  background: var(--lum-cream);
   border: none;
   padding: 0.65rem 0.9rem;
   font-family: var(--font-body);
   font-size: 0.78rem;
   font-weight: 300;
-  color: var(--lum-cream);
+  color: black;
   outline: none;
   min-width: 0;
 }
