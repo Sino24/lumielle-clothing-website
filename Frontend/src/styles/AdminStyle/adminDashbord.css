@@ -16,7 +16,7 @@
 .adm-page {
   width: 100%;
   min-height: 100vh;
-  padding-top: var(--nav-height, 0px);
+padding-top: var(--nav-height);  
   background: var(--lum-cream);
   font-family: var(--font-body);
   overflow-x: hidden;

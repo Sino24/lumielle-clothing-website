@@ -14,7 +14,7 @@
 }
 
 .alb-page {
-    padding-top: var(--nav-height);
+  padding-top: var(--nav-height);
   min-height: 100vh;
   background: var(--lum-cream);
   font-family: var(--font-body);
