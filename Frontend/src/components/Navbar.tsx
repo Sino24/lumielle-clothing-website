@@ -14,17 +14,15 @@ function Navbar() {
   const [scrolled,      setScrolled]      = useState(false);
   const [menuOpen,      setMenuOpen]      = useState(false);
   const [searchOpen,    setSearchOpen]    = useState(false);
-  const [mobileSearch,  setMobileSearch]  = useState(false);
   const [userMenuOpen,  setUserMenuOpen]  = useState(false);
   const [query,         setQuery]         = useState("");
 
-  const { cart }                          = useCart();
-  const { user, isLoggedIn, logout }      = useAuth();
-  const navigate                          = useNavigate();
-  const searchInputRef                    = useRef<HTMLInputElement>(null);
-  const mobileSearchInputRef              = useRef<HTMLInputElement>(null);
-  const mobileBarSearchInputRef           = useRef<HTMLInputElement>(null);
-  const userMenuRef                       = useRef<HTMLDivElement>(null);
+  const { cart }                        = useCart();
+  const { user, isLoggedIn, logout }    = useAuth();
+  const navigate                        = useNavigate();
+  const searchInputRef                  = useRef<HTMLInputElement>(null);
+  const mobileSearchInputRef            = useRef<HTMLInputElement>(null);
+  const userMenuRef                     = useRef<HTMLDivElement>(null);
 
   // Scroll listener
   useEffect(() => {
@@ -33,19 +31,12 @@ function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Focus desktop search input when search opens
+  // Focus desktop input when search opens
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
 
-  // Focus mobile bar search input when it opens
-  useEffect(() => {
-    if (mobileSearch) {
-      setTimeout(() => mobileBarSearchInputRef.current?.focus(), 60);
-    }
-  }, [mobileSearch]);
-
-  // Focus mobile menu search input when menu opens
+  // Focus mobile input when menu opens
   useEffect(() => {
     if (menuOpen) {
       setTimeout(() => mobileSearchInputRef.current?.focus(), 100);
@@ -55,10 +46,7 @@ function Navbar() {
   // Close mobile menu on resize to desktop
   useEffect(() => {
     const onResize = () => {
-      if (window.innerWidth > 768) {
-        setMenuOpen(false);
-        setMobileSearch(false);
-      }
+      if (window.innerWidth > 768) setMenuOpen(false);
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
@@ -80,7 +68,6 @@ function Navbar() {
     if (!trimmed) return;
     navigate(`/product?q=${encodeURIComponent(trimmed)}`);
     setSearchOpen(false);
-    setMobileSearch(false);
     setMenuOpen(false);
     setQuery("");
   };
@@ -90,7 +77,7 @@ function Navbar() {
     submitSearch(query);
   };
 
-  const handleMobileBarSearchSubmit = (e: React.FormEvent) => {
+  const handleMobileSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     submitSearch(query);
   };
@@ -98,7 +85,6 @@ function Navbar() {
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       setSearchOpen(false);
-      setMobileSearch(false);
       setQuery("");
     }
   };
@@ -110,11 +96,6 @@ function Navbar() {
     if (searchOpen) setQuery("");
   };
 
-  const toggleMobileSearch = () => {
-    setMobileSearch((v) => !v);
-    if (mobileSearch) setQuery("");
-  };
-
   const handleLogout = () => {
     logout();
     setUserMenuOpen(false);
@@ -122,6 +103,7 @@ function Navbar() {
     navigate("/");
   };
 
+  // First name only for display
   const firstName = user?.name?.split(" ")[0] ?? "";
 
   return (
@@ -170,6 +152,7 @@ function Navbar() {
 
         {/* ── Desktop Right Icons ── */}
         <div className="navbar__icons">
+
           {/* Search toggle */}
           <button
             className="navbar__icon-btn"
@@ -189,7 +172,7 @@ function Navbar() {
             )}
           </button>
 
-          {/* User icon / dropdown */}
+          {/* ── User icon / dropdown ── */}
           {isLoggedIn ? (
             <div className="navbar__user-wrap" ref={userMenuRef}>
               <button
@@ -255,15 +238,15 @@ function Navbar() {
           </Link>
         </div>
 
-        {/* ── Mobile Icons (search + user/login + cart) — always visible on mobile ── */}
-        <div className="navbar__mobile-icons">
+        {/* ── Mobile Right: Search icon + Hamburger ── */}
+        <div className="navbar__mobile-right">
           {/* Mobile search toggle */}
           <button
-            className="navbar__icon-btn"
-            aria-label={mobileSearch ? "Close search" : "Open search"}
-            onClick={toggleMobileSearch}
+            className="navbar__icon-btn navbar__mobile-search-toggle"
+            aria-label={searchOpen ? "Close search" : "Open search"}
+            onClick={toggleSearch}
           >
-            {mobileSearch ? (
+            {searchOpen ? (
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
@@ -275,71 +258,6 @@ function Navbar() {
               </svg>
             )}
           </button>
-
-          {/* Mobile user icon */}
-          {isLoggedIn ? (
-            <div className="navbar__user-wrap" ref={userMenuRef}>
-              <button
-                className="navbar__icon-btn navbar__user-btn"
-                aria-label="Account menu"
-                aria-expanded={userMenuOpen}
-                onClick={() => setUserMenuOpen((v) => !v)}
-              >
-                <span className="navbar__avatar">{firstName.charAt(0).toUpperCase()}</span>
-              </button>
-
-              {userMenuOpen && (
-                <div className="navbar__user-dropdown">
-                  <div className="navbar__user-greeting">Hi, {firstName}</div>
-                  <Link
-                    className="navbar__user-item"
-                    to="/account"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    My Account
-                  </Link>
-                  <Link
-                    className="navbar__user-item"
-                    to="/account/orders"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    My Orders
-                  </Link>
-                  <button
-                    className="navbar__user-item navbar__user-logout"
-                    onClick={handleLogout}
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link to="/login" className="navbar__icon-btn" aria-label="Sign in">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </Link>
-          )}
-
-          {/* Mobile cart */}
-          <Link
-            to="/cart"
-            className="navbar__icon-btn navbar__cart-link"
-            aria-label={`Cart — ${cart.length} items`}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <path d="M16 10a4 4 0 0 1-8 0" />
-            </svg>
-            {cart.length > 0 && (
-              <span className="navbar__cart-badge" aria-hidden="true">
-                {cart.length}
-              </span>
-            )}
-          </Link>
 
           {/* Hamburger */}
           <button
@@ -355,12 +273,12 @@ function Navbar() {
         </div>
       </nav>
 
-      {/* ── Mobile Bar Search (expands below navbar) ── */}
-      {mobileSearch && (
-        <div className="navbar__mobile-searchbar">
+      {/* ── Mobile Search Bar (full-width, below navbar) ── */}
+      {searchOpen && (
+        <div className="navbar__mobile-search-bar">
           <form
-            className="navbar__mobile-searchbar-form"
-            onSubmit={handleMobileBarSearchSubmit}
+            className="navbar__mobile-search-bar-form"
+            onSubmit={handleMobileSearchSubmit}
             role="search"
           >
             <div className="navbar__mobile-search-wrap">
@@ -375,7 +293,7 @@ function Navbar() {
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               <input
-                ref={mobileBarSearchInputRef}
+                ref={mobileSearchInputRef}
                 className="navbar__mobile-search-input"
                 type="search"
                 placeholder="Search products…"
@@ -383,6 +301,7 @@ function Navbar() {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
                 aria-label="Search products"
+                autoFocus
               />
               {query && (
                 <button
@@ -398,17 +317,95 @@ function Navbar() {
         </div>
       )}
 
-      {/* ── Mobile Menu (nav links only) ── */}
+      {/* ── Mobile Menu ── */}
       <div
         className={`navbar__mobile-menu${menuOpen ? " open" : ""}`}
         aria-hidden={!menuOpen}
       >
+        {/* Mobile Search inside menu (original) */}
+        <form
+          className="navbar__mobile-search"
+          onSubmit={handleMobileSearchSubmit}
+          role="search"
+        >
+          <div className="navbar__mobile-search-wrap">
+            <svg
+              className="navbar__mobile-search-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              ref={mobileSearchInputRef}
+              className="navbar__mobile-search-input"
+              type="search"
+              placeholder="Search products…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search products"
+            />
+            {query && (
+              <button
+                type="submit"
+                className="navbar__mobile-search-btn"
+                aria-label="Submit search"
+              >
+                Go
+              </button>
+            )}
+          </div>
+        </form>
+
+        {/* Mobile Nav Links */}
         <Link className="navbar__mobile-link" to="/" onClick={closeMenu}>Home</Link>
         <Link className="navbar__mobile-link" to="/product" onClick={closeMenu}>Collections</Link>
         <Link className="navbar__mobile-link" to="/lookbook" onClick={closeMenu}>Lookbook</Link>
         <Link className="navbar__mobile-link" to="/ClientProjects" onClick={closeMenu}>Client Projects</Link>
         <Link className="navbar__mobile-link" to="/about" onClick={closeMenu}>About</Link>
         <Link className="navbar__mobile-link" to="/contact" onClick={closeMenu}>Contact</Link>
+
+        {/* Mobile User */}
+        {isLoggedIn ? (
+          <>
+            <Link
+              className="navbar__mobile-link"
+              to="/account"
+              onClick={closeMenu}
+            >
+              My Account
+            </Link>
+            <button
+              className="navbar__mobile-link navbar__mobile-logout"
+              onClick={handleLogout}
+            >
+              Sign Out ({firstName})
+            </button>
+          </>
+        ) : (
+          <Link
+            className="navbar__mobile-link navbar__mobile-signin"
+            to="/login"
+            onClick={closeMenu}
+          >
+            Sign In
+          </Link>
+        )}
+
+        {/* Mobile Cart */}
+        <Link
+          className="navbar__mobile-link navbar__mobile-cart"
+          to="/cart"
+          onClick={closeMenu}
+        >
+          <span>Cart</span>
+          {cart.length > 0 && (
+            <span className="navbar__mobile-cart-count">{cart.length}</span>
+          )}
+        </Link>
       </div>
     </>
   );
