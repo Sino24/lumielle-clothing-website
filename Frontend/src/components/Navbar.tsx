@@ -11,18 +11,18 @@ import "../styles/ComponentStyle/Navbar.css";
 import logo from "../assets/newlogo2.png";
 
 function Navbar() {
-  const [scrolled,      setScrolled]      = useState(false);
-  const [menuOpen,      setMenuOpen]      = useState(false);
-  const [searchOpen,    setSearchOpen]    = useState(false);
-  const [userMenuOpen,  setUserMenuOpen]  = useState(false);
-  const [query,         setQuery]         = useState("");
+  const [scrolled,    setScrolled]    = useState(false);
+  const [menuOpen,    setMenuOpen]    = useState(false);
+  const [searchOpen,  setSearchOpen]  = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [query,       setQuery]       = useState("");
 
-  const { cart }                        = useCart();
-  const { user, isLoggedIn, logout }    = useAuth();
-  const navigate                        = useNavigate();
-  const searchInputRef                  = useRef<HTMLInputElement>(null);
-  const mobileSearchInputRef            = useRef<HTMLInputElement>(null);
-  const userMenuRef                     = useRef<HTMLDivElement>(null);
+  const { cart }              = useCart();
+  const { user, isLoggedIn, logout } = useAuth();
+  const navigate              = useNavigate();
+  const searchInputRef        = useRef<HTMLInputElement>(null);
+  const mobileSearchInputRef  = useRef<HTMLInputElement>(null);
+  const userMenuRef           = useRef<HTMLDivElement>(null);
 
   // Scroll listener
   useEffect(() => {
@@ -150,7 +150,7 @@ function Navbar() {
           />
         </form>
 
-        {/* ── Desktop Right Icons ── */}
+        {/* ── Right Icons ── */}
         <div className="navbar__icons">
 
           {/* Search toggle */}
@@ -181,12 +181,16 @@ function Navbar() {
                 aria-expanded={userMenuOpen}
                 onClick={() => setUserMenuOpen((v) => !v)}
               >
+                {/* Avatar circle with first letter */}
                 <span className="navbar__avatar">{firstName.charAt(0).toUpperCase()}</span>
               </button>
 
+              {/* Dropdown */}
               {userMenuOpen && (
                 <div className="navbar__user-dropdown">
-                  <div className="navbar__user-greeting">Hi, {firstName}</div>
+                  <div className="navbar__user-greeting">
+                    Hi, {firstName}
+                  </div>
                   <Link
                     className="navbar__user-item"
                     to="/account"
@@ -211,7 +215,11 @@ function Navbar() {
               )}
             </div>
           ) : (
-            <Link to="/login" className="navbar__icon-btn" aria-label="Sign in">
+            <Link
+              to="/login"
+              className="navbar__icon-btn"
+              aria-label="Sign in"
+            >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
@@ -238,91 +246,25 @@ function Navbar() {
           </Link>
         </div>
 
-        {/* ── Mobile Right: Search icon + Hamburger ── */}
-        <div className="navbar__mobile-right">
-          {/* Mobile search toggle */}
-          <button
-            className="navbar__icon-btn navbar__mobile-search-toggle"
-            aria-label={searchOpen ? "Close search" : "Open search"}
-            onClick={toggleSearch}
-          >
-            {searchOpen ? (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-            )}
-          </button>
-
-          {/* Hamburger */}
-          <button
-            className={`navbar__hamburger${menuOpen ? " open" : ""}`}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-        </div>
+        {/* ── Mobile Hamburger ── */}
+        <button
+          className={`navbar__hamburger${menuOpen ? " open" : ""}`}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </nav>
-
-      {/* ── Mobile Search Bar (full-width, below navbar) ── */}
-      {searchOpen && (
-        <div className="navbar__mobile-search-bar">
-          <form
-            className="navbar__mobile-search-bar-form"
-            onSubmit={handleMobileSearchSubmit}
-            role="search"
-          >
-            <div className="navbar__mobile-search-wrap">
-              <svg
-                className="navbar__mobile-search-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                ref={mobileSearchInputRef}
-                className="navbar__mobile-search-input"
-                type="search"
-                placeholder="Search products…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={handleSearchKeyDown}
-                aria-label="Search products"
-                autoFocus
-              />
-              {query && (
-                <button
-                  type="submit"
-                  className="navbar__mobile-search-btn"
-                  aria-label="Submit search"
-                >
-                  Go
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-      )}
 
       {/* ── Mobile Menu ── */}
       <div
         className={`navbar__mobile-menu${menuOpen ? " open" : ""}`}
         aria-hidden={!menuOpen}
       >
-        {/* Mobile Search inside menu (original) */}
+        {/* Mobile Search */}
         <form
           className="navbar__mobile-search"
           onSubmit={handleMobileSearchSubmit}
