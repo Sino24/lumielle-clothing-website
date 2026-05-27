@@ -1,33 +1,40 @@
-/* src/styles/UserAuth.css */
+/* src/styles/UserStyle/UserAuth.css */
+/* ✅ RENAMED from UserLogin.css to match the import in UserAuth.tsx */
 
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
 
+/* ── Variables ── */
 :root {
-  --lum-cream:   #F5F0E8;
-  --lum-dark:    #1A1714;
-  --lum-gold:    #C9A96E;
-  --lum-muted:   #7A746C;
-  --lum-border:  rgba(26, 23, 20, 0.12);
-  --lum-danger:  #C0392B;
-  --lum-success: #2c4a3e;
+  --lum-cream:    #F5F0E8;
+  --lum-dark:     #1A1714;
+  --lum-gold:     #C9A96E;
+  --lum-muted:    #7A746C;
+  --lum-border:   rgba(26, 23, 20, 0.12);
+  --lum-danger:   #C0392B;
+  --lum-success:  #2c4a3e;
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-body:    'Jost', sans-serif;
+
+  /* ✅ FIX: safe fallback so padding-top doesn't collapse to 0 and hide content */
+  --nav-height: 0px;
 }
 
 /* ── Page ── */
 .ua-page {
   min-height: 100vh;
+  min-height: 100dvh; /* ✅ FIX: use dvh on mobile so address bar is accounted for */
   background: var(--lum-dark);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: calc(var(--nav-height) + 2rem) 1.25rem 2rem; /* ✅ FIX: horizontal + bottom padding */
   font-family: var(--font-body);
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
-/* Orbs */
+/* ── Orbs ── */
 .ua-orb {
   position: absolute;
   border-radius: 50%;
@@ -36,20 +43,20 @@
 .ua-orb--1 {
   width: 500px; height: 500px;
   top: -200px; right: -100px;
-  border: 1px solid rgba(201,169,110,0.1);
+  border: 1px solid rgba(201, 169, 110, 0.1);
   animation: ua-spin 40s linear infinite;
 }
 .ua-orb--2 {
   width: 320px; height: 320px;
   bottom: -150px; left: -80px;
-  border: 1px solid rgba(201,169,110,0.07);
+  border: 1px solid rgba(201, 169, 110, 0.07);
   animation: ua-spin 55s linear infinite reverse;
 }
 .ua-orb--3 {
   width: 180px; height: 180px;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(201,169,110,0.04) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(201, 169, 110, 0.04) 0%, transparent 70%);
 }
 @keyframes ua-spin {
   from { transform: rotate(0deg); }
@@ -64,9 +71,10 @@
   grid-template-columns: 1fr 1fr;
   width: 100%;
   max-width: 960px;
-  min-height: 580px;
-  box-shadow: 0 32px 100px rgba(0,0,0,0.5);
-  animation: ua-rise 0.55s cubic-bezier(0.4,0,0.2,1) both;
+  /* ✅ FIX: removed fixed min-height that caused overflow on mobile */
+  box-shadow: 0 32px 100px rgba(0, 0, 0, 0.5);
+  animation: ua-rise 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
+  overflow: hidden; /* ✅ FIX: clip child backgrounds cleanly */
 }
 @keyframes ua-rise {
   from { opacity: 0; transform: translateY(32px); }
@@ -82,6 +90,7 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
+  min-width: 0; /* ✅ FIX: prevent grid blowout */
 }
 .ua-side::before {
   content: "";
@@ -91,8 +100,8 @@
     -45deg,
     transparent,
     transparent 28px,
-    rgba(255,255,255,0.04) 28px,
-    rgba(255,255,255,0.04) 29px
+    rgba(255, 255, 255, 0.04) 28px,
+    rgba(255, 255, 255, 0.04) 29px
   );
   pointer-events: none;
 }
@@ -109,6 +118,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 1.75rem;
+  flex-shrink: 0; /* ✅ FIX: don't squish the logo mark */
 }
 
 .ua-side-title {
@@ -124,7 +134,7 @@
 .ua-side-desc {
   font-size: 0.8rem;
   line-height: 1.75;
-  color: rgba(26,23,20,0.7);
+  color: rgba(26, 23, 20, 0.7);
   letter-spacing: 0.05em;
   margin: 0 0 2.5rem;
   max-width: 260px;
@@ -143,7 +153,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(26,23,20,0.65);
+  color: rgba(26, 23, 20, 0.65);
 }
 
 .ua-rule-dot {
@@ -161,6 +171,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0; /* ✅ FIX: prevent grid blowout */
+  box-sizing: border-box; /* ✅ FIX: padding stays inside column */
 }
 
 /* ── Tabs ── */
@@ -170,6 +182,7 @@
   border: 1px solid var(--lum-border);
   background: #fff;
   margin-bottom: 2.25rem;
+  overflow: hidden; /* ✅ FIX: clip the sliding bar at edges */
 }
 .ua-tab {
   flex: 1;
@@ -184,7 +197,10 @@
   cursor: pointer;
   position: relative;
   z-index: 1;
-  transition: color 0.25s;
+  transition: color 0.3s;
+  /* ✅ FIX: remove default button appearance on iOS */
+  -webkit-appearance: none;
+  appearance: none;
 }
 .ua-tab--active { color: var(--lum-cream); }
 
@@ -193,14 +209,16 @@
   bottom: 0; top: 0;
   width: 50%;
   background: var(--lum-dark);
-  transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
+  /* ✅ FIX: use transform instead of left for GPU-accelerated smooth slide */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
+  left: 0; /* ✅ FIX: explicit base left so transform is calculated correctly */
 }
-.ua-tab-bar--login  { left: 0; }
-.ua-tab-bar--signup { left: 50%; }
+.ua-tab-bar--login  { transform: translateX(0%); }
+.ua-tab-bar--signup { transform: translateX(100%); }
 
 /* ── Form heading ── */
-.ua-form-head  { margin-bottom: 1.75rem; }
+.ua-form-head { margin-bottom: 1.75rem; }
 .ua-heading {
   font-family: var(--font-display);
   font-size: 1.9rem;
@@ -229,7 +247,7 @@
   gap: 0.35rem;
 }
 .ua-field--animate {
-  animation: ua-field-in 0.3s cubic-bezier(0.4,0,0.2,1) both;
+  animation: ua-field-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 @keyframes ua-field-in {
   from { opacity: 0; transform: translateY(-8px); }
@@ -254,30 +272,49 @@
   display: flex;
   align-items: center;
 }
+
+/* ✅ FIX: explicit size so icons don't explode */
 .ua-ico {
   position: absolute;
   left: 0.85rem;
-  font-size: 0.8rem;
+  width: 16px;
+  height: 16px;
   color: var(--lum-muted);
   pointer-events: none;
   user-select: none;
+  flex-shrink: 0;
 }
+
 .ua-input {
   width: 100%;
   box-sizing: border-box;
   background: #fff;
   border: 1px solid var(--lum-border);
-  padding: 0.7rem 2.5rem 0.7rem 2.4rem;
+  /* ✅ FIX: unified padding — left leaves room for icon, right for toggle button */
+  padding: 0.72rem 2.8rem 0.72rem 2.5rem;
   font-family: var(--font-body);
   font-size: 0.82rem;
   letter-spacing: 0.04em;
   color: var(--lum-dark);
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  /* ✅ FIX: remove default iOS input styling */
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
 }
 .ua-input::placeholder { color: #c6bfb7; }
-.ua-input:focus    { border-color: var(--lum-gold); }
+.ua-input:focus {
+  border-color: var(--lum-gold);
+  /* ✅ FIX: subtle glow on focus — much more visible than border alone */
+  box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.12);
+}
 .ua-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ✅ FIX: password inputs need extra right padding for the Show/Hide button */
+.ua-input--pw {
+  padding-right: 4rem;
+}
 
 .ua-toggle-pw {
   position: absolute;
@@ -290,45 +327,61 @@
   text-transform: uppercase;
   color: var(--lum-muted);
   cursor: pointer;
-  padding: 0;
+  padding: 0.25rem;
   transition: color 0.15s;
+  /* ✅ FIX: minimum tap target for mobile */
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  -webkit-appearance: none;
+  appearance: none;
 }
 .ua-toggle-pw:hover { color: var(--lum-dark); }
 
-/* ── Error / success ── */
+/* ── Error / Success ── */
 .ua-error,
 .ua-success {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* ✅ FIX: align-start so icon stays top when text wraps */
   gap: 0.6rem;
   padding: 0.65rem 0.9rem;
   font-size: 0.75rem;
   letter-spacing: 0.04em;
+  line-height: 1.5; /* ✅ FIX: multi-line error messages don't collapse */
+}
+.ua-error svg,
+.ua-success svg {
+  flex-shrink: 0; /* ✅ FIX: icon must not shrink when text is long */
+  margin-top: 0.1rem;
 }
 .ua-error {
-  background: rgba(192,57,43,0.07);
+  background: rgba(192, 57, 43, 0.07);
   border-left: 3px solid var(--lum-danger);
   color: var(--lum-danger);
   animation: ua-shake 0.35s ease;
 }
 .ua-success {
-  background: rgba(44,74,62,0.08);
+  background: rgba(44, 74, 62, 0.08);
   border-left: 3px solid var(--lum-success);
   color: var(--lum-success);
 }
 @keyframes ua-shake {
-  0%,100% { transform: translateX(0); }
-  25%     { transform: translateX(-5px); }
-  75%     { transform: translateX(5px); }
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-5px); }
+  75%       { transform: translateX(5px); }
 }
 
-/* ── Submit ── */
+/* ── Submit button ── */
 .ua-submit {
   margin-top: 0.4rem;
   width: 100%;
   background: var(--lum-dark);
   color: var(--lum-cream);
   border: none;
+  /* ✅ FIX: min-height for proper mobile tap target */
+  min-height: 48px;
   padding: 0.9rem 1.5rem;
   font-family: var(--font-body);
   font-size: 0.7rem;
@@ -337,7 +390,10 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: transform 0.15s;
+  transition: transform 0.15s, color 0.36s; /* ✅ FIX: animate color so text stays readable on gold */
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
 }
 .ua-submit::after {
   content: "";
@@ -345,8 +401,12 @@
   inset: 0;
   background: var(--lum-gold);
   transform: translateX(-101%);
-  transition: transform 0.36s cubic-bezier(0.4,0,0.2,1);
+  transition: transform 0.36s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
+}
+/* ✅ FIX: text color shifts to dark when gold overlay covers button */
+.ua-submit:hover:not(:disabled) {
+  color: var(--lum-dark);
 }
 .ua-submit:hover:not(:disabled)::after { transform: translateX(0); }
 .ua-submit:disabled { opacity: 0.55; cursor: not-allowed; }
@@ -366,7 +426,7 @@
 .ua-spin {
   display: inline-block;
   width: 13px; height: 13px;
-  border: 2px solid rgba(245,240,232,0.3);
+  border: 2px solid rgba(245, 240, 232, 0.3);
   border-top-color: var(--lum-cream);
   border-radius: 50%;
   animation: ua-spinner 0.7s linear infinite;
@@ -383,14 +443,88 @@
   text-align: center;
 }
 
-/* ── Responsive ── */
-@media (max-width: 768px) {
-  .ua-wrap { grid-template-columns: 1fr; max-width: 440px; }
-  .ua-side { display: none; }
-  .ua-form-panel { padding: 2.5rem 2rem; }
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE — Tablet (≤ 900px)
+   ───────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .ua-wrap {
+    grid-template-columns: 280px 1fr; /* ✅ FIX: shrink side panel gracefully before hiding */
+  }
+  .ua-side {
+    padding: 2.25rem;
+  }
+  .ua-side-title {
+    font-size: 2rem;
+  }
 }
-@media (max-width: 480px) {
-  .ua-page { padding: 1rem; }
-  .ua-form-panel { padding: 2rem 1.5rem; }
-  .ua-heading { font-size: 1.6rem; }
+
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE — Mobile (≤ 680px)
+   Completely hide the side panel, single-column form card
+   ───────────────────────────────────────────────────────── */
+@media (max-width: 680px) {
+  .ua-page {
+    /* ✅ FIX: proper padding so card doesn't touch screen edges */
+    padding: calc(var(--nav-height) + 1.5rem) 1rem 1.5rem;
+    align-items: flex-start; /* ✅ FIX: don't vertically centre — avoids squish on short screens */
+  }
+
+  .ua-wrap {
+    grid-template-columns: 1fr; /* ✅ FIX: single column */
+    max-width: 420px;
+    margin: 0 auto;
+    width: 100%;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+  }
+
+  .ua-side {
+    display: none; /* ✅ FIX: hidden on mobile */
+  }
+
+  .ua-form-panel {
+    padding: 2rem 1.5rem 2rem; /* ✅ FIX: tighter padding so form breathes without overflow */
+  }
+
+  .ua-heading {
+    font-size: 1.65rem;
+  }
+
+  .ua-tabs {
+    margin-bottom: 1.75rem;
+  }
+
+  .ua-form {
+    gap: 1rem;
+  }
+
+  .ua-footer {
+    margin-top: 1.25rem;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE — Small phones (≤ 380px)
+   ───────────────────────────────────────────────────────── */
+@media (max-width: 380px) {
+  .ua-page {
+    padding: calc(var(--nav-height) + 1rem) 0.75rem 1rem;
+  }
+
+  .ua-form-panel {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .ua-heading {
+    font-size: 1.45rem;
+  }
+
+  .ua-tab {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    padding: 0.65rem 0.5rem;
+  }
+
+  .ua-input {
+    font-size: 0.8rem;
+  }
 }
