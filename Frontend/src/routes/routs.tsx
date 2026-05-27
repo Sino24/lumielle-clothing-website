@@ -16,6 +16,7 @@ import TermsAndConditions from "../pages/TermsAndConditions";
 
 /* ───────── User Auth ───────── */
 import UserAuth from "../Auth/UserAuth";
+import UserProfile from "../Auth/UserProfile";
 
 /* ───────── Admin Pages ───────── */
 import AdminLogin from "../admin/AdminLogin";
@@ -54,6 +55,7 @@ export default function AppRoutes() {
       {/* ───────── Protected User Routes ───────── */}
       <Route element={<UserProtectedRoute />}>
         {/* add more user pages here as you build them */}
+        <Route path="/profile" element={<UserProfile />} />
       </Route>
 
       {/* ───────── Admin Login ───────── */}

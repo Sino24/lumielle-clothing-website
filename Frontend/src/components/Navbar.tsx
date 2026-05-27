@@ -193,7 +193,7 @@ function Navbar() {
                   </div>
                   <Link
                     className="navbar__user-item"
-                    to="/account"
+                    to="/profile"
                     onClick={() => setUserMenuOpen(false)}
                   >
                     My Account
