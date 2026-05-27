@@ -4,21 +4,25 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 import "../styles/ComponentStyle/Navbar.css";
 
 import logo from "../assets/newlogo2.png";
 
 function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [scrolled,    setScrolled]    = useState(false);
+  const [menuOpen,    setMenuOpen]    = useState(false);
+  const [searchOpen,  setSearchOpen]  = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [query,       setQuery]       = useState("");
 
-  const { cart } = useCart();
-  const navigate = useNavigate();
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
+  const { cart }              = useCart();
+  const { user, isLoggedIn, logout } = useAuth();
+  const navigate              = useNavigate();
+  const searchInputRef        = useRef<HTMLInputElement>(null);
+  const mobileSearchInputRef  = useRef<HTMLInputElement>(null);
+  const userMenuRef           = useRef<HTMLDivElement>(null);
 
   // Scroll listener
   useEffect(() => {
@@ -29,9 +33,7 @@ function Navbar() {
 
   // Focus desktop input when search opens
   useEffect(() => {
-    if (searchOpen) {
-      searchInputRef.current?.focus();
-    }
+    if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
 
   // Focus mobile input when menu opens
@@ -44,12 +46,21 @@ function Navbar() {
   // Close mobile menu on resize to desktop
   useEffect(() => {
     const onResize = () => {
-      if (window.innerWidth > 768) {
-        setMenuOpen(false);
-      }
+      if (window.innerWidth > 768) setMenuOpen(false);
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // Close user dropdown when clicking outside
+  useEffect(() => {
+    const onClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
   const submitSearch = (q: string) => {
@@ -85,29 +96,29 @@ function Navbar() {
     if (searchOpen) setQuery("");
   };
 
+  const handleLogout = () => {
+    logout();
+    setUserMenuOpen(false);
+    setMenuOpen(false);
+    navigate("/");
+  };
+
+  // First name only for display
+  const firstName = user?.name?.split(" ")[0] ?? "";
+
   return (
     <>
       <nav className={`navbar${scrolled ? " scrolled" : ""}`}>
 
         {/* ── Brand ── */}
-        <Link
-          className="navbar__brand"
-          to="/"
-          aria-label="Lumielle home"
-        >
-          <img
-            className="navbar__logo-img"
-            src={logo}
-            alt="Lumielle logo"
-          />
+        <Link className="navbar__brand" to="/" aria-label="Lumielle home">
+          <img className="navbar__logo-img" src={logo} alt="Lumielle logo" />
           <div className="navbar__brand-divider" aria-hidden="true" />
           <div className="navbar__brand-text">
             <span className="navbar__brand-name">
               <em>wear your light</em>
             </span>
-            <span className="navbar__tagline">
-              Pure Cotton · Made in India
-            </span>
+            <span className="navbar__tagline">Pure Cotton · Made in India</span>
           </div>
         </Link>
 
@@ -160,6 +171,61 @@ function Navbar() {
               </svg>
             )}
           </button>
+
+          {/* ── User icon / dropdown ── */}
+          {isLoggedIn ? (
+            <div className="navbar__user-wrap" ref={userMenuRef}>
+              <button
+                className="navbar__icon-btn navbar__user-btn"
+                aria-label="Account menu"
+                aria-expanded={userMenuOpen}
+                onClick={() => setUserMenuOpen((v) => !v)}
+              >
+                {/* Avatar circle with first letter */}
+                <span className="navbar__avatar">{firstName.charAt(0).toUpperCase()}</span>
+              </button>
+
+              {/* Dropdown */}
+              {userMenuOpen && (
+                <div className="navbar__user-dropdown">
+                  <div className="navbar__user-greeting">
+                    Hi, {firstName}
+                  </div>
+                  <Link
+                    className="navbar__user-item"
+                    to="/account"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    My Account
+                  </Link>
+                  <Link
+                    className="navbar__user-item"
+                    to="/account/orders"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    My Orders
+                  </Link>
+                  <button
+                    className="navbar__user-item navbar__user-logout"
+                    onClick={handleLogout}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="navbar__icon-btn"
+              aria-label="Sign in"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </Link>
+          )}
 
           {/* Cart */}
           <Link
@@ -215,7 +281,6 @@ function Navbar() {
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-
             <input
               ref={mobileSearchInputRef}
               className="navbar__mobile-search-input"
@@ -225,7 +290,6 @@ function Navbar() {
               onChange={(e) => setQuery(e.target.value)}
               aria-label="Search products"
             />
-
             {query && (
               <button
                 type="submit"
@@ -239,26 +303,41 @@ function Navbar() {
         </form>
 
         {/* Mobile Nav Links */}
-        <Link className="navbar__mobile-link" to="/" onClick={closeMenu}>
-          Home
-        </Link>
-        <Link className="navbar__mobile-link" to="/product" onClick={closeMenu}>
-          Collections
-        </Link>
-        <Link className="navbar__mobile-link" to="/lookbook" onClick={closeMenu}>
-          Lookbook
-        </Link>
-        <Link className="navbar__mobile-link" to="/ClientProjects" onClick={closeMenu}>
-          Client Projects
-        </Link>
-        <Link className="navbar__mobile-link" to="/about" onClick={closeMenu}>
-          About
-        </Link>
-        <Link className="navbar__mobile-link" to="/contact" onClick={closeMenu}>
-          Contact
-        </Link>
+        <Link className="navbar__mobile-link" to="/" onClick={closeMenu}>Home</Link>
+        <Link className="navbar__mobile-link" to="/product" onClick={closeMenu}>Collections</Link>
+        <Link className="navbar__mobile-link" to="/lookbook" onClick={closeMenu}>Lookbook</Link>
+        <Link className="navbar__mobile-link" to="/ClientProjects" onClick={closeMenu}>Client Projects</Link>
+        <Link className="navbar__mobile-link" to="/about" onClick={closeMenu}>About</Link>
+        <Link className="navbar__mobile-link" to="/contact" onClick={closeMenu}>Contact</Link>
 
-        {/* Mobile Cart Link */}
+        {/* Mobile User */}
+        {isLoggedIn ? (
+          <>
+            <Link
+              className="navbar__mobile-link"
+              to="/account"
+              onClick={closeMenu}
+            >
+              My Account
+            </Link>
+            <button
+              className="navbar__mobile-link navbar__mobile-logout"
+              onClick={handleLogout}
+            >
+              Sign Out ({firstName})
+            </button>
+          </>
+        ) : (
+          <Link
+            className="navbar__mobile-link navbar__mobile-signin"
+            to="/login"
+            onClick={closeMenu}
+          >
+            Sign In
+          </Link>
+        )}
+
+        {/* Mobile Cart */}
         <Link
           className="navbar__mobile-link navbar__mobile-cart"
           to="/cart"
@@ -266,9 +345,7 @@ function Navbar() {
         >
           <span>Cart</span>
           {cart.length > 0 && (
-            <span className="navbar__mobile-cart-count">
-              {cart.length}
-            </span>
+            <span className="navbar__mobile-cart-count">{cart.length}</span>
           )}
         </Link>
       </div>
