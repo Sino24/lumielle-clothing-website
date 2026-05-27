@@ -40,7 +40,7 @@ const BLANK_ADDRESS = {
 
 // ── Component ─────────────────────────────────────────────
 const AccountPage: React.FC = () => {
-  const { user, token, logout } = useAuth();
+  const { token, logout } = useAuth(); // ✅ removed unused 'user'
   const navigate = useNavigate();
 
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";

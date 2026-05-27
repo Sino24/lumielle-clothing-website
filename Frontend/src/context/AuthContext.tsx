@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from "react";
 
-import type { ReactNode } from "react";
+import type { ReactNode } from "react"; // ✅ type-only import for verbatimModuleSyntax
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface User {
