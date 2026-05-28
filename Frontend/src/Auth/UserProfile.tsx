@@ -120,20 +120,27 @@ const BLANK_ADDRESS = {
   city: "", state: "", pincode: "", isDefault: false,
 };
 
-// ── Skeleton ──────────────────────────────────────────────
+// ── Skeleton — matches the real page layout ───────────────
 const AccountSkeleton: React.FC = () => (
-  <div className="acc-page">
-    <div className="acc-hero acc-hero--skeleton">
+  <div className="acc-skeleton-page">
+    {/* Hero strip */}
+    <div className="acc-skeleton-hero">
       <div className="acc-sk acc-sk--circle" />
       <div className="acc-sk-group">
         <div className="acc-sk acc-sk--title" />
         <div className="acc-sk acc-sk--sub" />
       </div>
     </div>
-    <div className="acc-tabs-bar">
-      {[1,2,3,4].map(i => <div key={i} className="acc-sk acc-sk--tab" />)}
+
+    {/* Tab bar strip */}
+    <div className="acc-skeleton-tabs">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="acc-sk acc-sk--tab" />
+      ))}
     </div>
-    <div className="acc-content-zone">
+
+    {/* Content area */}
+    <div className="acc-skeleton-body">
       <div className="acc-sk acc-sk--block" />
       <div className="acc-sk acc-sk--block acc-sk--block-sm" />
       <div className="acc-sk acc-sk--block acc-sk--block-sm" />
@@ -177,7 +184,6 @@ const AccountPage: React.FC = () => {
     setTimeout(() => setMsg(null), 3500);
   };
 
-  // ── FIX: all 4 `any` errors replaced with `unknown` + type-safe message extraction
   const errMsg = (err: unknown): string =>
     err instanceof Error ? err.message : "Something went wrong.";
 
@@ -272,6 +278,7 @@ const AccountPage: React.FC = () => {
     { id: "password",  label: "Password",     Icon: IconLock },
   ];
 
+  // ── Show skeleton while loading — no spinner ──────────
   if (loading) return <AccountSkeleton />;
 
   const initials = profile?.name
@@ -359,6 +366,7 @@ const AccountPage: React.FC = () => {
                     <span className="acc-input-icon"><IconUser /></span>
                     <input
                       id="pf-name"
+                      name="name"
                       className="acc-input"
                       type="text"
                       value={profileForm.name}
@@ -375,11 +383,13 @@ const AccountPage: React.FC = () => {
                     <span className="acc-input-icon"><IconMail /></span>
                     <input
                       id="pf-email"
+                      name="email"
                       className="acc-input acc-input--readonly"
                       type="email"
                       value={profile?.email ?? ""}
                       readOnly
                       title="Email cannot be changed"
+                      autoComplete="email"
                     />
                   </div>
                   <p className="acc-field-hint">Email address cannot be changed.</p>
@@ -393,6 +403,7 @@ const AccountPage: React.FC = () => {
                     <span className="acc-input-icon"><IconPhone /></span>
                     <input
                       id="pf-phone"
+                      name="phone"
                       className="acc-input"
                       type="tel"
                       placeholder="+91 98765 43210"
@@ -407,7 +418,7 @@ const AccountPage: React.FC = () => {
 
               <div className="acc-form-footer">
                 <button className="acc-btn acc-btn--primary" type="submit" disabled={saving}>
-                  {saving ? <><span className="acc-spin-sm" aria-hidden="true" />Saving…</> : "Save Changes"}
+                  Save Changes
                 </button>
               </div>
             </form>
@@ -493,11 +504,14 @@ const AccountPage: React.FC = () => {
 
                 <div className="acc-fields-grid">
                   <div className="acc-field">
-                    <label className="acc-label">Label</label>
+                    <label className="acc-label" htmlFor="addr-label">Label</label>
                     <select
+                      id="addr-label"
+                      name="label"
                       className="acc-input acc-select"
                       value={addressForm.label}
                       onChange={(e) => setAddressForm((p) => ({ ...p, label: e.target.value }))}
+                      autoComplete="off"
                     >
                       <option>Home</option>
                       <option>Office</option>
@@ -509,6 +523,7 @@ const AccountPage: React.FC = () => {
                     <label className="acc-check-label">
                       <input
                         type="checkbox"
+                        name="isDefault"
                         checked={addressForm.isDefault}
                         onChange={(e) => setAddressForm((p) => ({ ...p, isDefault: e.target.checked }))}
                       />
@@ -517,69 +532,84 @@ const AccountPage: React.FC = () => {
                   </div>
 
                   <div className="acc-field acc-field--full">
-                    <label className="acc-label">Address Line 1 *</label>
+                    <label className="acc-label" htmlFor="addr-line1">Address Line 1 *</label>
                     <input
+                      id="addr-line1"
+                      name="address-line1"
                       className="acc-input"
                       type="text"
                       placeholder="House / flat / street"
                       value={addressForm.line1}
                       onChange={(e) => setAddressForm((p) => ({ ...p, line1: e.target.value }))}
                       disabled={saving}
+                      autoComplete="address-line1"
                     />
                   </div>
 
                   <div className="acc-field acc-field--full">
-                    <label className="acc-label">
+                    <label className="acc-label" htmlFor="addr-line2">
                       Address Line 2 <span className="acc-optional">(optional)</span>
                     </label>
                     <input
+                      id="addr-line2"
+                      name="address-line2"
                       className="acc-input"
                       type="text"
                       placeholder="Area / landmark"
                       value={addressForm.line2}
                       onChange={(e) => setAddressForm((p) => ({ ...p, line2: e.target.value }))}
                       disabled={saving}
+                      autoComplete="address-line2"
                     />
                   </div>
 
                   <div className="acc-field">
-                    <label className="acc-label">City *</label>
+                    <label className="acc-label" htmlFor="addr-city">City *</label>
                     <input
+                      id="addr-city"
+                      name="city"
                       className="acc-input"
                       type="text"
                       value={addressForm.city}
                       onChange={(e) => setAddressForm((p) => ({ ...p, city: e.target.value }))}
                       disabled={saving}
+                      autoComplete="address-level2"
                     />
                   </div>
 
                   <div className="acc-field">
-                    <label className="acc-label">State *</label>
+                    <label className="acc-label" htmlFor="addr-state">State *</label>
                     <input
+                      id="addr-state"
+                      name="state"
                       className="acc-input"
                       type="text"
                       value={addressForm.state}
                       onChange={(e) => setAddressForm((p) => ({ ...p, state: e.target.value }))}
                       disabled={saving}
+                      autoComplete="address-level1"
                     />
                   </div>
 
                   <div className="acc-field">
-                    <label className="acc-label">Pincode *</label>
+                    <label className="acc-label" htmlFor="addr-pincode">Pincode *</label>
                     <input
+                      id="addr-pincode"
+                      name="postal-code"
                       className="acc-input"
                       type="text"
                       placeholder="600001"
                       value={addressForm.pincode}
                       onChange={(e) => setAddressForm((p) => ({ ...p, pincode: e.target.value }))}
                       disabled={saving}
+                      autoComplete="postal-code"
                     />
                   </div>
                 </div>
 
                 <div className="acc-form-footer">
                   <button className="acc-btn acc-btn--primary" type="submit" disabled={saving}>
-                    {saving ? <><span className="acc-spin-sm" aria-hidden="true" />Saving…</> : "Save Address"}
+                    Save Address
                   </button>
                   <button
                     className="acc-btn acc-btn--ghost"
@@ -620,6 +650,7 @@ const AccountPage: React.FC = () => {
                       <span className="acc-input-icon"><IconLock /></span>
                       <input
                         id={`pw-${field}`}
+                        name={field === "current" ? "current-password" : "new-password"}
                         className="acc-input acc-input--pw"
                         type={showPw ? "text" : "password"}
                         placeholder="••••••••"
@@ -645,7 +676,7 @@ const AccountPage: React.FC = () => {
 
               <div className="acc-form-footer">
                 <button className="acc-btn acc-btn--primary" type="submit" disabled={saving}>
-                  {saving ? <><span className="acc-spin-sm" aria-hidden="true" />Updating…</> : "Update Password"}
+                  Update Password
                 </button>
               </div>
             </form>

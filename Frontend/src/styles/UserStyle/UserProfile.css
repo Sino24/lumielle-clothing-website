@@ -1,5 +1,4 @@
 /* src/styles/UserStyle/UserProfile.css */
-/* Full-width account page — Amazon / Myntra style layout  */
 
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
 
@@ -16,30 +15,20 @@
   --lum-success:  #2c4a3e;
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-body:    'Jost', sans-serif;
-  --nav-height: 0px;
-  --hero-height: 130px;
+  /* Match these to your actual navbar height */
+  --nav-height:   76px;
+  --hero-height:  130px;
 }
 
 /* ══════════════════════════════════════════════
-   PAGE SHELL — full width, no centred box
-══════════════════════════════════════════════ */
-.acc-hero {
-  min-height: var(--hero-height);
-
-  width: 100%;
-  background: var(--lum-dark);
-  position: sticky;
-  top: var(--nav-height);
-  z-index: 20;
-  overflow: hidden;
-}
-/* ══════════════════════════════════════════════
-   SKELETON
+   SKELETON — mirrors the real page structure
+   so it sits exactly where the real content will
 ══════════════════════════════════════════════ */
 @keyframes acc-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
 .acc-sk {
   background: linear-gradient(
     90deg,
@@ -51,23 +40,143 @@
   animation: acc-shimmer 1.4s ease infinite;
   border-radius: 2px;
 }
-.acc-hero--skeleton {
+
+/* Outer wrapper — pushes skeleton below navbar */
+.acc-skeleton-page {
+  padding-top: var(--nav-height);
+  min-height: 100vh;
+  background: var(--lum-bg);
+}
+
+/* Hero strip — dark background, same height as real hero */
+.acc-skeleton-hero {
+  width: 100%;
+  min-height: var(--hero-height);
+  background: var(--lum-dark);
   display: flex;
   align-items: center;
   gap: 1.5rem;
   padding: 2rem max(2rem, 5vw);
+  box-sizing: border-box;
 }
-.acc-sk--circle  { width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0; }
-.acc-sk-group    { display: flex; flex-direction: column; gap: 0.6rem; flex: 1; }
-.acc-sk--title   { height: 28px; width: 220px; max-width: 55%; }
-.acc-sk--sub     { height: 14px; width: 320px; max-width: 80%; }
-.acc-sk--tab     { height: 42px; flex: 1; border-radius: 2px; }
-.acc-sk--block   { height: 160px; border-radius: 2px; background: rgba(26,23,20,0.05); }
-.acc-sk--block-sm { height: 100px; }
 
-.acc-tabs-bar .acc-sk--tab {
-  display: inline-block;
-  width: 120px;
+/* Skeleton pieces inside hero */
+.acc-sk--circle {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  /* lighter shimmer on dark bg */
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.08) 25%,
+    rgba(255,255,255,0.15) 50%,
+    rgba(255,255,255,0.08) 75%
+  );
+  background-size: 200% 100%;
+  animation: acc-shimmer 1.4s ease infinite;
+}
+
+.acc-sk-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+}
+
+.acc-sk--title {
+  height: 26px;
+  width: min(220px, 55%);
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.08) 25%,
+    rgba(255,255,255,0.15) 50%,
+    rgba(255,255,255,0.08) 75%
+  );
+  background-size: 200% 100%;
+  animation: acc-shimmer 1.4s ease infinite;
+}
+
+.acc-sk--sub {
+  height: 13px;
+  width: min(320px, 80%);
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.05) 25%,
+    rgba(255,255,255,0.10) 50%,
+    rgba(255,255,255,0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: acc-shimmer 1.4s ease infinite;
+}
+
+/* Tab bar strip */
+.acc-skeleton-tabs {
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid var(--lum-border);
+  display: flex;
+  gap: 0;
+  padding: 0 max(2rem, 5vw);
+  box-sizing: border-box;
+}
+
+.acc-sk--tab {
+  height: 52px;
+  width: 130px;
+  margin: 0 0.5rem;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+/* Content body */
+.acc-skeleton-body {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2.5rem max(2rem, 5vw) 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.acc-sk--block {
+  height: 160px;
+  border-radius: 2px;
+  background: rgba(26,23,20,0.05);
+}
+
+.acc-sk--block-sm {
+  height: 90px;
+}
+
+/* Mobile skeleton tweaks */
+@media (max-width: 680px) {
+  .acc-skeleton-hero {
+    padding: 1.75rem 1.25rem;
+  }
+  .acc-sk--circle {
+    width: 54px;
+    height: 54px;
+  }
+  .acc-skeleton-tabs {
+    padding: 0 1.25rem;
+    overflow-x: auto;
+  }
+  .acc-sk--tab {
+    width: 90px;
+  }
+  .acc-skeleton-body {
+    padding: 1.5rem 1.25rem 4rem;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   PAGE SHELL
+══════════════════════════════════════════════ */
+.acc-page {
+  padding-top: var(--nav-height);
+  min-height: 100vh;
+  background: var(--lum-bg);
 }
 
 /* ══════════════════════════════════════════════
@@ -75,16 +184,18 @@
 ══════════════════════════════════════════════ */
 .acc-hero {
   width: 100%;
+  min-height: var(--hero-height);
   background: var(--lum-dark);
   position: sticky;
   top: var(--nav-height);
   z-index: 11;
   overflow: hidden;
 }
-/* subtle diagonal texture */
+
+/* Subtle diagonal texture */
 .acc-hero::before {
   content: "";
-position: sticky;
+  position: absolute;
   inset: 0;
   background: repeating-linear-gradient(
     -55deg,
@@ -132,7 +243,6 @@ position: sticky;
   color: var(--lum-dark);
   letter-spacing: 0.04em;
   line-height: 1;
-  /* subtle gold ring */
   box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.25);
 }
 
@@ -206,8 +316,9 @@ position: sticky;
   border-bottom: 1px solid var(--lum-border);
   position: sticky;
   top: calc(var(--nav-height) + var(--hero-height));
-  z-index: 19;
+  z-index: 10;
 }
+
 .acc-tabs-inner {
   max-width: 1400px;
   margin: 0 auto;
@@ -235,10 +346,8 @@ position: sticky;
   cursor: pointer;
   white-space: nowrap;
   transition: color 0.2s, border-color 0.2s;
-  /* Remove default button look on iOS */
   -webkit-appearance: none;
   appearance: none;
-  /* move border to bottom of button, not box */
   margin-bottom: -1px;
 }
 .acc-tab-icon { display: flex; align-items: center; }
@@ -252,13 +361,12 @@ position: sticky;
 }
 
 /* ══════════════════════════════════════════════
-   CONTENT ZONE — full width, max-width centred
+   CONTENT ZONE
 ══════════════════════════════════════════════ */
 .acc-content-zone {
   max-width: 1400px;
   margin: 0 auto;
   padding: 2.5rem max(2rem, 5vw) 5rem;
-  padding-top: 100px;
 }
 
 /* ── Flash message ── */
@@ -321,7 +429,7 @@ position: sticky;
 }
 
 /* ══════════════════════════════════════════════
-   FORM LAYOUT — responsive grid
+   FORM LAYOUT
 ══════════════════════════════════════════════ */
 .acc-form {
   display: flex;
@@ -329,7 +437,6 @@ position: sticky;
   gap: 0;
 }
 
-/* 3-column grid for fields, collapsing on mobile */
 .acc-fields-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -505,19 +612,7 @@ position: sticky;
   color: var(--lum-muted);
 }
 
-.acc-add-addr-btn {
-  margin-top: 1.5rem;
-}
-
-.acc-spin-sm {
-  width: 12px; height: 12px;
-  border: 2px solid rgba(245,240,232,0.25);
-  border-top-color: var(--lum-cream);
-  border-radius: 50%;
-  animation: acc-spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
-@keyframes acc-spin { to { transform: rotate(360deg); } }
+.acc-add-addr-btn { margin-top: 1.5rem; }
 
 /* ══════════════════════════════════════════════
    EMPTY STATE
@@ -622,7 +717,6 @@ position: sticky;
   transition: color 0.15s;
   margin-left: auto;
 }
-/* When badge is also present, don't double-auto margin */
 .acc-address-badge + .acc-address-delete { margin-left: 0; }
 .acc-address-delete svg { width: 13px; height: 13px; }
 .acc-address-delete:hover { color: var(--lum-danger); }
@@ -665,36 +759,22 @@ position: sticky;
     width: 54px; height: 54px;
     font-size: 1.3rem;
   }
-  .acc-hero-name {
-    font-size: 1.35rem;
-  }
-  .acc-hero-meta {
-    gap: 0.3rem 0.9rem;
-  }
-  .acc-hero-meta-item {
-    font-size: 0.62rem;
-  }
-  .acc-logout-btn span { display: none; } /* icon only on mobile */
+  .acc-hero-name { font-size: 1.35rem; }
+  .acc-hero-meta { gap: 0.3rem 0.9rem; }
+  .acc-hero-meta-item { font-size: 0.62rem; }
+  .acc-logout-btn span { display: none; }
   .acc-logout-btn { padding: 0.6rem 0.75rem; }
 
-  .acc-tabs-inner {
-    padding: 0 1.25rem;
-  }
+  .acc-tabs-inner { padding: 0 1.25rem; }
   .acc-tab-btn {
     padding: 0.85rem 1rem;
     font-size: 0.62rem;
     letter-spacing: 0.1em;
   }
-  .acc-tab-icon { display: none; } /* hide icons in tabs, keep labels */
+  .acc-tab-icon { display: none; }
 
-  .acc-content-zone {
-    padding: 1.5rem 1.25rem 4rem;
-  }
-
-  .acc-section {
-    padding: 1.5rem 1.25rem;
-  }
-
+  .acc-content-zone { padding: 1.5rem 1.25rem 4rem; }
+  .acc-section { padding: 1.5rem 1.25rem; }
   .acc-section-title { font-size: 1.35rem; }
 
   .acc-fields-grid,
@@ -703,17 +783,13 @@ position: sticky;
     gap: 1.1rem;
   }
 
-  .acc-address-list {
-    grid-template-columns: 1fr;
-  }
+  .acc-address-list { grid-template-columns: 1fr; }
 
   .acc-form-footer {
     flex-direction: column;
     align-items: stretch;
   }
-  .acc-form-footer .acc-btn {
-    width: 100%;
-  }
+  .acc-form-footer .acc-btn { width: 100%; }
 }
 
 /* ══════════════════════════════════════════════
