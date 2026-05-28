@@ -14,7 +14,6 @@ const registerUser = async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
 
-    // Basic validation
     if (!name || !email || !password) {
       return res.status(400).json({
         message: "Name, email, and password are required",
@@ -27,18 +26,14 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Check for existing user
     const existing = await User.findOne({ email });
-
     if (existing) {
       return res.status(409).json({
         message: "An account with this email already exists",
       });
     }
 
-    // Create user (password hashing happens in the model pre-save hook)
-    const user = await User.create({ name, email, password, phone });
-
+    const user  = await User.create({ name, email, password, phone });
     const token = signToken(user._id);
 
     res.status(201).json({
@@ -68,7 +63,6 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Fetch with password (field is select:false by default)
     const user = await User.findOne({ email }).select("+password");
 
     if (!user || !(await user.matchPassword(password))) {
@@ -153,6 +147,36 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// ── PATCH /api/auth/password ──────────────────────────────────────────────────
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Both current and new password are required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
+    }
+
+    const user = await User.findById(req.user.id).select("+password");
+
+    if (!user || !(await user.matchPassword(currentPassword))) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+
+  } catch (error) {
+    console.error("ChangePassword error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // ── POST /api/auth/address ────────────────────────────────────────────────────
 const addAddress = async (req, res) => {
   try {
@@ -164,7 +188,6 @@ const addAddress = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // If this is default, unset all others
     if (isDefault) {
       user.addresses.forEach((a) => (a.isDefault = false));
     }
@@ -203,11 +226,46 @@ const deleteAddress = async (req, res) => {
   }
 };
 
+// ── GET /api/auth/users  (admin only) ────────────────────────────────────────
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({})
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.json(users);
+
+  } catch (error) {
+    console.error("GetAllUsers error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ── DELETE /api/auth/users/:id  (admin only) ─────────────────────────────────
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "User deleted successfully" });
+
+  } catch (error) {
+    console.error("DeleteUser error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getMe,
   updateProfile,
+  changePassword,
   addAddress,
   deleteAddress,
+  getAllUsers,
+  deleteUser,
 };
