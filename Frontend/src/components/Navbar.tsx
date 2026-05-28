@@ -11,18 +11,18 @@ import "../styles/ComponentStyle/Navbar.css";
 import logo from "../assets/newlogo2.png";
 
 function Navbar() {
-  const [scrolled,    setScrolled]    = useState(false);
-  const [menuOpen,    setMenuOpen]    = useState(false);
-  const [searchOpen,  setSearchOpen]  = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [query,       setQuery]       = useState("");
+  const [scrolled,      setScrolled]      = useState(false);
+  const [menuOpen,      setMenuOpen]      = useState(false);
+  const [searchOpen,    setSearchOpen]    = useState(false);
+  const [userMenuOpen,  setUserMenuOpen]  = useState(false);
+  const [query,         setQuery]         = useState("");
 
-  const { cart }              = useCart();
-  const { user, isLoggedIn, logout } = useAuth();
-  const navigate              = useNavigate();
-  const searchInputRef        = useRef<HTMLInputElement>(null);
-  const mobileSearchInputRef  = useRef<HTMLInputElement>(null);
-  const userMenuRef           = useRef<HTMLDivElement>(null);
+  const { cart }                         = useCart();
+  const { user, isLoggedIn, logout }     = useAuth();
+  const navigate                         = useNavigate();
+  const searchInputRef                   = useRef<HTMLInputElement>(null);
+  const userMenuRef                      = useRef<HTMLDivElement>(null);
+  const mobileMenuRef                    = useRef<HTMLDivElement>(null);
 
   // Scroll listener
   useEffect(() => {
@@ -31,15 +31,20 @@ function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Focus desktop input when search opens
+  // Focus desktop search input when search opens
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
 
-  // Focus mobile input when menu opens
+  // Apply/remove inert on mobile menu instead of aria-hidden
+  // inert correctly hides content from AT AND prevents focus trapping
   useEffect(() => {
+    const el = mobileMenuRef.current;
+    if (!el) return;
     if (menuOpen) {
-      setTimeout(() => mobileSearchInputRef.current?.focus(), 100);
+      el.removeAttribute("inert");
+    } else {
+      el.setAttribute("inert", "");
     }
   }, [menuOpen]);
 
@@ -140,6 +145,8 @@ function Navbar() {
         >
           <input
             ref={searchInputRef}
+            id="navbar-search-desktop"
+            name="q"
             className="navbar__search-input"
             type="search"
             placeholder="Search products…"
@@ -147,6 +154,7 @@ function Navbar() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleSearchKeyDown}
             aria-label="Search products"
+            autoComplete="search"
           />
         </form>
 
@@ -181,11 +189,9 @@ function Navbar() {
                 aria-expanded={userMenuOpen}
                 onClick={() => setUserMenuOpen((v) => !v)}
               >
-                {/* Avatar circle with first letter */}
                 <span className="navbar__avatar">{firstName.charAt(0).toUpperCase()}</span>
               </button>
 
-              {/* Dropdown */}
               {userMenuOpen && (
                 <div className="navbar__user-dropdown">
                   <div className="navbar__user-greeting">
@@ -251,6 +257,7 @@ function Navbar() {
           className={`navbar__hamburger${menuOpen ? " open" : ""}`}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
+          aria-controls="navbar-mobile-menu"
           onClick={() => setMenuOpen((v) => !v)}
         >
           <span />
@@ -259,10 +266,15 @@ function Navbar() {
         </button>
       </nav>
 
-      {/* ── Mobile Menu ── */}
+      {/* ── Mobile Menu ──
+          Uses `inert` (set via useEffect) instead of aria-hidden.
+          inert prevents focus reaching hidden links AND hides from screen readers,
+          without the "aria-hidden on ancestor of focused element" console error. -->
+      */}
       <div
+        id="navbar-mobile-menu"
+        ref={mobileMenuRef}
         className={`navbar__mobile-menu${menuOpen ? " open" : ""}`}
-        aria-hidden={!menuOpen}
       >
         {/* Mobile Search */}
         <form
@@ -282,13 +294,15 @@ function Navbar() {
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input
-              ref={mobileSearchInputRef}
+              id="navbar-search-mobile"
+              name="q"
               className="navbar__mobile-search-input"
               type="search"
               placeholder="Search products…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               aria-label="Search products"
+              autoComplete="search"
             />
             {query && (
               <button
