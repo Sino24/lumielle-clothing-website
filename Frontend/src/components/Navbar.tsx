@@ -204,13 +204,6 @@ function Navbar() {
                   >
                     My Account
                   </Link>
-                  <Link
-                    className="navbar__user-item"
-                    to="/account/orders"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    My Orders
-                  </Link>
                   <button
                     className="navbar__user-item navbar__user-logout"
                     onClick={handleLogout}
