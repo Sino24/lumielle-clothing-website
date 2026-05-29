@@ -57,6 +57,10 @@ app.use("/api/client-projects", require("./routes/clientProjectRoutes"));
 // Ratings
 app.use("/api/ratings",        require("./routes/ratingRoutes"));
 
+
+// Cart & Orders
+app.use("/api/cart",           require("./routes/cartRoutes"));
+
 // ── Health Check ───────────────────────────────────────────
 app.get("/", (req, res) => {
   res.send("API Running...");
