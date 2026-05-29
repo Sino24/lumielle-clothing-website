@@ -45,7 +45,7 @@ function Footer() {
           <p className="footer__col-title">Help</p>
           <ul className="footer__col-links">
     
-            <li><Link to="/sizing">Size Guide</Link></li>
+            <li><Link to="/size-guide">Size Guide</Link></li>
             <li><Link to="/contact">Contact Us</Link></li>
           </ul>
         </div>

@@ -35,6 +35,7 @@ import ProtectedRoute from "../components/ProtectedRoute";           // admin
 import UserProtectedRoute from "../components/UserProtectedRoute";   // user
 import AdminManageUsers from "../admin/AdminManageUsers";
 import AdminManageOrders from "../admin/AdminManageOrders";
+import SizeGuide from "../pages/SizeGuide";
 
 export default function AppRoutes() {
   return (
@@ -49,7 +50,8 @@ export default function AppRoutes() {
       <Route path="/lookbook"      element={<Lookbook />} />
       <Route path="/contact"       element={<Contact />} />
       <Route path="/ClientProjects" element={<ClientProjects />} />
-      <Route path="/terms"         element={<TermsAndConditions />} />
+      <Route path="/terms"          element={<TermsAndConditions />} />
+      <Route path="/size-guide"     element={<SizeGuide />} />
 
       {/* ───────── User Login / Register ───────── */}
       <Route path="/login" element={<UserAuth />} />

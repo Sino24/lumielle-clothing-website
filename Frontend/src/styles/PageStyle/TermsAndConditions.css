@@ -19,15 +19,15 @@
   color: var(--ink);
   font-family: var(--font-body);
   min-height: 100vh;
+  padding-top: var(--nav-height);
 }
 
 /* ─────────────────────────────────────
    Hero — mirrors site pattern
 ───────────────────────────────────── */
 .tc__hero {
-  padding: clamp(72px, 10vw, 130px) clamp(24px, 7vw, 100px) 0;
+  padding: clamp(24px, 7vw, 100px);
 }
-
 .tc__hero-inner {
   display: flex;
   align-items: flex-end;
