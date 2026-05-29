@@ -34,6 +34,7 @@ import AdminManageClientProjects from "../admin/AdminManageClientProjects";
 import ProtectedRoute from "../components/ProtectedRoute";           // admin
 import UserProtectedRoute from "../components/UserProtectedRoute";   // user
 import AdminManageUsers from "../admin/AdminManageUsers";
+import AdminManageOrders from "../admin/AdminManageOrders";
 
 export default function AppRoutes() {
   return (
@@ -72,6 +73,7 @@ export default function AppRoutes() {
         <Route path="/admin/hero"           element={<AdminManageHero />} />
         <Route path="/admin/client-projects" element={<AdminManageClientProjects />} />
         <Route path="/admin/users" element={<AdminManageUsers />} />
+        <Route path="/admin/orders"               element={<AdminManageOrders />} />
       </Route>
 
       {/* ───────── 404 ───────── */}

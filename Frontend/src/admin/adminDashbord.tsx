@@ -106,6 +106,12 @@ const AdminDashboard: React.FC = () => {
       icon:  "👤",
       desc:  "View & manage registered users",
     },
+    {
+      path:  "/admin/orders",
+      label: "Orders",
+      icon:  "📦",
+      desc:  "View & manage orders",
+    },
   ];
 
   const isActive = (path: string) => location.pathname === path;
