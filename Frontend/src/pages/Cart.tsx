@@ -26,24 +26,6 @@ interface ProfileData {
 const parsePrice = (str: string) =>
   parseInt(str.replace(/[₹,\s]/g, ""), 10) || 0;
 
-// ── Status pill ───────────────────────────────────────────────────────────────
-function StatusDot({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    pending:   "#C9A96E",
-    confirmed: "#5b8a72",
-    shipped:   "#4a7fa8",
-    delivered: "#2c7a4b",
-    cancelled: "#b94040",
-  };
-  return (
-    <span
-      className="cart-status-dot"
-      style={{ background: map[status] ?? "#999" }}
-      title={status}
-    />
-  );
-}
-
 // ── Component ─────────────────────────────────────────────────────────────────
 function Cart() {
   const { cart, removeFromCart, updateQty, clearCart, cartLoading } = useCart();
