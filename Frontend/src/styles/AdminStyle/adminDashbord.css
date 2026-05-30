@@ -16,7 +16,7 @@
 .adm-page {
   width: 100%;
   min-height: 100vh;
-padding-top: var(--nav-height);  
+  padding-top: var(--nav-height);
   background: var(--lum-cream);
   font-family: var(--font-body);
   overflow-x: hidden;
@@ -65,6 +65,7 @@ padding-top: var(--nav-height);
   cursor: pointer;
   padding: 0.65rem 1.5rem;
   transition: opacity 0.2s, transform 0.15s;
+  white-space: nowrap;
 }
 
 .adm-btn:hover         { opacity: 0.85; transform: translateY(-1px); }
@@ -84,6 +85,7 @@ padding-top: var(--nav-height);
 .adm-nav-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.45rem;
   border: 1px solid var(--lum-border);
   background: #fff;
@@ -96,6 +98,7 @@ padding-top: var(--nav-height);
   transition: border-color 0.2s, background 0.2s, color 0.2s;
   font-family: var(--font-body);
   white-space: nowrap;
+  min-height: 44px; /* accessible touch target */
 }
 
 .adm-nav-btn:hover {
@@ -165,7 +168,7 @@ padding-top: var(--nav-height);
   margin-bottom: 1rem;
 }
 
-/* ── Quick links grid — 4 columns to fit all 4 manage items ── */
+/* ── Quick links grid ── */
 .adm-links {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -182,6 +185,8 @@ padding-top: var(--nav-height);
   cursor: pointer;
   text-align: left;
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .adm-link-card:hover {
@@ -349,24 +354,47 @@ padding-top: var(--nav-height);
 }
 
 /* ── Responsive ── */
+
+/* 4 → 2 columns for links */
 @media (max-width: 1100px) {
   .adm-links { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* 4 → 2 columns for stats */
 @media (max-width: 1024px) {
   .adm-stats { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
-  .adm-content   { padding: 1.5rem 1.25rem 3rem; }
-  .adm-page-hd   { flex-direction: column; align-items: flex-start; }
-  .adm-nav-links { gap: 0.5rem; }
-  .adm-nav-btn   { flex: 1; justify-content: center; min-width: 0; }
+  .adm-content { padding: 1.5rem 1.25rem 3rem; }
+  .adm-page-hd { flex-direction: column; align-items: flex-start; }
+
+  /* Nav: 2-column grid so buttons sit side-by-side, not stretched full-width */
+  .adm-nav-links {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .adm-nav-btn {
+    width: 100%;
+    font-size: 0.68rem;
+    padding: 0.6rem 0.75rem;
+  }
+
   .adm-recent-row { gap: 0.8rem; }
 }
 
 @media (max-width: 640px) {
-  .adm-stats  { grid-template-columns: repeat(2, 1fr); }
-  .adm-links  { grid-template-columns: 1fr; }
-  .adm-nav-btn { width: 100%; }
+  .adm-stats { grid-template-columns: repeat(2, 1fr); }
+  .adm-links { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 400px) {
+  /* Very small phones: single column nav */
+  .adm-nav-links {
+    grid-template-columns: 1fr;
+  }
+
+  .adm-links { grid-template-columns: 1fr; }
 }

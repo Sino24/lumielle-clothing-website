@@ -15,15 +15,14 @@ interface Product {
 }
 
 const AdminDashboard: React.FC = () => {
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading,  setLoading]  = useState(true);
-  const [error,    setError]    = useState<string | null>(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState<string | null>(null);
 
-  const API_BASE =
-    import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
   useEffect(() => {
     fetch(`${API_BASE}/api/products`)
@@ -56,62 +55,16 @@ const AdminDashboard: React.FC = () => {
 
   const recent = [...products].slice(0, 5);
 
-  // Nav items — used for both the top nav bar and quick-link cards
   const navItems = [
-    {
-      path:  "/admin",
-      label: "Dashboard",
-      icon:  "🏠",
-      desc:  "Overview & stats",
-    },
-    {
-      path:  "/admin/products",
-      label: "Products",
-      icon:  "👕",
-      desc:  `${totalProducts} items in store`,
-    },
-    {
-      path:  "/admin/lookbook",
-      label: "Lookbook",
-      icon:  "🖼️",
-      desc:  "Manage editorial images",
-    },
-    {
-      path:  "/admin/about",
-      label: "About",
-      icon:  "ℹ️",
-      desc:  "Edit about page content",
-    },
-    {
-      path:  "/admin/contact",
-      label: "Messages",
-      icon:  "📬",
-      desc:  "View contact messages",
-    },
-    {
-      path:  "/admin/hero",
-      label: "Hero",
-      icon:  "🎬",
-      desc:  "Manage hero section",
-    },
-    {
-      path:  "/admin/client-projects",
-      label: "Client Projects",
-      icon:  "💼",
-      desc:  "Manage client project listings",
-    },
-    {
-      path:  "/admin/users",
-      label: "Users",
-      icon:  "👤",
-      desc:  "View & manage registered users",
-    },
-    {
-      path:  "/admin/orders",
-      label: "Orders",
-      icon:  "📦",
-      desc:  "View & manage orders",
-    },
+    { path: "/admin",               label: "Dashboard",      icon: "🏠", desc: "Overview & stats" },
+    { path: "/admin/products",      label: "Products",       icon: "👕", desc: `${totalProducts} items in store` },
+    { path: "/admin/lookbook",      label: "Lookbook",       icon: "🖼️", desc: "Manage editorial images" },
+    { path: "/admin/about",         label: "About",          icon: "ℹ️", desc: "Edit about page content" },
+    { path: "/admin/contact",       label: "Messages",       icon: "📬", desc: "View contact messages" },
+    { path: "/admin/hero",          label: "Hero",           icon: "🎬", desc: "Manage hero section" },
+    { path: "/admin/client-projects", label: "Client Projects", icon: "💼", desc: "Manage client project listings" },
+    { path: "/admin/users",         label: "Users",          icon: "👤", desc: "View & manage registered users" },
+    { path: "/admin/orders",        label: "Orders",         icon: "📦", desc: "View & manage orders" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -191,10 +144,7 @@ const AdminDashboard: React.FC = () => {
               <div className="adm-stat">
                 <span className="adm-stat-emoji">🖼️</span>
                 <div className="adm-stat-num">
-                  {products.reduce(
-                    (s, p) => s + 1 + (p.images?.length || 0),
-                    0
-                  )}
+                  {products.reduce((s, p) => s + 1 + (p.images?.length || 0), 0)}
                 </div>
                 <div className="adm-stat-label">Total Images</div>
               </div>
@@ -205,7 +155,7 @@ const AdminDashboard: React.FC = () => {
 
             <div className="adm-links">
               {navItems
-                .filter((item) => item.path !== "/admin") // exclude Dashboard itself
+                .filter((item) => item.path !== "/admin")
                 .map((item) => (
                   <button
                     className="adm-link-card"
@@ -230,7 +180,7 @@ const AdminDashboard: React.FC = () => {
             <div className="adm-recent">
               {recent.length === 0 ? (
                 <div className="adm-empty">
-                  No products yet.
+                  No products yet.{" "}
                   <button
                     className="adm-empty-link"
                     onClick={() => navigate("/admin/products")}
@@ -246,11 +196,7 @@ const AdminDashboard: React.FC = () => {
                     onClick={() => navigate("/admin/products")}
                   >
                     <div className="adm-recent-thumb">
-                      {p.img ? (
-                        <img src={p.img} alt={p.name} />
-                      ) : (
-                        "👕"
-                      )}
+                      {p.img ? <img src={p.img} alt={p.name} /> : "👕"}
                     </div>
                     <div className="adm-recent-meta">
                       <div className="adm-recent-name">{p.name}</div>
