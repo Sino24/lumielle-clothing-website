@@ -31,24 +31,25 @@ import AdminManageHero from "../admin/AdminManageHero";
 import AdminManageClientProjects from "../admin/AdminManageClientProjects";
 
 /* ───────── Protected Routes ───────── */
-import ProtectedRoute from "../components/ProtectedRoute";           // admin
-import UserProtectedRoute from "../components/UserProtectedRoute";   // user
+import ProtectedRoute from "../components/ProtectedRoute";
+import UserProtectedRoute from "../components/UserProtectedRoute";
 import AdminManageUsers from "../admin/AdminManageUsers";
 import AdminManageOrders from "../admin/AdminManageOrders";
 import SizeGuide from "../pages/SizeGuide";
+import AdminLayout from "../admin/AdminLayout";
 
 export default function AppRoutes() {
   return (
     <Routes>
 
       {/* ───────── Public Routes ───────── */}
-      <Route path="/"              element={<Home />} />
-      <Route path="/product"       element={<Products />} />
-      <Route path="/products/:id"  element={<ProductDetail />} />
-      <Route path="/cart"          element={<Cart />} />
-      <Route path="/about"         element={<About />} />
-      <Route path="/lookbook"      element={<Lookbook />} />
-      <Route path="/contact"       element={<Contact />} />
+      <Route path="/"               element={<Home />} />
+      <Route path="/product"        element={<Products />} />
+      <Route path="/products/:id"   element={<ProductDetail />} />
+      <Route path="/cart"           element={<Cart />} />
+      <Route path="/about"          element={<About />} />
+      <Route path="/lookbook"       element={<Lookbook />} />
+      <Route path="/contact"        element={<Contact />} />
       <Route path="/ClientProjects" element={<ClientProjects />} />
       <Route path="/terms"          element={<TermsAndConditions />} />
       <Route path="/size-guide"     element={<SizeGuide />} />
@@ -58,24 +59,25 @@ export default function AppRoutes() {
 
       {/* ───────── Protected User Routes ───────── */}
       <Route element={<UserProtectedRoute />}>
-        {/* add more user pages here as you build them */}
         <Route path="/account" element={<UserProfile />} />
       </Route>
 
-      {/* ───────── Admin Login ───────── */}
+      {/* ───────── Admin Login (no navbar) ───────── */}
       <Route path="/admin/login" element={<AdminLogin />} />
 
       {/* ───────── Protected Admin Routes ───────── */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/admin"                element={<Admin />} />
-        <Route path="/admin/products"       element={<AdminManageProduct />} />
-        <Route path="/admin/lookbook"       element={<AdminManageLookbook />} />
-        <Route path="/admin/about"          element={<AdminManageAbout />} />
-        <Route path="/admin/contact"        element={<AdminManageContact />} />
-        <Route path="/admin/hero"           element={<AdminManageHero />} />
-        <Route path="/admin/client-projects" element={<AdminManageClientProjects />} />
-        <Route path="/admin/users" element={<AdminManageUsers />} />
-        <Route path="/admin/orders"               element={<AdminManageOrders />} />
+        <Route element={<AdminLayout />}>
+          <Route path="/admin"                 element={<Admin />} />
+          <Route path="/admin/products"        element={<AdminManageProduct />} />
+          <Route path="/admin/lookbook"        element={<AdminManageLookbook />} />
+          <Route path="/admin/about"           element={<AdminManageAbout />} />
+          <Route path="/admin/contact"         element={<AdminManageContact />} />
+          <Route path="/admin/hero"            element={<AdminManageHero />} />
+          <Route path="/admin/client-projects" element={<AdminManageClientProjects />} />
+          <Route path="/admin/users"           element={<AdminManageUsers />} />
+          <Route path="/admin/orders"          element={<AdminManageOrders />} />
+        </Route>
       </Route>
 
       {/* ───────── 404 ───────── */}

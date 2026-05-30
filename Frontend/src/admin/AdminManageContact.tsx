@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import "../styles/AdminStyle/AdminManageContact.css";
 
+
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const getAuthHeader = () => ({
@@ -97,8 +98,11 @@ const AdminManageContact: React.FC = () => {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
+    
     <div className="amc-page">
       <div className="amc-content">
+      
+
 
         {/* PAGE HEADER */}
         <div className="amc-page-hd">
