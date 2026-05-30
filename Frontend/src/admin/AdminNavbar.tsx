@@ -41,13 +41,7 @@ const AdminNavBar: React.FC = () => {
       <nav className="anb">
         <div className="anb-inner">
 
-          {/* Brand */}
-          <button className="anb-brand" onClick={() => navigate("/admin")}>
-            <span className="anb-brand-mark">✦</span>
-            <span className="anb-brand-name">DRIP</span>
-            <span className="anb-brand-sep">|</span>
-            <span className="anb-brand-admin">Admin</span>
-          </button>
+       
 
           {/* Desktop links */}
           <div className="anb-links">
