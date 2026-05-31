@@ -18,18 +18,16 @@
   --ease:         cubic-bezier(0.4, 0, 0.2, 1);
   --transition:   0.28s var(--ease);
 
-  /* ⬇ Set this to match your navbar height exactly */
   --navbar-height: 64px;
 }
 
 /* ── Base ────────────────────────────────────────────────────────────────────── */
 .pd {
-margin-top: calc(var(--navbar-height) /4);
+  margin-top: calc(var(--navbar-height) / 4);
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
   min-height: 100vh;
-  /* Push content below fixed navbar */
   padding-top: var(--navbar-height);
   padding-bottom: clamp(60px, 10vw, 120px);
   animation: page-in 0.5s var(--ease) both;
@@ -92,7 +90,6 @@ margin-top: calc(var(--navbar-height) /4);
 /* ── Layout ──────────────────────────────────────────────────────────────────── */
 .pd__layout {
   display: grid;
-  /* Gallery ~45%, info panel ~55% — uses full available width */
   grid-template-columns: 45fr 55fr;
   gap: clamp(24px, 3vw, 48px);
   padding: clamp(20px, 3vw, 40px) clamp(24px, 5vw, 64px);
@@ -108,7 +105,6 @@ margin-top: calc(var(--navbar-height) /4);
   top: calc(var(--navbar-height) + 16px);
 }
 
-/* Main image — fills the gallery column naturally */
 .pd__main-img-wrap {
   position: relative;
   overflow: hidden;
@@ -136,7 +132,6 @@ margin-top: calc(var(--navbar-height) /4);
   top: 14px;
   left: 14px;
   padding: 4px 10px;
-
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -222,6 +217,14 @@ margin-top: calc(var(--navbar-height) /4);
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Meta row: category + share ─────────────────────────────────────────────── */
+.pd__meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .pd__category {
   font-size: 10px;
   font-weight: 600;
@@ -231,6 +234,113 @@ margin-top: calc(var(--navbar-height) /4);
   margin: 0;
 }
 
+/* ── Share button & dropdown ─────────────────────────────────────────────────── */
+.pd__share-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.pd__share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 5px 13px 5px 10px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+}
+
+.pd__share-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: var(--surface);
+}
+
+/* Dropdown */
+.pd__share-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(17,17,16,0.10), 0 1px 4px rgba(17,17,16,0.06);
+  overflow: hidden;
+  z-index: 100;
+  animation: dropdown-in 0.18s var(--ease) both;
+}
+
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.pd__share-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition), color var(--transition);
+  letter-spacing: 0.02em;
+}
+
+.pd__share-item:hover {
+  background: var(--surface);
+}
+
+.pd__share-item svg {
+  flex-shrink: 0;
+  color: var(--muted);
+  transition: color var(--transition);
+}
+
+.pd__share-item:hover svg {
+  color: var(--ink);
+}
+
+/* "Copied!" success state */
+.pd__share-item--copied {
+  color: var(--badge-new);
+  pointer-events: none;
+}
+
+.pd__share-item--copied svg {
+  color: var(--badge-new);
+}
+
+/* Small hint text next to label */
+.pd__share-item-hint {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  margin-left: auto;
+}
+
+/* Divider between items */
+.pd__share-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 0;
+}
+
+/* ── Product name ────────────────────────────────────────────────────────────── */
 .pd__name {
   font-family: var(--font-display);
   font-size: clamp(26px, 3vw, 42px);
@@ -587,7 +697,6 @@ margin-top: calc(var(--navbar-height) /4);
   color: var(--accent);
 }
 
-/* ← Smaller related grid: fixed max-width cards centred in row */
 .pd__related-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 220px));
@@ -662,7 +771,6 @@ margin-top: calc(var(--navbar-height) /4);
 
 /* Mobile */
 @media (max-width: 600px) {
-  /* Navbar height on mobile (adjust if yours differs) */
   .pd, .pd-missing {
     --navbar-height: 56px;
   }
@@ -749,6 +857,16 @@ margin-top: calc(var(--navbar-height) /4);
 
   .pd__related-price {
     font-size: 11px;
+  }
+
+  /* Share dropdown: open leftward on mobile to avoid clipping */
+  .pd__share-dropdown {
+    right: 0;
+    left: auto;
+  }
+
+  .pd__share-item-hint {
+    display: none;
   }
 }
 
