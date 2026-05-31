@@ -12,6 +12,7 @@ const {
   getOrderById,
   getAllOrders,
   updateOrderStatus,
+  deleteOrder
 } = require("../controllers/cartController");
 
 const { protectUser } = require("../middleware/userAuthMiddleware");
@@ -28,5 +29,10 @@ router.get   ("/orders/:id",    protectUser, getOrderById);
 // ── Admin routes ──────────────────────────────────────────────────────────────
 router.get   ("/admin/orders",        protect, getAllOrders);
 router.patch ("/admin/orders/:id",    protect, updateOrderStatus);
+router.delete(
+  "/admin/orders/:id",
+  protect ,
+  deleteOrder
+);
 
 module.exports = router;

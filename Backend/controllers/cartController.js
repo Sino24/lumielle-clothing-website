@@ -236,6 +236,30 @@ const updateOrderStatus = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+const deleteOrder = async (req, res) => {
+  console.log("DELETE ORDER ID:", req.params.id);
+
+  try {
+    const order = await Order.findByIdAndDelete(req.params.id);
+
+    console.log("FOUND ORDER:", order);
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      });
+    }
+
+    res.json({
+      message: "Order deleted successfully",
+    });
+  } catch (err) {
+    console.error("DELETE ERROR:", err);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
 
 module.exports = {
   getCart,
@@ -246,4 +270,5 @@ module.exports = {
   getOrderById,
   getAllOrders,
   updateOrderStatus,
+ deleteOrder,
 };
