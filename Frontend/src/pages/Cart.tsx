@@ -1,12 +1,9 @@
-// src/pages/Cart.tsx
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import "../styles/PageStyle/Cart.css";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 interface Address {
   _id:       string;
   label:     string;
@@ -22,53 +19,66 @@ interface ProfileData {
   addresses: Address[];
 }
 
-// ── Price helper ──────────────────────────────────────────────────────────────
 const parsePrice = (str: string) =>
   parseInt(str.replace(/[₹,\s]/g, ""), 10) || 0;
 
-// ── Component ─────────────────────────────────────────────────────────────────
 function Cart() {
   const { cart, removeFromCart, updateQty, clearCart, cartLoading } = useCart();
   const { token } = useAuth();
   const navigate   = useNavigate();
   const API_BASE   = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  const [addresses,      setAddresses]      = useState<Address[]>([]);
-  const [selectedAddr,   setSelectedAddr]   = useState<string>("");
-  const [checkingOut,    setCheckingOut]    = useState(false);
-  const [orderSuccess,   setOrderSuccess]   = useState(false);
-  const [orderId,        setOrderId]        = useState<string>("");
+  const [addresses,    setAddresses]    = useState<Address[]>([]);
+  const [selectedAddr, setSelectedAddr] = useState<string>("");
+  const [addrLoading,  setAddrLoading]  = useState(false);
+  const [addrError,    setAddrError]    = useState(false);
+  const [checkingOut,  setCheckingOut]  = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [orderId,      setOrderId]      = useState<string>("");
+  const [orderError,   setOrderError]   = useState<string>("");
+
+  // Snapshot cart before any async clears
+  const cartSnapshot = useRef(cart);
+  useEffect(() => { cartSnapshot.current = cart; }, [cart]);
 
   // Fetch saved addresses when logged in
   useEffect(() => {
     if (!token) return;
+    setAddrLoading(true);
     fetch(`${API_BASE}/api/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())
       .then((data: ProfileData) => {
-        setAddresses(data.addresses ?? []);
-        const def = data.addresses?.find((a) => a.isDefault);
+        const addrs = data.addresses ?? [];
+        setAddresses(addrs);
+        const def = addrs.find((a) => a.isDefault);
         if (def) setSelectedAddr(def._id);
+        else if (addrs.length === 1) setSelectedAddr(addrs[0]._id);
       })
-      .catch(() => {/* silent */});
+      .catch(() => {})
+      .finally(() => setAddrLoading(false));
   }, [token, API_BASE]);
 
   const total     = cart.reduce((sum, item) => sum + parsePrice(item.price) * item.quantity, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const buildWhatsAppMsg = () => {
+  const buildWhatsAppMsg = (
+    items    = cartSnapshot.current,
+    addrId   = selectedAddr,
+    addrList = addresses,
+  ) => {
     let msg = "Hello Lumielle,%0A%0AI would like to order:%0A%0A";
-    cart.forEach((item, i) => {
+    items.forEach((item, i) => {
       msg += `${i + 1}. ${item.name}%0A`;
       msg += `Size: ${item.size}%0A`;
       msg += `Qty: ${item.quantity}%0A`;
       msg += `Price: ${item.price}%0A%0A`;
     });
-    msg += `Total: ₹${total.toLocaleString("en-IN")}%0A%0A`;
-
-    if (selectedAddr) {
-      const addr = addresses.find((a) => a._id === selectedAddr);
+    const orderTotal = items.reduce((s, it) => s + parsePrice(it.price) * it.quantity, 0);
+    msg += `Total: ₹${orderTotal.toLocaleString("en-IN")}%0A%0A`;
+    if (addrId) {
+      const addr = addrList.find((a) => a._id === addrId);
       if (addr) {
         msg += `Delivery to:%0A`;
         msg += `${addr.line1}${addr.line2 ? `, ${addr.line2}` : ""}%0A`;
@@ -78,56 +88,134 @@ function Cart() {
     return msg;
   };
 
+  const selectedAddrObj = addresses.find((a) => a._id === selectedAddr) ?? null;
+
+  // ── Checkout ─────────────────────────────────────────────────────────────
   const checkout = async () => {
-    if (checkingOut) return;
+    if (checkingOut || !token) return;
+
+    if (!selectedAddr || !selectedAddrObj) {
+      setAddrError(true);
+      document.getElementById("cart-addr-wrap")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    setAddrError(false);
+    setOrderError("");
     setCheckingOut(true);
 
+    // Freeze everything before async work
+    const itemsToOrder = cartSnapshot.current.map((item) => ({
+      productId: item._id,
+      name:      item.name,
+      price:     item.price,
+      img:       item.img,
+      size:      item.size,
+      quantity:  item.quantity,
+    }));
+    const orderTotal = cartSnapshot.current.reduce(
+      (s, it) => s + parsePrice(it.price) * it.quantity, 0,
+    );
+    const addrId  = selectedAddr;
+    const addrObj = {
+      label:   selectedAddrObj.label,
+      line1:   selectedAddrObj.line1,
+      line2:   selectedAddrObj.line2 || "",
+      city:    selectedAddrObj.city,
+      state:   selectedAddrObj.state,
+      pincode: selectedAddrObj.pincode,
+    };
+    const addrListSnapshot = [...addresses];
+    const cartAtCheckout   = [...cartSnapshot.current];
+
     try {
-      // If logged in → create order record first
-      if (token) {
-        const res  = await fetch(`${API_BASE}/api/cart/checkout`, {
-          method:  "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            items:     cart.map(({ _id, name, price, img, size, quantity }) => ({
-              productId: _id, name, price, img, size, quantity,
-            })),
-            addressId: selectedAddr || undefined,
-          }),
-        });
-        const data = await res.json() as { order?: { _id: string }; message?: string };
+      const res = await fetch(`${API_BASE}/api/cart/checkout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:  `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          addressId: addrId,
+          address:   addrObj,
+          items:     itemsToOrder,
+          total:     orderTotal,
+        }),
+      });
 
-        if (res.ok && data.order) {
-          setOrderId(data.order._id);
-          await clearCart();
-          setOrderSuccess(true);
-        }
+      const raw = await res.text();
+      let data: { order?: { _id: string }; _id?: string; message?: string } = {};
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        throw new Error(
+          `Server error (${res.status}): ${raw.slice(0, 120)}`,
+        );
       }
 
-      // Open WhatsApp regardless of auth state
-      window.open(`https://wa.me/+918590109684?text=${buildWhatsAppMsg()}`, "_blank");
-
-      if (!token) {
-        // Guest: just clear local cart after redirect
-        await clearCart();
+      if (!res.ok) {
+        throw new Error(data.message ?? `Order failed (${res.status}). Please try again.`);
       }
-    } catch {
-      // Open WhatsApp even on error
-      window.open(`https://wa.me/+918590109684?text=${buildWhatsAppMsg()}`, "_blank");
+
+      const newOrderId = data.order?._id ?? data._id ?? "";
+
+      // Open WhatsApp using frozen snapshots — BEFORE clearing cart
+      window.open(
+        `https://wa.me/+918590109684?text=${buildWhatsAppMsg(
+          cartAtCheckout,
+          addrId,
+          addrListSnapshot,
+        )}`,
+        "_blank",
+      );
+
+      // Clear cart on server + in memory
+      await clearCart();
+
+      setOrderId(newOrderId);
+      setOrderSuccess(true);
+
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setOrderError(errMsg);
+      console.error("Checkout error:", err);
     } finally {
       setCheckingOut(false);
     }
   };
 
-  // ── Loading state ────────────────────────────────────────────────────────
+  // ── Loading ──────────────────────────────────────────────────────────────
   if (cartLoading) {
     return (
       <main className="cart-loading">
         <div className="cart-loading__spinner" />
         <p className="cart-loading__text">Loading your bag…</p>
+      </main>
+    );
+  }
+
+  // ── Login gate ───────────────────────────────────────────────────────────
+  if (!token) {
+    return (
+      <main className="cart-gate">
+        <div className="cart-gate__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"
+               strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="9"  cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+        </div>
+        <p className="cart-gate__eyebrow">Your Bag</p>
+        <h1 className="cart-gate__title">Sign in to view your <em>bag</em></h1>
+        <p className="cart-gate__sub">
+          Create an account or sign in to add items, save your bag, and place orders.
+        </p>
+        <div className="cart-gate__actions">
+          <Link className="cart-gate__cta" to="/login">Sign In</Link>
+          <Link className="cart-gate__sec" to="/register">Create Account</Link>
+        </div>
+        <Link className="cart-gate__browse" to="/product">← Continue browsing</Link>
       </main>
     );
   }
@@ -143,30 +231,35 @@ function Cart() {
           Your order has been recorded. Please complete it on WhatsApp — our team will confirm shortly.
         </p>
         {orderId && (
-          <p className="cart-success__ref">Reference: <code>#{orderId.slice(-8).toUpperCase()}</code></p>
+          <p className="cart-success__ref">
+            Reference: <code>#{orderId.slice(-8).toUpperCase()}</code>
+          </p>
         )}
         <div className="cart-success__actions">
-          <button className="cart-success__cta" onClick={() => navigate("/account")}>
-            View Orders
+          <button
+            className="cart-success__cta"
+            onClick={() =>
+              navigate("/account", {
+                state: { tab: "orders", refreshOrders: true },
+              })
+            }
+          >
+            View My Orders
           </button>
-          <Link className="cart-success__sec" to="/product">
-            Continue Shopping
-          </Link>
+          <Link className="cart-success__sec" to="/product">Continue Shopping</Link>
         </div>
       </main>
     );
   }
 
-  // ── Empty state ──────────────────────────────────────────────────────────
+  // ── Empty ────────────────────────────────────────────────────────────────
   if (cart.length === 0) {
     return (
       <main className="cart-empty">
         <p className="cart-empty__eyebrow">Your Bag</p>
         <h1 className="cart-empty__title">Your cart is <em>empty</em></h1>
         <p className="cart-empty__sub">Looks like you haven't added anything yet.</p>
-        <Link className="cart-empty__cta" to="/product">
-          Explore the collection &nbsp;→
-        </Link>
+        <Link className="cart-empty__cta" to="/product">Explore the collection &nbsp;→</Link>
       </main>
     );
   }
@@ -175,7 +268,6 @@ function Cart() {
   return (
     <main className="cart">
 
-      {/* Header */}
       <div className="cart__head">
         <p className="cart__eyebrow">Your Bag</p>
         <h1 className="cart__title">Your <em>Selection</em></h1>
@@ -188,11 +280,9 @@ function Cart() {
         <div className="cart__items">
           {cart.map((item) => (
             <article key={item._id + item.size} className="cart__item">
-
               <div className="cart__img-wrap">
                 <img src={item.img} alt={item.name} className="cart__img" />
               </div>
-
               <div className="cart__info">
                 <div className="cart__info-top">
                   <div>
@@ -201,7 +291,6 @@ function Cart() {
                   </div>
                   <p className="cart__price">{item.price}</p>
                 </div>
-
                 <div className="cart__info-bottom">
                   <div className="cart__qty">
                     <button
@@ -216,11 +305,9 @@ function Cart() {
                       aria-label="Increase quantity"
                     >+</button>
                   </div>
-
                   <p className="cart__line-total">
                     ₹{(parsePrice(item.price) * item.quantity).toLocaleString("en-IN")}
                   </p>
-
                   <button
                     className="cart__remove"
                     onClick={() => removeFromCart(item._id, item.size)}
@@ -231,13 +318,10 @@ function Cart() {
               </div>
             </article>
           ))}
-
-          <Link className="cart__continue" to="/product">
-            ← Continue Shopping
-          </Link>
+          <Link className="cart__continue" to="/product">← Continue Shopping</Link>
         </div>
 
-        {/* Summary */}
+        {/* Summary sidebar */}
         <aside className="cart__summary">
           <p className="cart__summary-label">Order Summary</p>
 
@@ -265,53 +349,104 @@ function Cart() {
             Inclusive of all taxes · Free shipping above ₹999
           </p>
 
-          {/* Address selector — only shown when logged in and addresses exist */}
-          {token && addresses.length > 0 && (
-            <div className="cart__addr-select-wrap">
-              <label className="cart__addr-label" htmlFor="cart-addr">
-                Deliver to
-              </label>
-              <select
-                id="cart-addr"
-                className="cart__addr-select"
-                value={selectedAddr}
-                onChange={(e) => setSelectedAddr(e.target.value)}
-              >
-                <option value="">— Select address —</option>
-                {addresses.map((a) => (
-                  <option key={a._id} value={a._id}>
-                    {a.label}: {a.line1}, {a.city}
-                  </option>
-                ))}
-              </select>
-              <p className="cart__addr-hint">
-                <Link to="/account" className="cart__addr-link">
-                  Manage addresses →
-                </Link>
-              </p>
-            </div>
-          )}
-
-          {/* Guest prompt */}
-          {!token && (
-            <div className="cart__login-nudge">
-              <p className="cart__login-nudge-text">
-                <Link to="/login" className="cart__login-link">Sign in</Link> to save your cart and track orders
-              </p>
-            </div>
-          )}
-
-          <button
-            className="cart__checkout"
-            onClick={checkout}
-            disabled={checkingOut}
+          {/* Address selector */}
+          <div
+            id="cart-addr-wrap"
+            className={`cart__addr-wrap${addrError ? " cart__addr-wrap--error" : ""}`}
           >
-            {checkingOut ? "Processing…" : "Checkout on WhatsApp"}
+            <label className="cart__addr-label" htmlFor="cart-addr">
+              Delivery Address <span className="cart__addr-required">*</span>
+            </label>
+
+            {addrLoading ? (
+              <p className="cart__addr-loading-text">Loading addresses…</p>
+            ) : addresses.length > 0 ? (
+              <>
+                <select
+                  id="cart-addr"
+                  className={`cart__addr-select${addrError ? " cart__addr-select--error" : ""}`}
+                  value={selectedAddr}
+                  onChange={(e) => {
+                    setSelectedAddr(e.target.value);
+                    if (e.target.value) setAddrError(false);
+                  }}
+                >
+                  <option value="">— Select a delivery address —</option>
+                  {addresses.map((a) => (
+                    <option key={a._id} value={a._id}>
+                      {a.label}: {a.line1}, {a.city}
+                    </option>
+                  ))}
+                </select>
+                {addrError && (
+                  <p className="cart__addr-error-msg">
+                    Please select a delivery address to continue.
+                  </p>
+                )}
+                <p className="cart__addr-hint">
+                  <Link to="/account" className="cart__addr-link">Manage addresses →</Link>
+                </p>
+              </>
+            ) : (
+              <div className="cart__addr-nudge">
+                <div className="cart__addr-nudge-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                </div>
+                <p className="cart__addr-nudge-text">
+                  You need a saved address to place an order.
+                </p>
+                <Link to="/account" className="cart__addr-nudge-cta">Add Address →</Link>
+              </div>
+            )}
+          </div>
+
+          {/* Error banner */}
+          {orderError && (
+            <div className="cart__error-banner">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>{orderError}</span>
+            </div>
+          )}
+
+          {/* Place Order */}
+          <button
+            className={`cart__checkout${addresses.length === 0 || !selectedAddr ? " cart__checkout--blocked" : ""}`}
+            onClick={checkout}
+            disabled={checkingOut || addresses.length === 0 || addrLoading}
+            title={addresses.length === 0 ? "Add a delivery address first" : undefined}
+          >
+            {checkingOut ? (
+              <>
+                <span className="cart__checkout-spinner" />
+                Processing…
+              </>
+            ) : (
+              "Place Order"
+            )}
           </button>
 
-          <p className="cart__whatsapp-note">
-            You'll be redirected to WhatsApp to confirm your order
-          </p>
+          {addresses.length === 0 && !addrLoading && (
+            <p className="cart__checkout-note">
+              Add a delivery address in your{" "}
+              <Link to="/account" className="cart__addr-link">account</Link>{" "}
+              to place an order.
+            </p>
+          )}
+
+          {addresses.length > 0 && (
+            <p className="cart__whatsapp-note">
+              Order saved to your account &amp; opened on WhatsApp for confirmation
+            </p>
+          )}
         </aside>
       </div>
     </main>

@@ -1,7 +1,7 @@
 // src/pages/AccountPage.tsx
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import {
@@ -73,7 +73,6 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
   cancelled: { label: "Cancelled", color: "#9a2020", bg: "rgba(154,32,32,0.10)"  },
 };
 
-// ── Price helper ──────────────────────────────────────────
 const parsePrice = (str: string) =>
   parseInt(str.replace(/[₹,\s]/g, ""), 10) || 0;
 
@@ -173,23 +172,13 @@ const OrderCard: React.FC<{ order: Order }> = ({ order }) => {
 };
 
 // ── Cart Section ──────────────────────────────────────────
+// Shows current bag contents with a "Go to Bag" CTA that redirects to /cart
 const CartSection: React.FC = () => {
   const { cart, removeFromCart, updateQty, clearCart } = useCart();
+  const navigate = useNavigate();
 
   const total     = cart.reduce((sum, item) => sum + parsePrice(item.price) * item.quantity, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  const buildWhatsAppMsg = () => {
-    let msg = "Hello Lumielle,%0A%0AI would like to order:%0A%0A";
-    cart.forEach((item, i) => {
-      msg += `${i + 1}. ${item.name}%0A`;
-      msg += `Size: ${item.size}%0A`;
-      msg += `Qty: ${item.quantity}%0A`;
-      msg += `Price: ${item.price}%0A%0A`;
-    });
-    msg += `Total: ₹${total.toLocaleString("en-IN")}`;
-    return msg;
-  };
 
   if (cart.length === 0) {
     return (
@@ -210,7 +199,6 @@ const CartSection: React.FC = () => {
 
   return (
     <div className="acc-cart">
-      {/* Summary bar */}
       <div className="acc-cart__bar">
         <span className="acc-cart__bar-count">
           <IoBagOutline size={15} />
@@ -221,23 +209,17 @@ const CartSection: React.FC = () => {
         </button>
       </div>
 
-      {/* Items list */}
       <div className="acc-cart__list">
         {cart.map((item) => (
           <div key={item._id + item.size} className="acc-cart__item">
-            {/* Image */}
             <div className="acc-cart__img-wrap">
               <img src={item.img} alt={item.name} className="acc-cart__img" />
             </div>
-
-            {/* Info */}
             <div className="acc-cart__item-info">
               <p className="acc-cart__item-name">{item.name}</p>
               <p className="acc-cart__item-meta">Size: {item.size}</p>
               <p className="acc-cart__item-price">{item.price}</p>
             </div>
-
-            {/* Controls */}
             <div className="acc-cart__item-controls">
               <div className="acc-cart__qty">
                 <button
@@ -256,11 +238,9 @@ const CartSection: React.FC = () => {
                   <IoAddOutline size={12} />
                 </button>
               </div>
-
               <p className="acc-cart__line-total">
                 ₹{(parsePrice(item.price) * item.quantity).toLocaleString("en-IN")}
               </p>
-
               <button
                 className="acc-cart__remove"
                 onClick={() => removeFromCart(item._id, item.size)}
@@ -273,25 +253,24 @@ const CartSection: React.FC = () => {
         ))}
       </div>
 
-      {/* Footer */}
       <div className="acc-cart__footer">
         <div className="acc-cart__total-row">
           <span className="acc-cart__total-label">Order Total</span>
           <strong className="acc-cart__total-val">₹{total.toLocaleString("en-IN")}</strong>
         </div>
         <p className="acc-cart__note">Inclusive of all taxes · Free shipping above ₹999</p>
+        {/* ── Primary CTA: redirect to full Cart page for checkout ── */}
         <div className="acc-cart__actions">
-          <a
-            className="acc-btn acc-btn--whatsapp"
-            href={`https://wa.me/+918590109684?text=${buildWhatsAppMsg()}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            className="acc-btn acc-btn--primary acc-cart__buynow-btn"
+            onClick={() => navigate("/cart")}
+            type="button"
           >
-            <IoLogoWhatsapp size={16} />
-            Checkout on WhatsApp
-          </a>
-          <Link className="acc-btn acc-btn--ghost acc-cart__view-btn" to="/cart">
-            View full cart <IoArrowForwardOutline size={13} />
+            <IoCartOutline size={16} />
+            Buy Now
+          </button>
+          <Link className="acc-btn acc-btn--ghost acc-cart__view-btn" to="/product">
+            Continue Shopping <IoArrowForwardOutline size={13} />
           </Link>
         </div>
       </div>
@@ -304,9 +283,18 @@ const AccountPage: React.FC = () => {
   const { token, logout } = useAuth();
   const { cart }          = useCart();
   const navigate          = useNavigate();
+  const location          = useLocation();
   const API_BASE          = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  const [activeTab,       setActiveTab]       = useState<Tab>("profile");
+  // Read navigation state passed from Cart.tsx success screen
+  const navState = location.state as { tab?: Tab; refreshOrders?: boolean } | null;
+
+  // ── Capture refreshOrders flag in a ref BEFORE it gets wiped by navigate() ──
+  // This is the key fix: navState is cleared immediately on mount, so we must
+  // snapshot the refreshOrders flag into a ref before that happens.
+  const pendingRefreshOrders = useRef<boolean>(navState?.refreshOrders === true);
+
+  const [activeTab,       setActiveTab]       = useState<Tab>(navState?.tab ?? "profile");
   const [profile,         setProfile]         = useState<ProfileData | null>(null);
   const [loading,         setLoading]         = useState(true);
   const [saving,          setSaving]          = useState(false);
@@ -329,6 +317,16 @@ const AccountPage: React.FC = () => {
     Authorization:  `Bearer ${token}`,
   }), [token]);
 
+  // Clear the navigation state after we've consumed it, so a manual
+  // page refresh doesn't re-trigger the forced reload.
+  useEffect(() => {
+    if (navState) {
+      navigate("/account", { replace: true, state: null });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Profile fetch
   useEffect(() => {
     if (!token) return;
     fetch(`${API_BASE}/api/auth/me`, { headers: authHeaders() })
@@ -341,18 +339,36 @@ const AccountPage: React.FC = () => {
       .finally(() => setLoading(false));
   }, [token, API_BASE, authHeaders]);
 
-  useEffect(() => {
-    if (activeTab !== "orders" || ordersLoaded || !token) return;
+  // Orders fetch — runs when the orders tab is opened.
+  // Uses a ref-captured refreshOrders flag so it survives the navigate() wipe.
+  const fetchOrders = useCallback(() => {
+    if (!token) return;
     setOrdersLoading(true);
     fetch(`${API_BASE}/api/cart/orders`, { headers: authHeaders() })
       .then((r) => r.json())
       .then((data: Order[]) => {
         setOrders(Array.isArray(data) ? data : []);
         setOrdersLoaded(true);
+        // Consume the refresh flag after a successful fetch
+        pendingRefreshOrders.current = false;
       })
-      .catch(() => setOrders([]))
+      .catch(() => {
+        setOrders([]);
+        setOrdersLoaded(true);
+        pendingRefreshOrders.current = false;
+      })
       .finally(() => setOrdersLoading(false));
-  }, [activeTab, ordersLoaded, token, API_BASE, authHeaders]);
+  }, [token, API_BASE, authHeaders]);
+
+  useEffect(() => {
+    if (activeTab !== "orders" || !token) return;
+
+    // If a refresh was requested (came from checkout) OR orders haven't loaded yet, fetch
+    if (pendingRefreshOrders.current || !ordersLoaded) {
+      fetchOrders();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, token]);
 
   const flash = (type: "success"|"error", text: string) => {
     setMsg({ type, text });
@@ -721,7 +737,7 @@ const AccountPage: React.FC = () => {
           </section>
         )}
 
-        {/* ── Cart ── */}
+        {/* ── Cart / My Bag ── */}
         {activeTab === "cart" && (
           <section className="acc-section" key="cart">
             <div className="acc-section-hd">

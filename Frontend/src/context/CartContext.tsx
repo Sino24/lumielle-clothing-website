@@ -1,10 +1,9 @@
 // src/context/CartContext.tsx
 //
 // Strategy:
-//  - Guests:        cart lives in localStorage (same as before)
+//  - Guests:        cart is EMPTY — must log in to use cart
 //  - Logged-in:     cart is synced to /api/cart on every meaningful change
 //                   and loaded from the server on mount / login
-//  - On login:      merge guest cart into server cart, then clear localStorage
 //  - On logout:     clear in-memory cart (server copy is preserved for next login)
 
 import React, {
@@ -32,7 +31,7 @@ interface CartContextValue {
   addToCart:      (item: Omit<CartItem, "quantity"> & { quantity?: number }) => void;
   removeFromCart: (id: string, size: string) => void;
   updateQty:      (id: string, size: string, qty: number) => void;
-  clearCart:      () => void;
+  clearCart:      () => Promise<void>;
   cartLoading:    boolean;
 }
 
@@ -45,21 +44,12 @@ export const useCart = (): CartContextValue => {
   return ctx;
 };
 
-// ── Local-storage helpers ────────────────────────────────────────────────────
-const LS_KEY = "lumielle_cart";
-const lsRead  = (): CartItem[] => {
-  try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch { return []; }
-};
-const lsWrite = (items: CartItem[]) =>
-  localStorage.setItem(LS_KEY, JSON.stringify(items));
-const lsClear = () => localStorage.removeItem(LS_KEY);
-
 // ── Provider ──────────────────────────────────────────────────────────────────
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token } = useAuth();
   const API_BASE   = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  const [cart, setCartRaw]   = useState<CartItem[]>([]);
+  const [cart, setCartRaw]     = useState<CartItem[]>([]);
   const [cartLoading, setCartLoading] = useState(false);
 
   // Ref so sync callbacks always see the latest token without causing re-renders
@@ -77,7 +67,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const serverSync = useCallback(async (items: CartItem[]) => {
     if (!tokenRef.current) return;
-    // Map CartItem → API payload (productId field)
     const payload = items.map(({ _id, name, price, img, size, quantity }) => ({
       productId: _id, name, price, img, size, quantity,
     }));
@@ -94,42 +83,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ── On mount / token change ──────────────────────────────────────────────
   useEffect(() => {
     if (!token) {
-      // Guest: load from localStorage
-      setCartRaw(lsRead());
+      // Guest: cart is always empty — login required
+      setCartRaw([]);
       return;
     }
 
-    // Logged in: fetch server cart and merge with any guest items
+    // Logged in: fetch server cart
     setCartLoading(true);
-    const guestItems = lsRead();
-
     serverFetch()
       .then((serverItems) => {
-        let merged = [...serverItems];
-
-        // Merge guest items that aren't already in server cart
-        for (const gi of guestItems) {
-          const exists = merged.find(
-            (si) => si._id === gi._id && si.size === gi.size
-          );
-          if (exists) {
-            exists.quantity += gi.quantity;
-          } else {
-            merged.push(gi);
-          }
-        }
-
-        setCartRaw(merged);
-        lsClear();
-
-        // Persist merged cart to server
-        if (guestItems.length > 0) {
-          serverSync(merged).catch(console.error);
-        }
+        setCartRaw(serverItems);
       })
       .catch(() => {
-        // Server unreachable — fall back to guest items
-        setCartRaw(guestItems);
+        setCartRaw([]);
       })
       .finally(() => setCartLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -148,9 +114,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         syncTimer.current = setTimeout(() => {
           serverSync(next).catch(console.error);
         }, 600);
-      } else {
-        lsWrite(next);
       }
+      // Guests: no-op (cart stays empty, no localStorage)
 
       return next;
     });
@@ -159,6 +124,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ── Actions ──────────────────────────────────────────────────────────────
   const addToCart = useCallback(
     (item: Omit<CartItem, "quantity"> & { quantity?: number }) => {
+      // Silently ignore if not logged in — callers should check token first
+      if (!tokenRef.current) return;
+
       setCart((prev) => {
         const existing = prev.find(
           (i) => i._id === item._id && i.size === item.size
@@ -205,8 +173,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         method:  "DELETE",
         headers: { Authorization: `Bearer ${tokenRef.current}` },
       }).catch(console.error);
-    } else {
-      lsClear();
     }
   }, [API_BASE]);
 

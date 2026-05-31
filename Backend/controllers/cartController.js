@@ -2,6 +2,7 @@
 
 const Cart  = require("../models/Cart");
 const Order = require("../models/Order");
+const User  = require("../models/User");
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const parsePrice = (priceStr) =>
@@ -11,7 +12,18 @@ const parsePrice = (priceStr) =>
 const getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({ user: req.user.id });
-    res.json({ items: cart?.items ?? [] });
+
+    // Map stored productId back to _id so CartContext keeps its shape
+    const items = (cart?.items ?? []).map((item) => ({
+      _id:      item.productId,
+      name:     item.name,
+      price:    item.price,
+      img:      item.img,
+      size:     item.size,
+      quantity: item.quantity,
+    }));
+
+    res.json({ items });
   } catch (err) {
     console.error("getCart error:", err.message);
     res.status(500).json({ message: "Server error" });
@@ -28,9 +40,9 @@ const syncCart = async (req, res) => {
     }
 
     const clean = items
-      .filter((i) => i.productId && i.name && i.price && i.size && i.quantity > 0)
-      .map(({ productId, name, price, img, size, quantity }) => ({
-        productId,
+      .filter((i) => (i.productId || i._id) && i.name && i.price && i.size && i.quantity > 0)
+      .map(({ productId, _id, name, price, img, size, quantity }) => ({
+        productId: productId || _id,
         name,
         price,
         img:      img || "",
@@ -44,7 +56,17 @@ const syncCart = async (req, res) => {
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
 
-    res.json({ items: cart.items });
+    // Return items with _id shape for CartContext
+    const outItems = cart.items.map((item) => ({
+      _id:      item.productId,
+      name:     item.name,
+      price:    item.price,
+      img:      item.img,
+      size:     item.size,
+      quantity: item.quantity,
+    }));
+
+    res.json({ items: outItems });
   } catch (err) {
     console.error("syncCart error:", err.message);
     res.status(500).json({ message: "Server error" });
@@ -67,51 +89,84 @@ const clearCart = async (req, res) => {
 };
 
 // ── POST /api/cart/checkout ───────────────────────────────────────────────────
-// Called after the user taps "Checkout on WhatsApp".
-// Creates an Order record and clears the cart.
 const checkout = async (req, res) => {
   try {
-    const { items, addressId } = req.body;
+    const { items, address, addressId, total: clientTotal } = req.body;
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    const total = items.reduce(
-      (sum, item) => sum + parsePrice(item.price) * (item.quantity || 1),
+    // Validate and normalise items — accept both productId and _id field names
+    const cleanItems = items.map((item) => {
+      const productId = item.productId || item._id;
+      if (!productId || !item.name || !item.price || !item.size || !item.quantity) {
+        throw new Error(`Invalid item in cart: ${JSON.stringify(item)}`);
+      }
+      return {
+        productId,
+        name:     item.name,
+        price:    item.price,
+        img:      item.img || "",
+        size:     item.size,
+        quantity: Math.max(1, parseInt(item.quantity, 10) || 1),
+      };
+    });
+
+    // Compute total server-side; fall back to client value only if calculation gives 0
+    const computedTotal = cleanItems.reduce(
+      (sum, item) => sum + parsePrice(item.price) * item.quantity,
       0
     );
+    const total = computedTotal || clientTotal || 0;
 
-    // Optionally attach address snapshot
-    let address;
-    if (addressId && req.user.addresses) {
-      const found = req.user.addresses.find(
-        (a) => a._id.toString() === addressId
-      );
-      if (found) {
-        address = {
-          label:   found.label,
-          line1:   found.line1,
-          line2:   found.line2 || "",
-          city:    found.city,
-          state:   found.state,
-          pincode: found.pincode,
-        };
+    // ── Resolve delivery address ─────────────────────────────────────────
+    // Preferred: frontend sends the full address object inline
+    // Fallback:  look up from User document by addressId
+    let addressSnapshot = null;
+
+    if (address && address.line1 && address.city) {
+      addressSnapshot = {
+        label:   address.label   || "Home",
+        line1:   address.line1,
+        line2:   address.line2   || "",
+        city:    address.city,
+        state:   address.state   || "",
+        pincode: address.pincode || "",
+      };
+    } else if (addressId) {
+      const user = await User.findById(req.user.id).select("addresses");
+      if (user) {
+        const found = user.addresses?.find(
+          (a) => a._id.toString() === addressId
+        );
+        if (found) {
+          addressSnapshot = {
+            label:   found.label,
+            line1:   found.line1,
+            line2:   found.line2 || "",
+            city:    found.city,
+            state:   found.state,
+            pincode: found.pincode,
+          };
+        }
       }
     }
 
+    if (!addressSnapshot) {
+      return res.status(400).json({ message: "A valid delivery address is required." });
+    }
+
+    // ── Create the order ─────────────────────────────────────────────────
     const order = await Order.create({
       user:    req.user.id,
-      items:   items.map(({ productId, name, price, img, size, quantity }) => ({
-        productId, name, price, img: img || "", size,
-        quantity: Math.max(1, parseInt(quantity, 10) || 1),
-      })),
+      items:   cleanItems,
       total,
       status:  "pending",
-      address: address || undefined,
+      address: addressSnapshot,
     });
 
-    // Clear the saved cart
+    // ── Clear the user's server-side cart ────────────────────────────────
     await Cart.findOneAndUpdate(
       { user: req.user.id },
       { items: [] },
@@ -121,7 +176,7 @@ const checkout = async (req, res) => {
     res.status(201).json({ order });
   } catch (err) {
     console.error("checkout error:", err.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: err.message || "Server error" });
   }
 };
 
@@ -148,7 +203,7 @@ const getOrderById = async (req, res) => {
   }
 };
 
-// ── Admin: GET /api/cart/admin/orders ─────────────────────────────────────────
+// ── Admin: GET /api/cart/admin/orders ────────────────────────────────────────
 const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find({})
@@ -167,7 +222,7 @@ const updateOrderStatus = async (req, res) => {
     const { status } = req.body;
     const allowed = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
     if (!allowed.includes(status)) {
-      return res.status(400).json({ message: "Invalid status" });
+      return res.status(400).json({ message: "Invalid status value" });
     }
     const order = await Order.findByIdAndUpdate(
       req.params.id,
