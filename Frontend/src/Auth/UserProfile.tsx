@@ -9,7 +9,6 @@ import {
   IoTrashOutline,
   IoAddOutline,
   IoRemoveOutline,
-  IoLogoWhatsapp,
   IoCartOutline,
   IoArrowForwardOutline,
 } from "react-icons/io5";
