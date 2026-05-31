@@ -177,22 +177,42 @@ const AdminManageOrders: React.FC = () => {
     }
   };
 
-  // ── Delete ─────────────────────────────────────────────────────────────────
-  const deleteOrder = async (id: string) => {
-    try {
-      const r = await fetch(`${API_BASE}/api/cart/admin/orders/${id}`, {
-        method: "DELETE",
-        headers: getAuthHeader(),
-      });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      setOrders((p) => p.filter((o) => o._id !== id));
-      showToast("Order deleted", "success");
-    } catch {
-      showToast("Failed to delete order", "error");
-    }
-    setDeleteTarget(null);
-  };
+// ── Delete ─────────────────────────────────────────────────────────────────
+const deleteOrder = async (id: string) => {
+  try {
+    const r = await fetch(`${API_BASE}/api/cart/admin/orders/${id}`, {
+      method: "DELETE",
+      headers: getAuthHeader(),
+    });
 
+    const data = await r.json().catch(() => null);
+
+    console.log("DELETE STATUS:", r.status);
+    console.log("DELETE RESPONSE:", data);
+
+    // Already deleted
+    if (r.status === 404) {
+      setOrders((prev) => prev.filter((o) => o._id !== id));
+      showToast("Order already deleted", "info");
+      setDeleteTarget(null);
+      return;
+    }
+
+    if (!r.ok) {
+      throw new Error(data?.message || `HTTP ${r.status}`);
+    }
+
+    // Remove from UI
+    setOrders((prev) => prev.filter((o) => o._id !== id));
+
+    showToast("Order deleted", "success");
+  } catch (err) {
+    console.error("DELETE ERROR:", err);
+    showToast("Failed to delete order", "error");
+  } finally {
+    setDeleteTarget(null);
+  }
+};
   // ── Sort toggle ────────────────────────────────────────────────────────────
   const toggleSort = (field: SortField) => {
     if (sortField === field) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
