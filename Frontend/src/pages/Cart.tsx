@@ -477,7 +477,13 @@ function Cart() {
           {addresses.length === 0 && !addrLoading && (
             <p className="cart__checkout-note">
               Add a delivery address in your{" "}
-              <Link to="/account" className="cart__addr-link">account</Link>{" "}
+             <Link
+  to="/account"
+  state={{ tab: "addresses" }}
+  className="cart__addr-link"
+>
+  account
+</Link>
               to place an order.
             </p>
           )}
