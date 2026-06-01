@@ -86,12 +86,12 @@ function Contact() {
 
           <div className="contact__info-item">
             <span>Phone</span>
-            <p>{about?.phone || "+91 98765 43210"}</p>
+            <p>{about?.phone || "+91 756-103-2017"}</p>
           </div>
 
           <div className="contact__info-item">
             <span>Hours</span>
-            <p>Mon – Sat, 10am – 6pm IST</p>
+            <p>24x7-Costumer Support</p>
           </div>
         </div>
 
