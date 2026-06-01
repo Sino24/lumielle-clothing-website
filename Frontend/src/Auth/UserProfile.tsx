@@ -287,7 +287,6 @@ const AccountPage: React.FC = () => {
 
   const pendingRefreshOrders = useRef<boolean>(navState?.refreshOrders === true);
 
-  // ── DEFAULT TAB IS NOW "cart" (My Bag) ───────────────────
   const [activeTab,       setActiveTab]       = useState<Tab>(navState?.tab ?? "cart");
   const [profile,         setProfile]         = useState<ProfileData | null>(null);
   const [loading,         setLoading]         = useState(true);
@@ -311,12 +310,26 @@ const AccountPage: React.FC = () => {
     Authorization:  `Bearer ${token}`,
   }), [token]);
 
+  // ── KEY FIX: respond to location.state changes even when already mounted ──
+  // This handles the case where the user is already on /account (e.g. on the
+  // "cart" tab) and clicks "Manage addresses →" in Cart.tsx — React won't
+  // remount AccountPage, so useState never re-runs. This effect picks up the
+  // new state and switches the tab accordingly.
   useEffect(() => {
-    if (navState) {
-      navigate("/account", { replace: true, state: null });
+    if (!navState?.tab) return;
+
+    setActiveTab(navState.tab);
+    setMsg(null);
+
+    if (navState.refreshOrders) {
+      pendingRefreshOrders.current = true;
     }
+
+    // Clear the state from history so a page refresh doesn't re-apply it
+    navigate("/account", { replace: true, state: null });
+  // location.state is the dependency — re-run whenever the state object changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [location.state]);
 
   useEffect(() => {
     if (!token) return;
@@ -433,7 +446,6 @@ const AccountPage: React.FC = () => {
 
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
-  // ── Tab order: My Bag first, Profile Settings last ────────
   const tabs: { id: Tab; label: string; Icon: React.FC }[] = [
     { id: "cart",      label: "My Bag",           Icon: () => <IoBagOutline size={14} /> },
     { id: "orders",    label: "My Orders",        Icon: IconPackage },
