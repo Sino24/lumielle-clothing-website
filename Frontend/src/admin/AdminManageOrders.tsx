@@ -1,7 +1,7 @@
-// src/pages/Admin/AdminManageOrders.tsx
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import "../styles/AdminStyle/AdminManageOrders.css";
+import { AdminSkeleton } from "../components/AdminSkeleton";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -177,42 +177,30 @@ const AdminManageOrders: React.FC = () => {
     }
   };
 
-// ── Delete ─────────────────────────────────────────────────────────────────
-const deleteOrder = async (id: string) => {
-  try {
-    const r = await fetch(`${API_BASE}/api/cart/admin/orders/${id}`, {
-      method: "DELETE",
-      headers: getAuthHeader(),
-    });
-
-    const data = await r.json().catch(() => null);
-
-    console.log("DELETE STATUS:", r.status);
-    console.log("DELETE RESPONSE:", data);
-
-    // Already deleted
-    if (r.status === 404) {
+  // ── Delete ─────────────────────────────────────────────────────────────────
+  const deleteOrder = async (id: string) => {
+    try {
+      const r = await fetch(`${API_BASE}/api/cart/admin/orders/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeader(),
+      });
+      const data = await r.json().catch(() => null);
+      if (r.status === 404) {
+        setOrders((prev) => prev.filter((o) => o._id !== id));
+        showToast("Order already deleted", "info");
+        setDeleteTarget(null);
+        return;
+      }
+      if (!r.ok) throw new Error(data?.message || `HTTP ${r.status}`);
       setOrders((prev) => prev.filter((o) => o._id !== id));
-      showToast("Order already deleted", "info");
+      showToast("Order deleted", "success");
+    } catch (err) {
+      showToast("Failed to delete order", "error");
+    } finally {
       setDeleteTarget(null);
-      return;
     }
+  };
 
-    if (!r.ok) {
-      throw new Error(data?.message || `HTTP ${r.status}`);
-    }
-
-    // Remove from UI
-    setOrders((prev) => prev.filter((o) => o._id !== id));
-
-    showToast("Order deleted", "success");
-  } catch (err) {
-    console.error("DELETE ERROR:", err);
-    showToast("Failed to delete order", "error");
-  } finally {
-    setDeleteTarget(null);
-  }
-};
   // ── Sort toggle ────────────────────────────────────────────────────────────
   const toggleSort = (field: SortField) => {
     if (sortField === field) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -272,7 +260,10 @@ const deleteOrder = async (id: string) => {
               {loading ? "Loading…" : `${orders.length} total order${orders.length !== 1 ? "s" : ""}`}
             </p>
           </div>
-          <button className="amo-btn ghost" onClick={fetchOrders} type="button">🔄 Refresh</button>
+          <button className="amo-btn ghost amo-refresh-btn" onClick={fetchOrders} type="button">
+            <span className="amo-refresh-icon">🔄</span>
+            <span className="amo-refresh-text">Refresh</span>
+          </button>
         </div>
 
         {/* STATS */}
@@ -280,7 +271,7 @@ const deleteOrder = async (id: string) => {
           <div className="amo-stats">
             <div className="amo-stat">
               <div className="amo-stat-num">{orders.length}</div>
-              <div className="amo-stat-label">Total Orders</div>
+              <div className="amo-stat-label">Total</div>
             </div>
             <div className="amo-stat">
               <div className="amo-stat-num amo-stat-num--gold">
@@ -343,7 +334,7 @@ const deleteOrder = async (id: string) => {
               <input
                 className="amo-search"
                 type="text"
-                placeholder="Search by order ID, customer, or product…"
+                placeholder="Search by ID, customer or product…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -376,10 +367,7 @@ const deleteOrder = async (id: string) => {
 
         {/* ORDER LIST */}
         {loading ? (
-          <div className="amo-loading-state">
-            <div className="amo-spin" />
-            <div className="amo-load-text">Loading orders…</div>
-          </div>
+         <AdminSkeleton variant="orders" />
         ) : filtered.length === 0 ? (
           <div className="amo-empty-state">
             <div className="amo-empty-icon">{search ? "🔍" : "📦"}</div>
@@ -395,7 +383,7 @@ const deleteOrder = async (id: string) => {
         ) : (
           <div className="amo-list">
 
-            {/* TABLE HEADER */}
+            {/* TABLE HEADER — desktop only */}
             <div className="amo-list-hd">
               <div className="amo-col-id">Order ID</div>
               <div className="amo-col-customer">Customer</div>
@@ -408,16 +396,17 @@ const deleteOrder = async (id: string) => {
 
             {filtered.map((order, idx) => {
               const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending;
+              const isOpen = expandedId === order._id;
               return (
                 <div
                   key={order._id}
-                  className={`amo-order${expandedId === order._id ? " amo-order--open" : ""}`}
+                  className={`amo-order${isOpen ? " amo-order--open" : ""}`}
                   style={{ animationDelay: `${idx * 25}ms` }}
                 >
-                  {/* ROW */}
+                  {/* DESKTOP ROW */}
                   <div
                     className="amo-order-row"
-                    onClick={() => setExpandedId(expandedId === order._id ? null : order._id)}
+                    onClick={() => setExpandedId(isOpen ? null : order._id)}
                   >
                     <div className="amo-col-id">
                       <span className="amo-order-id">#{order._id.slice(-8).toUpperCase()}</span>
@@ -478,13 +467,81 @@ const deleteOrder = async (id: string) => {
                         <IconTrash />
                       </button>
                       <span className="amo-chevron-wrap">
-                        <IconChevron open={expandedId === order._id} />
+                        <IconChevron open={isOpen} />
                       </span>
                     </div>
                   </div>
 
-                  {/* EXPANDED DETAIL PANEL */}
-                  {expandedId === order._id && (
+                  {/* MOBILE CARD — shown instead of the grid row on small screens */}
+                  <div
+                    className="amo-order-card"
+                    onClick={() => setExpandedId(isOpen ? null : order._id)}
+                  >
+                    {/* Card top: ID + status + chevron */}
+                    <div className="amo-card-top">
+                      <span className="amo-order-id">#{order._id.slice(-8).toUpperCase()}</span>
+                      <span
+                        className="amo-status-pill"
+                        style={{ color: cfg.color, background: cfg.bg, borderColor: cfg.border }}
+                      >
+                        {cfg.label}
+                      </span>
+                      <span className="amo-chevron-wrap" style={{ marginLeft: "auto" }}>
+                        <IconChevron open={isOpen} />
+                      </span>
+                    </div>
+
+                    {/* Card middle: customer + amount */}
+                    <div className="amo-card-mid">
+                      <div className="amo-card-customer">
+                        <span className="amo-customer-name">{order.userName || "Guest"}</span>
+                        {order.userEmail && (
+                          <span className="amo-customer-email">{order.userEmail}</span>
+                        )}
+                      </div>
+                      <div className="amo-card-right">
+                        <span className="amo-total-val">₹{order.total.toLocaleString("en-IN")}</span>
+                        <span className="amo-card-date">{fmtDate(order.createdAt)}</span>
+                      </div>
+                    </div>
+
+                    {/* Card bottom: item thumbs + action buttons */}
+                    <div className="amo-card-bot">
+                      <div className="amo-items-preview">
+                        {order.items.slice(0, 4).map((item, i) => (
+                          <div key={i} className="amo-item-thumb" title={item.name}>
+                            {item.img
+                              ? <img src={item.img} alt={item.name} />
+                              : <span>👕</span>}
+                          </div>
+                        ))}
+                        {order.items.length > 4 && (
+                          <div className="amo-item-thumb amo-item-thumb--more">
+                            +{order.items.length - 4}
+                          </div>
+                        )}
+                      </div>
+                      <div className="amo-card-actions" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          className="amo-btn gold sm"
+                          type="button"
+                          onClick={() => { setEditTarget(order); setEditStatus(order.status); }}
+                        >
+                          <IconEdit />
+                        </button>
+                        <button
+                          className="amo-btn danger sm"
+                          type="button"
+                          onClick={() => setDeleteTarget(order._id)}
+                        >
+                          <IconTrash />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* EXPANDED DETAIL PANEL — shared by desktop + mobile */}
+                  {isOpen && (
                     <div className="amo-detail">
                       <div className="amo-detail-grid">
 
@@ -522,7 +579,6 @@ const deleteOrder = async (id: string) => {
                             </div>
                           </div>
 
-                          {/* Delivery Address */}
                           {order.address && (
                             <>
                               <div className="amo-detail-section-title" style={{ marginTop: "1.25rem" }}>

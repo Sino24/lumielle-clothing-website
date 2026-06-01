@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import "../styles/AdminStyle/AdminManageLookbook.css";
+import { AdminSkeleton } from "../components/AdminSkeleton";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -158,10 +159,7 @@ const AdminManageLookbook: React.FC = () => {
         {/* GRID */}
         <div className="alb-grid">
           {loading ? (
-            <div className="alb-loading-state">
-              <div className="alb-spin" />
-              <div className="alb-load-text">Loading looks…</div>
-            </div>
+    <AdminSkeleton variant="lookbook" />
           ) : looks.length === 0 ? (
             <div className="alb-empty-state">
               <div className="alb-empty-icon">🖼️</div>

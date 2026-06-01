@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/AdminStyle/adminDashbord.css";
+import { AdminSkeleton } from "../components/AdminSkeleton";
 
 interface Product {
   _id: string;
@@ -103,10 +104,7 @@ const AdminDashboard: React.FC = () => {
 
         {/* ── Body ── */}
         {loading ? (
-          <div className="adm-loading">
-            <div className="adm-spin" />
-            <span>Loading store data…</span>
-          </div>
+    <AdminSkeleton variant="dashboard" />
         ) : error ? (
           <div className="adm-error">
             <div className="adm-error-icon">⚠️</div>

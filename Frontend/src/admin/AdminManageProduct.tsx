@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import "../styles/AdminStyle/AdminManageProduct.css";
+import { AdminSkeleton } from "../components/AdminSkeleton";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ColorEntry { label: string; hex: string; }
@@ -58,13 +59,11 @@ const CategorySelect: React.FC<CategorySelectProps> = ({
   value, existingCategories, onChange,
 }) => {
   const [mode, setMode] = useState<"select" | "new">(
-    // If the current value is already in the list (or empty), use select mode
     value === "" || existingCategories.includes(value) ? "select" : "new"
   );
   const [newVal, setNewVal] = useState(mode === "new" ? value : "");
   const newInputRef = useRef<HTMLInputElement>(null);
 
-  // Switch to new mode and focus the input
   const switchToNew = () => {
     setMode("new");
     setNewVal("");
@@ -72,7 +71,6 @@ const CategorySelect: React.FC<CategorySelectProps> = ({
     setTimeout(() => newInputRef.current?.focus(), 50);
   };
 
-  // Switch back to select mode
   const switchToSelect = () => {
     setMode("select");
     setNewVal("");
@@ -203,7 +201,7 @@ const ImageField: React.FC<ImageFieldProps> = ({
         <div className="pm-upload-content">
           {uploading
             ? <><span className="pm-upload-spinner" /><span className="pm-upload-text">Uploading…</span></>
-            : <><span className="pm-upload-icon">📤</span><span className="pm-upload-text">Click or drag & drop to upload</span></>
+            : <><span className="pm-upload-icon">📤</span><span className="pm-upload-text">Tap or drag & drop to upload</span></>
           }
         </div>
       </div>
@@ -301,7 +299,7 @@ const MultiImageField: React.FC<MultiImageFieldProps> = ({
         <div className="pm-upload-content">
           {uploading
             ? <><span className="pm-upload-spinner" /><span className="pm-upload-text">Uploading {uploadingCount} image(s)…</span></>
-            : <><span className="pm-upload-icon">🖼️</span><span className="pm-upload-text">Select multiple images from gallery</span><span className="pm-upload-hint">Or drag & drop · Ctrl+click to select many</span></>
+            : <><span className="pm-upload-icon">🖼️</span><span className="pm-upload-text">Select images from gallery</span><span className="pm-upload-hint">Tap to select · multiple supported</span></>
           }
         </div>
       </div>
@@ -350,7 +348,6 @@ const ProductManage: React.FC = () => {
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
-  // Derive unique categories from existing products
   const existingCategories = Array.from(new Set(products.map((p) => p.category).filter(Boolean)));
   const filterCategories   = ["all", ...existingCategories];
 
@@ -471,7 +468,7 @@ const ProductManage: React.FC = () => {
             <p className="pm-page-sub">Manage inventory · {products.length} total</p>
           </div>
           <div className="pm-page-actions">
-            <button className="pm-btn ghost" onClick={fetchProducts}>🔄 Refresh</button>
+            <button className="pm-btn ghost pm-btn-icon-only" onClick={fetchProducts} title="Refresh">🔄</button>
             <button className="pm-btn gold"  onClick={openAdd}>+ Add Product</button>
           </div>
         </div>
@@ -486,25 +483,24 @@ const ProductManage: React.FC = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <select
-            className="pm-filter-select"
-            value={catFilter}
-            onChange={(e) => setCatFilter(e.target.value)}
-          >
-            {filterCategories.map((c) => (
-              <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>
-            ))}
-          </select>
-          <span className="pm-results-info">{filtered.length} / {products.length}</span>
+          <div className="pm-toolbar-row2">
+            <select
+              className="pm-filter-select"
+              value={catFilter}
+              onChange={(e) => setCatFilter(e.target.value)}
+            >
+              {filterCategories.map((c) => (
+                <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>
+              ))}
+            </select>
+            <span className="pm-results-info">{filtered.length} / {products.length}</span>
+          </div>
         </div>
 
         {/* GRID */}
         <div className="pm-grid">
           {loading ? (
-            <div className="pm-loading-state">
-              <div className="pm-spin" />
-              <div className="pm-load-text">Loading products…</div>
-            </div>
+     <AdminSkeleton variant="products" />
           ) : filtered.length === 0 ? (
             <div className="pm-empty-state">
               <div className="pm-empty-icon">👕</div>
@@ -587,7 +583,6 @@ const ProductManage: React.FC = () => {
                 />
               </div>
 
-              {/* ── Category with dropdown + new option ── */}
               <div className="pm-form-group">
                 <label className="pm-label">
                   Category <span className="pm-req">*</span>
@@ -597,7 +592,6 @@ const ProductManage: React.FC = () => {
                   existingCategories={existingCategories}
                   onChange={(val) => setF("category", val)}
                 />
-                {/* Show the resolved value as a pill when something is selected */}
                 {form.category && (
                   <div className="pm-cat-preview">
                     <span className="pm-cat-pill">{form.category}</span>
@@ -677,7 +671,7 @@ const ProductManage: React.FC = () => {
                     <div className="pm-color-swatch" style={{ background: c.hex }}>
                       <input type="color" value={c.hex} onChange={(e) => setColorField(i, "hex", e.target.value)} />
                     </div>
-                    <input className="pm-input" placeholder="Label (e.g. Midnight Black)" value={c.label} onChange={(e) => setColorField(i, "label", e.target.value)} />
+                    <input className="pm-input pm-color-label-in" placeholder="Label (e.g. Midnight Black)" value={c.label} onChange={(e) => setColorField(i, "label", e.target.value)} />
                     <input className="pm-input pm-hex-in" placeholder="#000000" value={c.hex} onChange={(e) => setColorField(i, "hex", e.target.value)} />
                     <button className="pm-rm-btn" onClick={() => removeColor(i)}>✕</button>
                   </div>

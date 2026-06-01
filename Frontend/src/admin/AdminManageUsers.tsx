@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import "../styles/AdminStyle/AdminManageUsers.css";
+import { AdminSkeleton } from "../components/AdminSkeleton";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -255,10 +256,7 @@ const AdminManageUsers: React.FC = () => {
 
         {/* USER LIST */}
         {loading ? (
-          <div className="amu-loading-state">
-            <div className="amu-spin" />
-            <div className="amu-load-text">Loading users…</div>
-          </div>
+         <AdminSkeleton variant="users" />
         ) : filtered.length === 0 ? (
           <div className="amu-empty-state">
             <div className="amu-empty-icon">{search ? "🔍" : "👤"}</div>

@@ -1,0 +1,301 @@
+─────────────────────────────────── */
+@keyframes ask-shimmer {
+  0%   { background-position: -700px 0; }
+  100% { background-position:  700px 0; }
+}
+
+.ask {
+  background: linear-gradient(
+    90deg,
+    #ede9e2 25%,
+    #f7f4f0 50%,
+    #ede9e2 75%
+  );
+  background-size: 700px 100%;
+  animation: ask-shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* ── Page wrapper ───────────────────────────────────────────────────────────── */
+.ask-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding: 2.5rem 2.5rem 4rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Shared header ──────────────────────────────────────────────────────────── */
+.ask-hd {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.ask-hd-left  { display: flex; flex-direction: column; gap: 10px; }
+.ask-hd-right { display: flex; gap: 10px; align-items: center; }
+
+.ask-title     { height: 32px; width: 200px; }
+.ask-sub       { height: 13px; width: 170px; }
+.ask-btn       { height: 36px; width: 130px; border-radius: 4px; }
+.ask-btn-ghost { height: 36px; width: 100px; border-radius: 4px; }
+
+/* ── Dashboard nav strip ────────────────────────────────────────────────────── */
+.ask-nav { display: flex; flex-wrap: wrap; gap: 8px; }
+.ask-nav-pill { height: 34px; width: 100px; border-radius: 8px; }
+
+/* ── Stats row ──────────────────────────────────────────────────────────────── */
+.ask-stats { display: grid; gap: 1rem; }
+.ask-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 1.25rem 1rem;
+  border-radius: 12px;
+  background: #FAF8F5;
+  border: 1px solid #EDE9E3;
+}
+.ask-stat-emoji { height: 28px; width: 28px; border-radius: 50%; }
+.ask-stat-num   { height: 22px; width: 60px; }
+.ask-stat-label { height: 11px; width: 80px; }
+
+/* ── Section label ──────────────────────────────────────────────────────────── */
+.ask-section-label { height: 13px; width: 80px; }
+.ask-mt { margin-top: 0.75rem; }
+
+/* ── Dashboard quick-link cards ─────────────────────────────────────────────── */
+.ask-links { display: flex; flex-direction: column; gap: 8px; }
+.ask-link-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #FAF8F5;
+  border: 1px solid #EDE9E3;
+}
+.ask-link-icon  { height: 28px; width: 28px; border-radius: 8px; }
+.ask-link-text  { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+.ask-link-title { height: 13px; width: 120px; }
+.ask-link-desc  { height: 11px; width: 180px; }
+.ask-link-arrow { height: 20px; width: 14px; margin-left: auto; }
+
+/* ── Dashboard recent rows ──────────────────────────────────────────────────── */
+.ask-recent { display: flex; flex-direction: column; gap: 6px; }
+.ask-recent-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #FAF8F5;
+  border: 1px solid #EDE9E3;
+}
+.ask-thumb        { height: 46px; width: 46px; border-radius: 8px; }
+.ask-recent-meta  { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+.ask-recent-name  { height: 13px; width: 150px; }
+.ask-recent-cat   { height: 10px; width: 90px; }
+.ask-recent-price { height: 14px; width: 60px; }
+
+/* ── Generic toolbar ────────────────────────────────────────────────────────── */
+.ask-toolbar { display: flex; gap: 10px; align-items: center; }
+.ask-search  { height: 38px; flex: 1; max-width: 320px; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRODUCTS skeleton  — mirrors pm-page exactly
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* toolbar: full-width search on top, then row with filter select + count */
+.ask-pm-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.ask-pm-search  { height: 40px; width: 100%; border-radius: 0; }
+.ask-pm-toolbar-row2 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.ask-pm-select { height: 38px; flex: 1; max-width: 200px; }
+.ask-pm-count  { height: 13px; width: 60px; }
+
+/* product grid — auto-fill same as pm-grid */
+.ask-pm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+/* individual product card */
+.ask-pm-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #EDE9E3;
+}
+
+/* 3:4 hero image */
+.ask-pm-img { aspect-ratio: 3/4; border-radius: 0; }
+
+/* body section: category pill, name, price, swatches */
+.ask-pm-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0.75rem 1rem 0.6rem;
+  flex: 1;
+}
+.ask-pm-cat   { height: 9px;  width: 40%; }
+.ask-pm-name  { height: 15px; width: 80%; }
+.ask-pm-price { height: 12px; width: 32%; }
+
+/* colour swatches row */
+.ask-pm-swatches { display: flex; gap: 5px; margin-top: 2px; }
+.ask-pm-swatch   { height: 14px; width: 14px; border-radius: 50%; }
+
+/* footer: size tags + img count */
+.ask-pm-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.75rem;
+  border-top: 1px solid #EDE9E3;
+  flex-wrap: wrap;
+}
+.ask-pm-sizes    { display: flex; gap: 4px; }
+.ask-pm-size-tag { height: 18px; width: 28px; }
+.ask-pm-img-count{ height: 11px; width: 36px; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOOKBOOK skeleton  — mirrors alb-grid exactly
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ask-lb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+.ask-lb-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #EDE9E3;
+}
+.ask-lb-img       { aspect-ratio: 3/4; border-radius: 0; }
+.ask-lb-card-body { display: flex; flex-direction: column; gap: 8px; padding: 0.75rem 1rem; }
+.ask-lb-order     { height: 9px;  width: 24px; }
+.ask-lb-title     { height: 14px; width: 65%; }
+.ask-lb-sub       { height: 10px; width: 45%; }
+
+/* ── Form panels (about / hero) ─────────────────────────────────────────────── */
+.ask-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 4px;
+  background: #FAF8F5;
+  border: 1px solid #EDE9E3;
+}
+.ask-panel-title { height: 14px; width: 120px; }
+.ask-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.ask-input     { height: 38px; }
+.ask-textarea  { height: 80px; }
+.ask-input-num { height: 38px; width: 64px; }
+.ask-upload-box{ height: 72px; border-radius: 6px; }
+.ask-full      { grid-column: 1 / -1; }
+.ask-flex1     { flex: 1; height: 38px; }
+.ask-value-row { display: flex; gap: 10px; align-items: center; width: 100%; }
+
+/* ── Hero preview ───────────────────────────────────────────────────────────── */
+.ask-hero-preview {
+  width: 100%;
+  height: clamp(160px, 25vw, 260px);
+  border-radius: 4px;
+}
+
+/* ── Contact message list ───────────────────────────────────────────────────── */
+.ask-msg-list { display: flex; flex-direction: column; gap: 6px; }
+.ask-msg-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #FAF8F5;
+  border: 1px solid #EDE9E3;
+}
+.ask-avatar      { height: 38px; width: 38px; border-radius: 50%; }
+.ask-msg-meta    { display: flex; flex-direction: column; gap: 7px; min-width: 130px; }
+.ask-msg-name    { height: 13px; width: 110px; }
+.ask-msg-email   { height: 10px; width: 90px; }
+.ask-msg-preview { flex: 1; height: 11px; }
+.ask-msg-right   { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.ask-msg-date    { height: 10px; width: 70px; }
+.ask-status-pill { height: 20px; width: 56px; border-radius: 20px; }
+
+/* ── Users / Orders table ───────────────────────────────────────────────────── */
+.ask-table { display: flex; flex-direction: column; }
+.ask-table-head {
+  display: flex;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #EDE9E3;
+}
+.ask-th { height: 11px; flex: 1; }
+.ask-table-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #F5F2EE;
+  background: #FAF8F5;
+}
+.ask-table-row:first-of-type { border-radius: 10px 10px 0 0; }
+.ask-table-row:last-of-type  { border-radius: 0 0 10px 10px; border-bottom: none; }
+.ask-td-name { height: 13px; flex: 1.5; }
+.ask-td-mid  { height: 12px; flex: 1; }
+.ask-td-pill { height: 20px; width: 64px; border-radius: 20px; }
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .ask-stats        { grid-template-columns: repeat(2, 1fr) !important; }
+  .ask-form-grid    { grid-template-columns: 1fr; }
+  .ask-full         { grid-column: unset; }
+}
+
+@media (min-width: 640px) {
+  /* toolbar goes single row on tablet+ just like pm-toolbar does */
+  .ask-pm-toolbar {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .ask-pm-search      { flex: 1; min-width: 200px; width: auto; }
+  .ask-pm-toolbar-row2{ flex: none; }
+}
+
+@media (max-width: 600px) {
+  .ask-page         { padding: 1.5rem 1rem 3rem; gap: 1.25rem; }
+  .ask-nav-pill     { width: 80px; }
+  .ask-msg-preview  { display: none; }
+  .ask-link-desc    { display: none; }
+}
+
+@media (max-width: 399px) {
+  /* matches pm-grid 2-col on very small screens */
+  .ask-pm-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+}

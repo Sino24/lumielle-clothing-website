@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import "../styles/AdminStyle/AdminManageHero.css";
+import { AdminSkeleton } from "../components/AdminSkeleton";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -138,10 +139,7 @@ const AdminManageHero: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="amh-loading-state">
-            <div className="amh-spin" />
-            <div className="amh-load-text">Loading hero data…</div>
-          </div>
+       <AdminSkeleton variant="hero" />
         ) : (
           <div className="amh-form">
 

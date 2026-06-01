@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import "../styles/AdminStyle/AdminManageClientProjects.css";
+import { AdminSkeleton } from "../components/AdminSkeleton";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -236,10 +237,7 @@ const AdminManageClientProjects: React.FC = () => {
 
         {/* List */}
         {loading ? (
-          <div className="acp-loading-state">
-            <div className="acp-spin" />
-            <div className="acp-load-text">Loading projects…</div>
-          </div>
+     <AdminSkeleton variant="client-projects" />
         ) : projects.length === 0 ? (
           <div className="acp-empty">
             <p>No projects yet.</p>

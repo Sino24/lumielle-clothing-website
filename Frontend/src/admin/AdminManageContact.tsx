@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import "../styles/AdminStyle/AdminManageContact.css";
+import { AdminSkeleton } from "../components/AdminSkeleton";
 
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -138,10 +139,7 @@ const AdminManageContact: React.FC = () => {
 
         {/* MESSAGE LIST */}
         {loading ? (
-          <div className="amc-loading-state">
-            <div className="amc-spin" />
-            <div className="amc-load-text">Loading messages…</div>
-          </div>
+        <AdminSkeleton variant="contact" />
         ) : contacts.length === 0 ? (
           <div className="amc-empty-state">
             <div className="amc-empty-icon">✉️</div>

@@ -171,7 +171,6 @@ const OrderCard: React.FC<{ order: Order }> = ({ order }) => {
 };
 
 // ── Cart Section ──────────────────────────────────────────
-// Shows current bag contents with a "Go to Bag" CTA that redirects to /cart
 const CartSection: React.FC = () => {
   const { cart, removeFromCart, updateQty, clearCart } = useCart();
   const navigate = useNavigate();
@@ -258,7 +257,6 @@ const CartSection: React.FC = () => {
           <strong className="acc-cart__total-val">₹{total.toLocaleString("en-IN")}</strong>
         </div>
         <p className="acc-cart__note">Inclusive of all taxes · Free shipping above ₹999</p>
-        {/* ── Primary CTA: redirect to full Cart page for checkout ── */}
         <div className="acc-cart__actions">
           <button
             className="acc-btn acc-btn--primary acc-cart__buynow-btn"
@@ -285,15 +283,12 @@ const AccountPage: React.FC = () => {
   const location          = useLocation();
   const API_BASE          = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // Read navigation state passed from Cart.tsx success screen
   const navState = location.state as { tab?: Tab; refreshOrders?: boolean } | null;
 
-  // ── Capture refreshOrders flag in a ref BEFORE it gets wiped by navigate() ──
-  // This is the key fix: navState is cleared immediately on mount, so we must
-  // snapshot the refreshOrders flag into a ref before that happens.
   const pendingRefreshOrders = useRef<boolean>(navState?.refreshOrders === true);
 
-  const [activeTab,       setActiveTab]       = useState<Tab>(navState?.tab ?? "profile");
+  // ── DEFAULT TAB IS NOW "cart" (My Bag) ───────────────────
+  const [activeTab,       setActiveTab]       = useState<Tab>(navState?.tab ?? "cart");
   const [profile,         setProfile]         = useState<ProfileData | null>(null);
   const [loading,         setLoading]         = useState(true);
   const [saving,          setSaving]          = useState(false);
@@ -316,8 +311,6 @@ const AccountPage: React.FC = () => {
     Authorization:  `Bearer ${token}`,
   }), [token]);
 
-  // Clear the navigation state after we've consumed it, so a manual
-  // page refresh doesn't re-trigger the forced reload.
   useEffect(() => {
     if (navState) {
       navigate("/account", { replace: true, state: null });
@@ -325,7 +318,6 @@ const AccountPage: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Profile fetch
   useEffect(() => {
     if (!token) return;
     fetch(`${API_BASE}/api/auth/me`, { headers: authHeaders() })
@@ -338,8 +330,6 @@ const AccountPage: React.FC = () => {
       .finally(() => setLoading(false));
   }, [token, API_BASE, authHeaders]);
 
-  // Orders fetch — runs when the orders tab is opened.
-  // Uses a ref-captured refreshOrders flag so it survives the navigate() wipe.
   const fetchOrders = useCallback(() => {
     if (!token) return;
     setOrdersLoading(true);
@@ -348,7 +338,6 @@ const AccountPage: React.FC = () => {
       .then((data: Order[]) => {
         setOrders(Array.isArray(data) ? data : []);
         setOrdersLoaded(true);
-        // Consume the refresh flag after a successful fetch
         pendingRefreshOrders.current = false;
       })
       .catch(() => {
@@ -361,8 +350,6 @@ const AccountPage: React.FC = () => {
 
   useEffect(() => {
     if (activeTab !== "orders" || !token) return;
-
-    // If a refresh was requested (came from checkout) OR orders haven't loaded yet, fetch
     if (pendingRefreshOrders.current || !ordersLoaded) {
       fetchOrders();
     }
@@ -446,12 +433,13 @@ const AccountPage: React.FC = () => {
 
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
+  // ── Tab order: My Bag first, Profile Settings last ────────
   const tabs: { id: Tab; label: string; Icon: React.FC }[] = [
-    { id: "profile",   label: "My Profile", Icon: IconUser },
-    { id: "orders",    label: "My Orders",  Icon: IconPackage },
-    { id: "addresses", label: "Addresses",  Icon: IconMapPin },
-    { id: "password",  label: "Password",   Icon: IconLock },
-    { id: "cart",      label: "My Bag",     Icon: () => <IoBagOutline size={14} /> },
+    { id: "cart",      label: "My Bag",           Icon: () => <IoBagOutline size={14} /> },
+    { id: "orders",    label: "My Orders",        Icon: IconPackage },
+    { id: "addresses", label: "Addresses",        Icon: IconMapPin },
+    { id: "password",  label: "Password",         Icon: IconLock },
+    { id: "profile",   label: "Profile Settings", Icon: IconUser },
   ];
 
   if (loading) return <AccountSkeleton />;
@@ -517,47 +505,14 @@ const AccountPage: React.FC = () => {
           </div>
         )}
 
-        {/* ── Profile ── */}
-        {activeTab === "profile" && (
-          <section className="acc-section" key="profile">
+        {/* ── Cart / My Bag ── */}
+        {activeTab === "cart" && (
+          <section className="acc-section" key="cart">
             <div className="acc-section-hd">
-              <h2 className="acc-section-title">Personal Information</h2>
-              <p className="acc-section-sub">Update your name and contact details</p>
+              <h2 className="acc-section-title">My Bag</h2>
+              <p className="acc-section-sub">Items currently in your shopping bag</p>
             </div>
-            <form className="acc-form" onSubmit={saveProfile}>
-              <div className="acc-fields-grid">
-                <div className="acc-field">
-                  <label className="acc-label" htmlFor="pf-name">Full Name</label>
-                  <div className="acc-input-wrap">
-                    <span className="acc-input-icon"><IconUser /></span>
-                    <input id="pf-name" name="name" className="acc-input" type="text"
-                      value={profileForm.name} disabled={saving} autoComplete="name"
-                      onChange={(e) => setProfileForm((p) => ({ ...p, name: e.target.value }))} />
-                  </div>
-                </div>
-                <div className="acc-field">
-                  <label className="acc-label" htmlFor="pf-email">Email Address</label>
-                  <div className="acc-input-wrap">
-                    <span className="acc-input-icon"><IconMail /></span>
-                    <input id="pf-email" name="email" className="acc-input acc-input--readonly"
-                      type="email" value={profile?.email ?? ""} readOnly title="Email cannot be changed" />
-                  </div>
-                  <p className="acc-field-hint">Email address cannot be changed.</p>
-                </div>
-                <div className="acc-field">
-                  <label className="acc-label" htmlFor="pf-phone">Phone <span className="acc-optional">(optional)</span></label>
-                  <div className="acc-input-wrap">
-                    <span className="acc-input-icon"><IconPhone /></span>
-                    <input id="pf-phone" name="phone" className="acc-input" type="tel"
-                      placeholder="+91 98765 43210" value={profileForm.phone} disabled={saving} autoComplete="tel"
-                      onChange={(e) => setProfileForm((p) => ({ ...p, phone: e.target.value }))} />
-                  </div>
-                </div>
-              </div>
-              <div className="acc-form-footer">
-                <button className="acc-btn acc-btn--primary" type="submit" disabled={saving}>Save Changes</button>
-              </div>
-            </form>
+            <CartSection />
           </section>
         )}
 
@@ -736,14 +691,47 @@ const AccountPage: React.FC = () => {
           </section>
         )}
 
-        {/* ── Cart / My Bag ── */}
-        {activeTab === "cart" && (
-          <section className="acc-section" key="cart">
+        {/* ── Profile Settings ── */}
+        {activeTab === "profile" && (
+          <section className="acc-section" key="profile">
             <div className="acc-section-hd">
-              <h2 className="acc-section-title">My Bag</h2>
-              <p className="acc-section-sub">Items currently in your shopping bag</p>
+              <h2 className="acc-section-title">Profile Settings</h2>
+              <p className="acc-section-sub">Update your name and contact details</p>
             </div>
-            <CartSection />
+            <form className="acc-form" onSubmit={saveProfile}>
+              <div className="acc-fields-grid">
+                <div className="acc-field">
+                  <label className="acc-label" htmlFor="pf-name">Full Name</label>
+                  <div className="acc-input-wrap">
+                    <span className="acc-input-icon"><IconUser /></span>
+                    <input id="pf-name" name="name" className="acc-input" type="text"
+                      value={profileForm.name} disabled={saving} autoComplete="name"
+                      onChange={(e) => setProfileForm((p) => ({ ...p, name: e.target.value }))} />
+                  </div>
+                </div>
+                <div className="acc-field">
+                  <label className="acc-label" htmlFor="pf-email">Email Address</label>
+                  <div className="acc-input-wrap">
+                    <span className="acc-input-icon"><IconMail /></span>
+                    <input id="pf-email" name="email" className="acc-input acc-input--readonly"
+                      type="email" value={profile?.email ?? ""} readOnly title="Email cannot be changed" />
+                  </div>
+                  <p className="acc-field-hint">Email address cannot be changed.</p>
+                </div>
+                <div className="acc-field">
+                  <label className="acc-label" htmlFor="pf-phone">Phone <span className="acc-optional">(optional)</span></label>
+                  <div className="acc-input-wrap">
+                    <span className="acc-input-icon"><IconPhone /></span>
+                    <input id="pf-phone" name="phone" className="acc-input" type="tel"
+                      placeholder="+91 98765 43210" value={profileForm.phone} disabled={saving} autoComplete="tel"
+                      onChange={(e) => setProfileForm((p) => ({ ...p, phone: e.target.value }))} />
+                  </div>
+                </div>
+              </div>
+              <div className="acc-form-footer">
+                <button className="acc-btn acc-btn--primary" type="submit" disabled={saving}>Save Changes</button>
+              </div>
+            </form>
           </section>
         )}
 

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import "../styles/PageStyle/ProductDetail.css";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import { PageSkeleton } from "../components/SkeletonLoader";
 
 interface ColorEntry {
@@ -38,7 +39,6 @@ function ShareMenu({ productName }: { productName: string }) {
   const currentUrl = window.location.href;
   const shareText = `Check out ${productName} on Lumielle`;
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -54,12 +54,8 @@ function ShareMenu({ productName }: { productName: string }) {
     try {
       await navigator.clipboard.writeText(currentUrl);
       setCopied(true);
-      setTimeout(() => {
-        setCopied(false);
-        setOpen(false);
-      }, 1800);
+      setTimeout(() => { setCopied(false); setOpen(false); }, 1800);
     } catch {
-      // Fallback for older browsers
       const el = document.createElement("textarea");
       el.value = currentUrl;
       document.body.appendChild(el);
@@ -67,10 +63,7 @@ function ShareMenu({ productName }: { productName: string }) {
       document.execCommand("copy");
       document.body.removeChild(el);
       setCopied(true);
-      setTimeout(() => {
-        setCopied(false);
-        setOpen(false);
-      }, 1800);
+      setTimeout(() => { setCopied(false); setOpen(false); }, 1800);
     }
   };
 
@@ -81,13 +74,7 @@ function ShareMenu({ productName }: { productName: string }) {
   };
 
   const handleInstagram = async () => {
-    // Instagram doesn't support direct URL sharing via web;
-    // copy the link so user can paste it in their story/bio/DM
-    try {
-      await navigator.clipboard.writeText(currentUrl);
-    } catch {
-      /* noop */
-    }
+    try { await navigator.clipboard.writeText(currentUrl); } catch { /* noop */ }
     window.open("https://www.instagram.com", "_blank", "noopener,noreferrer");
     setOpen(false);
   };
@@ -95,15 +82,9 @@ function ShareMenu({ productName }: { productName: string }) {
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: productName,
-          text: shareText,
-          url: currentUrl,
-        });
+        await navigator.share({ title: productName, text: shareText, url: currentUrl });
         setOpen(false);
-      } catch {
-        /* user cancelled */
-      }
+      } catch { /* user cancelled */ }
     }
   };
 
@@ -117,17 +98,8 @@ function ShareMenu({ productName }: { productName: string }) {
         aria-label="Share this product"
         aria-expanded={open}
       >
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <circle cx="18" cy="5" r="3" />
           <circle cx="6" cy="12" r="3" />
           <circle cx="18" cy="19" r="3" />
@@ -163,7 +135,6 @@ function ShareMenu({ productName }: { productName: string }) {
           </button>
 
           <button className="pd__share-item" onClick={handleWhatsApp} role="menuitem">
-            {/* WhatsApp icon */}
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
               <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.123 1.528 5.855L0 24l6.335-1.51A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.807 9.807 0 01-5.001-1.371l-.36-.214-3.727.888.926-3.638-.234-.374A9.784 9.784 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z" />
@@ -172,8 +143,8 @@ function ShareMenu({ productName }: { productName: string }) {
           </button>
 
           <button className="pd__share-item" onClick={handleInstagram} role="menuitem">
-            {/* Instagram icon */}
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
               <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
               <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
@@ -186,7 +157,8 @@ function ShareMenu({ productName }: { productName: string }) {
             <>
               <div className="pd__share-divider" />
               <button className="pd__share-item" onClick={handleNativeShare} role="menuitem">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
                   <polyline points="16 6 12 2 8 6" />
                   <line x1="12" y1="2" x2="12" y2="15" />
@@ -205,9 +177,10 @@ function ShareMenu({ productName }: { productName: string }) {
 function ProductDetail() {
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  const { id }     = useParams<{ id: string }>();
-  const navigate   = useNavigate();
+  const { id }        = useParams<{ id: string }>();
+  const navigate      = useNavigate();
   const { addToCart } = useCart();
+  const { token }     = useAuth();
 
   const [pageState, setPageState]         = useState<PageState>("loading");
   const [product, setProduct]             = useState<ProductData | null>(null);
@@ -218,13 +191,12 @@ function ProductDetail() {
   const [selectedSize, setSelectedSize]   = useState<string | null>(null);
   const [qty, setQty]                     = useState(1);
   const [openTab, setOpenTab]             = useState<"details" | "care">("details");
-  const [addedToCart, setAddedToCart]     = useState(false);
+
+  // "adding" gives a brief in-button feedback before the redirect fires
+  const [adding, setAdding]               = useState(false);
 
   useEffect(() => {
-    if (!id) {
-      setPageState("notfound");
-      return;
-    }
+    if (!id) { setPageState("notfound"); return; }
 
     setPageState("loading");
     setActiveImg(0);
@@ -236,20 +208,12 @@ function ProductDetail() {
 
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/products/${id}`, {
-          signal: controller.signal,
-        });
-
-        if (!res.ok) {
-          setPageState("notfound");
-          return;
-        }
+        const res = await fetch(`${API_BASE}/api/products/${id}`, { signal: controller.signal });
+        if (!res.ok) { setPageState("notfound"); return; }
 
         const data: ProductData = await res.json();
 
-        const allRes = await fetch(`${API_BASE}/api/products`, {
-          signal: controller.signal,
-        });
+        const allRes = await fetch(`${API_BASE}/api/products`, { signal: controller.signal });
         const allProducts: ProductData[] = await allRes.json();
 
         const relatedProducts = allProducts
@@ -259,7 +223,6 @@ function ProductDetail() {
         setProduct(data);
         setRelated(relatedProducts);
         setPageState("found");
-
       } catch (error: unknown) {
         if (error instanceof Error && error.name === "AbortError") return;
         console.error(error);
@@ -268,37 +231,50 @@ function ProductDetail() {
     };
 
     fetchProduct();
-
     return () => controller.abort();
   }, [id, API_BASE]);
 
+  // ── Add to cart → redirect to /cart ──────────────────────────────────────
   const handleAddToCart = useCallback(() => {
     if (!selectedSize || !product) return;
+
+    // If user is not logged in, send them to login first
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
     addToCart({
-      _id: product._id,
-      name: product.name,
-      price: product.price,
-      img: product.img,
-      size: selectedSize,
+      _id:      product._id,
+      name:     product.name,
+      price:    product.price,
+      img:      product.img,
+      size:     selectedSize,
       quantity: qty,
     });
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2200);
-  }, [selectedSize, product, qty, addToCart]);
 
+    // Brief visual feedback, then navigate
+    setAdding(true);
+    setTimeout(() => {
+      setAdding(false);
+      navigate("/cart");
+    }, 420);
+  }, [selectedSize, product, qty, addToCart, navigate, token]);
+
+  // ── Go to Cart (always navigates, adds first if size selected) ────────────
   const handleGoToCart = useCallback(() => {
-    if (selectedSize && product) {
+    if (selectedSize && product && token) {
       addToCart({
-        _id: product._id,
-        name: product.name,
-        price: product.price,
-        img: product.img,
-        size: selectedSize,
+        _id:      product._id,
+        name:     product.name,
+        price:    product.price,
+        img:      product.img,
+        size:     selectedSize,
         quantity: qty,
       });
     }
     navigate("/cart");
-  }, [selectedSize, product, qty, addToCart, navigate]);
+  }, [selectedSize, product, qty, addToCart, navigate, token]);
 
   if (pageState === "loading") return <PageSkeleton />;
 
@@ -350,11 +326,7 @@ function ProductDetail() {
               className="pd__main-img"
             />
             {product.badge && (
-              <span
-                className={`pd__badge pd__badge--${product.badge
-                  .toLowerCase()
-                  .replace(/\s+/g, "-")}`}
-              >
+              <span className={`pd__badge pd__badge--${product.badge.toLowerCase().replace(/\s+/g, "-")}`}>
                 {product.badge}
               </span>
             )}
@@ -392,7 +364,6 @@ function ProductDetail() {
         {/* ── Info panel ── */}
         <div className="pd__info">
 
-          {/* Category row + share button */}
           <div className="pd__meta-row">
             <p className="pd__category">{product.category}</p>
             <ShareMenu productName={product.name} />
@@ -424,17 +395,13 @@ function ProductDetail() {
             <div className="pd__option-group">
               <p className="pd__option-label">
                 Colour —
-                <span className="pd__option-value">
-                  {" "}{product.colors[selectedColor]?.label}
-                </span>
+                <span className="pd__option-value"> {product.colors[selectedColor]?.label}</span>
               </p>
               <div className="pd__colors">
                 {product.colors.map((c, i) => (
                   <button
                     key={i}
-                    className={`pd__color-swatch ${
-                      selectedColor === i ? "pd__color-swatch--active" : ""
-                    }`}
+                    className={`pd__color-swatch ${selectedColor === i ? "pd__color-swatch--active" : ""}`}
                     style={{ background: c.hex }}
                     onClick={() => setSelectedColor(i)}
                     title={c.label}
@@ -449,17 +416,13 @@ function ProductDetail() {
             <div className="pd__option-group">
               <p className="pd__option-label">
                 Size
-                {selectedSize && (
-                  <span className="pd__option-value"> — {selectedSize}</span>
-                )}
+                {selectedSize && <span className="pd__option-value"> — {selectedSize}</span>}
               </p>
               <div className="pd__sizes">
                 {product.sizes.map((size) => (
                   <button
                     key={size}
-                    className={`pd__size-btn ${
-                      selectedSize === size ? "pd__size-btn--active" : ""
-                    }`}
+                    className={`pd__size-btn ${selectedSize === size ? "pd__size-btn--active" : ""}`}
                     onClick={() => setSelectedSize(size)}
                   >
                     {size}
@@ -479,27 +442,22 @@ function ProductDetail() {
                   className="pd__qty-btn"
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
                   aria-label="Decrease quantity"
-                >
-                  −
-                </button>
+                >−</button>
                 <span className="pd__qty-value">{qty}</span>
                 <button
                   className="pd__qty-btn"
                   onClick={() => setQty((q) => q + 1)}
                   aria-label="Increase quantity"
-                >
-                  +
-                </button>
+                >+</button>
               </div>
 
+              {/* Add to Cart — shows brief "Adding…" then redirects */}
               <button
-                className={`pd__add-btn ${
-                  addedToCart ? "pd__add-btn--success" : ""
-                } ${!selectedSize ? "pd__add-btn--disabled" : ""}`}
+                className={`pd__add-btn${adding ? " pd__add-btn--success" : ""}${!selectedSize ? " pd__add-btn--disabled" : ""}`}
                 onClick={handleAddToCart}
-                disabled={!selectedSize}
+                disabled={!selectedSize || adding}
               >
-                {addedToCart ? "✓ Added to Cart" : "Add to Cart"}
+                {adding ? "Adding…" : !token ? "Sign in to Add" : "Add to Cart"}
               </button>
             </div>
 
@@ -511,17 +469,13 @@ function ProductDetail() {
           <div className="pd__tabs">
             <div className="pd__tab-headers">
               <button
-                className={`pd__tab-btn ${
-                  openTab === "details" ? "pd__tab-btn--active" : ""
-                }`}
+                className={`pd__tab-btn ${openTab === "details" ? "pd__tab-btn--active" : ""}`}
                 onClick={() => setOpenTab("details")}
               >
                 Product Details
               </button>
               <button
-                className={`pd__tab-btn ${
-                  openTab === "care" ? "pd__tab-btn--active" : ""
-                }`}
+                className={`pd__tab-btn ${openTab === "care" ? "pd__tab-btn--active" : ""}`}
                 onClick={() => setOpenTab("care")}
               >
                 Care Instructions
@@ -532,20 +486,14 @@ function ProductDetail() {
               {openTab === "details" && (
                 <ul className="pd__detail-list">
                   {product.details?.map((d, i) => (
-                    <li key={i}>
-                      <span className="pd__detail-dot">—</span>
-                      {d}
-                    </li>
+                    <li key={i}><span className="pd__detail-dot">—</span>{d}</li>
                   ))}
                 </ul>
               )}
               {openTab === "care" && (
                 <ul className="pd__detail-list">
                   {product.careInstructions?.map((c, i) => (
-                    <li key={i}>
-                      <span className="pd__detail-dot">—</span>
-                      {c}
-                    </li>
+                    <li key={i}><span className="pd__detail-dot">—</span>{c}</li>
                   ))}
                 </ul>
               )}
@@ -559,9 +507,7 @@ function ProductDetail() {
       {related.length > 0 && (
         <section className="pd__related">
           <span className="pd__related-eyebrow">You might also like</span>
-          <h2 className="pd__related-title">
-            From the same <em>collection</em>
-          </h2>
+          <h2 className="pd__related-title">From the same <em>collection</em></h2>
           <div className="pd__related-grid">
             {related.map((rp) => (
               <article
@@ -575,11 +521,7 @@ function ProductDetail() {
                 <div className="pd__related-img-wrap">
                   <img src={rp.img} alt={rp.name} />
                   {rp.badge && (
-                    <span
-                      className={`pd__badge pd__badge--${rp.badge
-                        .toLowerCase()
-                        .replace(/\s+/g, "-")}`}
-                    >
+                    <span className={`pd__badge pd__badge--${rp.badge.toLowerCase().replace(/\s+/g, "-")}`}>
                       {rp.badge}
                     </span>
                   )}

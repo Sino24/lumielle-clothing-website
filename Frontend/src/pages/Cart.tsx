@@ -22,9 +22,51 @@ interface ProfileData {
 const parsePrice = (str: string) =>
   parseInt(str.replace(/[₹,\s]/g, ""), 10) || 0;
 
+// ── Cart Skeleton ─────────────────────────────────────────────────────────────
+// Shown while auth is resolving (prevents flash of login gate for logged-in users)
+function CartSkeleton() {
+  return (
+    <main className="cart-skeleton">
+      <div className="cart-skeleton__head">
+        <div className="csk csk-eyebrow" />
+        <div className="csk csk-title" />
+        <div className="csk csk-count" />
+      </div>
+      <div className="cart-skeleton__layout">
+        {/* Items column */}
+        <div className="cart-skeleton__items">
+          {[0, 1, 2].map((i) => (
+            <div className="cart-skeleton__item" key={i}>
+              <div className="csk csk-img" />
+              <div className="cart-skeleton__item-info">
+                <div className="csk csk-name" />
+                <div className="csk csk-meta" />
+                <div className="csk csk-price" />
+                <div className="csk csk-controls" />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Summary sidebar */}
+        <div className="cart-skeleton__summary">
+          <div className="csk csk-sum-label" />
+          <div className="csk csk-sum-row" />
+          <div className="csk csk-sum-row csk-sum-row--short" />
+          <div className="csk csk-sum-row" />
+          <div className="csk csk-sum-divider" />
+          <div className="csk csk-sum-total" />
+          <div className="csk csk-sum-note" />
+          <div className="csk csk-sum-btn" />
+        </div>
+      </div>
+    </main>
+  );
+}
+
 function Cart() {
   const { cart, removeFromCart, updateQty, clearCart, cartLoading } = useCart();
-  const { token } = useAuth();
+  // Destructure `loading` from auth so we know when auth hydration is done
+  const { token, loading: authLoading } = useAuth();
   const navigate   = useNavigate();
   const API_BASE   = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -104,7 +146,6 @@ function Cart() {
     setOrderError("");
     setCheckingOut(true);
 
-    // Freeze everything before async work
     const itemsToOrder = cartSnapshot.current.map((item) => ({
       productId: item._id,
       name:      item.name,
@@ -148,9 +189,7 @@ function Cart() {
       try {
         data = JSON.parse(raw);
       } catch {
-        throw new Error(
-          `Server error (${res.status}): ${raw.slice(0, 120)}`,
-        );
+        throw new Error(`Server error (${res.status}): ${raw.slice(0, 120)}`);
       }
 
       if (!res.ok) {
@@ -159,17 +198,11 @@ function Cart() {
 
       const newOrderId = data.order?._id ?? data._id ?? "";
 
-      // Open WhatsApp using frozen snapshots — BEFORE clearing cart
       window.open(
-        `https://wa.me/+918590109684?text=${buildWhatsAppMsg(
-          cartAtCheckout,
-          addrId,
-          addrListSnapshot,
-        )}`,
+        `https://wa.me/+918590109684?text=${buildWhatsAppMsg(cartAtCheckout, addrId, addrListSnapshot)}`,
         "_blank",
       );
 
-      // Clear cart on server + in memory
       await clearCart();
 
       setOrderId(newOrderId);
@@ -184,14 +217,9 @@ function Cart() {
     }
   };
 
-  // ── Loading ──────────────────────────────────────────────────────────────
-  if (cartLoading) {
-    return (
-      <main className="cart-loading">
-        <div className="cart-loading__spinner" />
-        <p className="cart-loading__text">Loading your bag…</p>
-      </main>
-    );
+  // ── Auth still resolving → show skeleton (prevents login-gate flash) ──────
+  if (authLoading || cartLoading) {
+    return <CartSkeleton />;
   }
 
   // ── Login gate ───────────────────────────────────────────────────────────
