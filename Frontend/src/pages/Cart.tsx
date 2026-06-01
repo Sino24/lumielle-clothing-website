@@ -199,7 +199,7 @@ function Cart() {
       const newOrderId = data.order?._id ?? data._id ?? "";
 
       window.open(
-        `https://wa.me/+918590109684?text=${buildWhatsAppMsg(cartAtCheckout, addrId, addrListSnapshot)}`,
+        `https://wa.me/+917561032017?text=${buildWhatsAppMsg(cartAtCheckout, addrId, addrListSnapshot)}`,
         "_blank",
       );
 
@@ -411,9 +411,15 @@ function Cart() {
                     Please select a delivery address to continue.
                   </p>
                 )}
-                <p className="cart__addr-hint">
-                  <Link to="/account" className="cart__addr-link">Manage addresses →</Link>
-                </p>
+            <p className="cart__addr-hint">
+  <Link
+    to="/account"
+    state={{ tab: "addresses" }}
+    className="cart__addr-link"
+  >
+    Manage addresses →
+  </Link>
+</p>
               </>
             ) : (
               <div className="cart__addr-nudge">
@@ -427,7 +433,13 @@ function Cart() {
                 <p className="cart__addr-nudge-text">
                   You need a saved address to place an order.
                 </p>
-                <Link to="/account" className="cart__addr-nudge-cta">Add Address →</Link>
+               <Link
+  to="/account"
+  state={{ tab: "addresses" }}
+  className="cart__addr-nudge-cta"
+>
+  Add Address →
+</Link>
               </div>
             )}
           </div>
