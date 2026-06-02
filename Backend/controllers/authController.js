@@ -27,7 +27,11 @@ const registerUser = async (req, res) => {
         existing.verifyCode        = code;
         existing.verifyCodeExpires = expires;
         await existing.save();
-        await sendVerificationEmail(email, existing.name, code);
+        try {
+          await sendVerificationEmail(email, existing.name, code);
+        } catch (emailErr) {
+          console.error("Email send failed (re-register):", emailErr.message);
+        }
         return res.status(200).json({
           message: "A new verification code has been sent to your email.",
           userId:  existing._id,
@@ -46,7 +50,12 @@ const registerUser = async (req, res) => {
       isVerified:        false,
     });
 
-    await sendVerificationEmail(email, name, code);
+    try {
+      await sendVerificationEmail(email, name, code);
+    } catch (emailErr) {
+      console.error("Email send failed (register):", emailErr.message);
+      // Still return success — user can request a resend
+    }
 
     res.status(201).json({
       message: "Account created. Please check your email for a verification code.",
@@ -114,7 +123,12 @@ const resendVerificationCode = async (req, res) => {
     user.verifyCodeExpires = expires;
     await user.save();
 
-    await sendVerificationEmail(user.email, user.name, code);
+    try {
+      await sendVerificationEmail(user.email, user.name, code);
+    } catch (emailErr) {
+      console.error("Email send failed (resend):", emailErr.message);
+      return res.status(500).json({ message: "Failed to send email. Please try again shortly." });
+    }
 
     res.json({ message: "A new verification code has been sent to your email." });
 
@@ -148,7 +162,11 @@ const loginUser = async (req, res) => {
       user.verifyCode        = code;
       user.verifyCodeExpires = expires;
       await user.save();
-      await sendVerificationEmail(user.email, user.name, code);
+      try {
+        await sendVerificationEmail(user.email, user.name, code);
+      } catch (emailErr) {
+        console.error("Email send failed (login):", emailErr.message);
+      }
 
       return res.status(403).json({
         message:        "Please verify your email before logging in. We've sent a new code.",
