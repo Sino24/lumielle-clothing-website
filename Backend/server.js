@@ -2,11 +2,8 @@ const express = require("express");
 const dotenv  = require("dotenv");
 const cors    = require("cors");
 
-// ── ADD THESE 3 LINES ──────────────────────────────────────
-const helmet        = require("helmet");
-const rateLimit     = require("express-rate-limit");
-const mongoSanitize = require("express-mongo-sanitize");
-// ──────────────────────────────────────────────────────────
+const helmet    = require("helmet");
+const rateLimit = require("express-rate-limit");
 
 const connectDB = require("./config/db");
 
@@ -23,13 +20,9 @@ app.use(cors({
   credentials: true,
 }));
 
-// ── ADD THESE 3 LINES ──────────────────────────────────────
 app.use(helmet());
-app.use(mongoSanitize());
-app.use(express.json({ limit: "10kb" }));  // replaces your old express.json()
-// ──────────────────────────────────────────────────────────
+app.use(express.json({ limit: "10kb" }));
 
-// ── ADD THESE LINES (rate limit on auth routes) ────────────
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -39,7 +32,6 @@ const authLimiter = rateLimit({
 });
 app.use("/api/auth/login",    authLimiter);
 app.use("/api/auth/register", authLimiter);
-// ──────────────────────────────────────────────────────────
 
 app.use("/api/products",        require("./routes/productRoutes"));
 app.use("/api/upload",          require("./routes/uploadRoutes"));
@@ -82,6 +74,6 @@ app.listen(PORT, () => {
   console.log(`💼 Client Projects → /api/client-projects`);
   console.log(`⭐ Ratings         → /api/ratings`);
   console.log(`🛒 Cart            → /api/cart`);
-  console.log(`🛡️  Security        → helmet + rate-limit + mongo-sanitize`);
+  console.log(`🛡️  Security        → helmet + rate-limit`);
   console.log("");
 });
