@@ -1,20 +1,15 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendVerificationEmail = async (email, name, code) => {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.warn("EMAIL_USER or EMAIL_PASS not set — skipping email send");
+  if (!process.env.RESEND_API_KEY) {
+    console.warn("RESEND_API_KEY not set — skipping email send");
     return;
   }
-  await transporter.sendMail({
-    from:    `"Lumielle" <${process.env.EMAIL_USER}>`,
+
+  await resend.emails.send({
+    from:    "Lumielle <onboarding@resend.dev>",
     to:      email,
     subject: "Verify your Lumielle account",
     html: `
