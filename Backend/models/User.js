@@ -1,5 +1,3 @@
-// models/User.js
-
 const mongoose = require("mongoose");
 const bcrypt   = require("bcryptjs");
 
@@ -33,7 +31,6 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
-    // Saved delivery addresses
     addresses: [
       {
         label:     { type: String, default: "Home" },
@@ -51,19 +48,11 @@ const userSchema = new mongoose.Schema(
       default: true,
     },
 
-    // ── Email verification ────────────────────────────────
     isVerified: {
       type:    Boolean,
-      default: false,
-    },
-    verifyCode: {
-      type: String,
-    },
-    verifyCodeExpires: {
-      type: Date,
+      default: true,
     },
 
-    // For future use (password reset)
     resetPasswordToken:   String,
     resetPasswordExpires: Date,
   },
@@ -72,14 +61,12 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// ── Hash password before save ─────────────────────────────
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
-// ── Instance method: compare password ────────────────────
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return bcrypt.compare(enteredPassword, this.password);
 };

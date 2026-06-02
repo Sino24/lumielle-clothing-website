@@ -3,8 +3,6 @@ const router  = express.Router();
 
 const {
   registerUser,
-  verifyEmail,
-  resendVerificationCode,
   loginUser,
   getMe,
   updateProfile,
@@ -19,10 +17,8 @@ const { protectUser } = require("../middleware/userAuthMiddleware");
 const { protect }     = require("../middleware/authMiddleware");
 
 // ── Public ────────────────────────────────────────────────
-router.post("/register",     registerUser);
-router.post("/verify",       verifyEmail);
-router.post("/resend-code",  resendVerificationCode);
-router.post("/login",        loginUser);
+router.post("/register", registerUser);
+router.post("/login",    loginUser);
 
 // ── User-protected ────────────────────────────────────────
 router.get   ("/me",                 protectUser, getMe);

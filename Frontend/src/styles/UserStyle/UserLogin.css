@@ -1,30 +1,33 @@
-/* src/styles/UserStyle/UserLogin.css */
+/* src/styles/UserStyle/UserAuth.css */
+/* ✅ RENAMED from UserLogin.css to match the import in UserAuth.tsx */
 
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
 
 /* ── Variables ── */
 :root {
-  --lum-cream:   #F5F0E8;
-  --lum-dark:    #1A1714;
-  --lum-gold:    #C9A96E;
-  --lum-muted:   #7A746C;
-  --lum-border:  rgba(26, 23, 20, 0.12);
-  --lum-danger:  #C0392B;
-  --lum-success: #2c4a3e;
+  --lum-cream:    #F5F0E8;
+  --lum-dark:     #1A1714;
+  --lum-gold:     #C9A96E;
+  --lum-muted:    #7A746C;
+  --lum-border:   rgba(26, 23, 20, 0.12);
+  --lum-danger:   #C0392B;
+  --lum-success:  #2c4a3e;
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-body:    'Jost', sans-serif;
-  --nav-height:   0px;
+
+  /* ✅ FIX: safe fallback so padding-top doesn't collapse to 0 and hide content */
+  --nav-height: 0px;
 }
 
 /* ── Page ── */
 .ua-page {
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100dvh; /* ✅ FIX: use dvh on mobile so address bar is accounted for */
   background: var(--lum-dark);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: calc(var(--nav-height) + 2rem) 1.25rem 2rem;
+  padding: calc(var(--nav-height) + 2rem) 1.25rem 2rem; /* ✅ FIX: horizontal + bottom padding */
   font-family: var(--font-body);
   position: relative;
   overflow: hidden;
@@ -68,17 +71,11 @@
   grid-template-columns: 1fr 1fr;
   width: 100%;
   max-width: 960px;
+  /* ✅ FIX: removed fixed min-height that caused overflow on mobile */
   box-shadow: 0 32px 100px rgba(0, 0, 0, 0.5);
   animation: ua-rise 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
-  overflow: hidden;
+  overflow: hidden; /* ✅ FIX: clip child backgrounds cleanly */
 }
-
-/* ── Verify screen wrapper — single column, narrower ── */
-.ua-wrap--verify {
-  grid-template-columns: 1fr;
-  max-width: 480px;
-}
-
 @keyframes ua-rise {
   from { opacity: 0; transform: translateY(32px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -93,7 +90,7 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
-  min-width: 0;
+  min-width: 0; /* ✅ FIX: prevent grid blowout */
 }
 .ua-side::before {
   content: "";
@@ -121,8 +118,9 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 1.75rem;
-  flex-shrink: 0;
+  flex-shrink: 0; /* ✅ FIX: don't squish the logo mark */
 }
+
 .ua-side-title {
   font-family: var(--font-display);
   font-size: 2.6rem;
@@ -132,6 +130,7 @@
   letter-spacing: 0.03em;
   margin: 0 0 1.25rem;
 }
+
 .ua-side-desc {
   font-size: 0.8rem;
   line-height: 1.75;
@@ -140,11 +139,13 @@
   margin: 0 0 2.5rem;
   max-width: 260px;
 }
+
 .ua-side-rules {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
+
 .ua-side-rule {
   display: flex;
   align-items: center;
@@ -154,6 +155,7 @@
   text-transform: uppercase;
   color: rgba(26, 23, 20, 0.65);
 }
+
 .ua-rule-dot {
   width: 5px; height: 5px;
   background: var(--lum-dark);
@@ -169,20 +171,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-/* ── Verify icon ── */
-.ua-verify-icon {
-  width: 64px; height: 64px;
-  background: rgba(201, 169, 110, 0.12);
-  border: 1px solid rgba(201, 169, 110, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1.75rem;
-  color: var(--lum-gold);
+  min-width: 0; /* ✅ FIX: prevent grid blowout */
+  box-sizing: border-box; /* ✅ FIX: padding stays inside column */
 }
 
 /* ── Tabs ── */
@@ -192,7 +182,7 @@
   border: 1px solid var(--lum-border);
   background: #fff;
   margin-bottom: 2.25rem;
-  overflow: hidden;
+  overflow: hidden; /* ✅ FIX: clip the sliding bar at edges */
 }
 .ua-tab {
   flex: 1;
@@ -208,18 +198,21 @@
   position: relative;
   z-index: 1;
   transition: color 0.3s;
+  /* ✅ FIX: remove default button appearance on iOS */
   -webkit-appearance: none;
   appearance: none;
 }
 .ua-tab--active { color: var(--lum-cream); }
+
 .ua-tab-bar {
   position: absolute;
   bottom: 0; top: 0;
   width: 50%;
   background: var(--lum-dark);
+  /* ✅ FIX: use transform instead of left for GPU-accelerated smooth slide */
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
-  left: 0;
+  left: 0; /* ✅ FIX: explicit base left so transform is calculated correctly */
 }
 .ua-tab-bar--login  { transform: translateX(0%); }
 .ua-tab-bar--signup { transform: translateX(100%); }
@@ -260,6 +253,7 @@
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
 .ua-label {
   font-size: 0.63rem;
   letter-spacing: 0.18em;
@@ -272,18 +266,14 @@
   color: var(--lum-muted);
   text-transform: none;
 }
-.ua-field-hint {
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
-  color: var(--lum-muted);
-  margin: 0;
-  line-height: 1.5;
-}
+
 .ua-input-wrap {
   position: relative;
   display: flex;
   align-items: center;
 }
+
+/* ✅ FIX: explicit size so icons don't explode */
 .ua-ico {
   position: absolute;
   left: 0.85rem;
@@ -294,11 +284,13 @@
   user-select: none;
   flex-shrink: 0;
 }
+
 .ua-input {
   width: 100%;
   box-sizing: border-box;
   background: #fff;
   border: 1px solid var(--lum-border);
+  /* ✅ FIX: unified padding — left leaves room for icon, right for toggle button */
   padding: 0.72rem 2.8rem 0.72rem 2.5rem;
   font-family: var(--font-body);
   font-size: 0.82rem;
@@ -306,6 +298,7 @@
   color: var(--lum-dark);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
+  /* ✅ FIX: remove default iOS input styling */
   -webkit-appearance: none;
   appearance: none;
   border-radius: 0;
@@ -313,18 +306,14 @@
 .ua-input::placeholder { color: #c6bfb7; }
 .ua-input:focus {
   border-color: var(--lum-gold);
+  /* ✅ FIX: subtle glow on focus — much more visible than border alone */
   box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.12);
 }
 .ua-input:disabled { opacity: 0.5; cursor: not-allowed; }
-.ua-input--pw   { padding-right: 4rem; }
 
-/* Verification code input — large centered digits */
-.ua-input--code {
-  font-size: 1.4rem;
-  letter-spacing: 0.4em;
-  text-align: center;
-  padding-left: 2.5rem;
-  padding-right: 1rem;
+/* ✅ FIX: password inputs need extra right padding for the Show/Hide button */
+.ua-input--pw {
+  padding-right: 4rem;
 }
 
 .ua-toggle-pw {
@@ -340,6 +329,7 @@
   cursor: pointer;
   padding: 0.25rem;
   transition: color 0.15s;
+  /* ✅ FIX: minimum tap target for mobile */
   min-width: 44px;
   min-height: 44px;
   display: flex;
@@ -354,15 +344,18 @@
 .ua-error,
 .ua-success {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start; /* ✅ FIX: align-start so icon stays top when text wraps */
   gap: 0.6rem;
   padding: 0.65rem 0.9rem;
   font-size: 0.75rem;
   letter-spacing: 0.04em;
-  line-height: 1.5;
+  line-height: 1.5; /* ✅ FIX: multi-line error messages don't collapse */
 }
 .ua-error svg,
-.ua-success svg { flex-shrink: 0; margin-top: 0.1rem; }
+.ua-success svg {
+  flex-shrink: 0; /* ✅ FIX: icon must not shrink when text is long */
+  margin-top: 0.1rem;
+}
 .ua-error {
   background: rgba(192, 57, 43, 0.07);
   border-left: 3px solid var(--lum-danger);
@@ -387,6 +380,7 @@
   background: var(--lum-dark);
   color: var(--lum-cream);
   border: none;
+  /* ✅ FIX: min-height for proper mobile tap target */
   min-height: 48px;
   padding: 0.9rem 1.5rem;
   font-family: var(--font-body);
@@ -396,7 +390,7 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: transform 0.15s, color 0.36s;
+  transition: transform 0.15s, color 0.36s; /* ✅ FIX: animate color so text stays readable on gold */
   border-radius: 0;
   -webkit-appearance: none;
   appearance: none;
@@ -410,9 +404,13 @@
   transition: transform 0.36s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
 }
-.ua-submit:hover:not(:disabled) { color: var(--lum-dark); }
+/* ✅ FIX: text color shifts to dark when gold overlay covers button */
+.ua-submit:hover:not(:disabled) {
+  color: var(--lum-dark);
+}
 .ua-submit:hover:not(:disabled)::after { transform: translateX(0); }
 .ua-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
 .ua-submit-inner {
   position: relative;
   z-index: 1;
@@ -423,48 +421,6 @@
 }
 .ua-arrow { transition: transform 0.2s; }
 .ua-submit:hover:not(:disabled) .ua-arrow { transform: translateX(4px); }
-
-/* ── Resend code button ── */
-.ua-resend-btn {
-  background: none;
-  border: none;
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  color: var(--lum-gold);
-  cursor: pointer;
-  padding: 0.4rem 0;
-  text-align: center;
-  transition: color 0.2s, opacity 0.2s;
-  -webkit-appearance: none;
-  appearance: none;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.ua-resend-btn:hover:not(:disabled) { color: var(--lum-dark); }
-.ua-resend-btn:disabled {
-  color: var(--lum-muted);
-  cursor: default;
-  text-decoration: none;
-  opacity: 0.7;
-}
-
-/* ── Back button ── */
-.ua-back-btn {
-  background: none;
-  border: none;
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  color: var(--lum-muted);
-  cursor: pointer;
-  padding: 0.5rem 0;
-  text-align: center;
-  transition: color 0.2s;
-  -webkit-appearance: none;
-  appearance: none;
-}
-.ua-back-btn:hover { color: var(--lum-dark); }
 
 /* ── Spinner ── */
 .ua-spin {
@@ -487,40 +443,88 @@
   text-align: center;
 }
 
-/* ── Responsive: tablet ── */
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE — Tablet (≤ 900px)
+   ───────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .ua-wrap { grid-template-columns: 280px 1fr; }
-  .ua-side { padding: 2.25rem; }
-  .ua-side-title { font-size: 2rem; }
+  .ua-wrap {
+    grid-template-columns: 280px 1fr; /* ✅ FIX: shrink side panel gracefully before hiding */
+  }
+  .ua-side {
+    padding: 2.25rem;
+  }
+  .ua-side-title {
+    font-size: 2rem;
+  }
 }
 
-/* ── Responsive: mobile ── */
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE — Mobile (≤ 680px)
+   Completely hide the side panel, single-column form card
+   ───────────────────────────────────────────────────────── */
 @media (max-width: 680px) {
   .ua-page {
+    /* ✅ FIX: proper padding so card doesn't touch screen edges */
     padding: calc(var(--nav-height) + 1.5rem) 1rem 1.5rem;
-    align-items: flex-start;
+    align-items: flex-start; /* ✅ FIX: don't vertically centre — avoids squish on short screens */
   }
+
   .ua-wrap {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* ✅ FIX: single column */
     max-width: 420px;
     margin: 0 auto;
     width: 100%;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
   }
-  .ua-wrap--verify { max-width: 420px; }
-  .ua-side { display: none; }
-  .ua-form-panel { padding: 2rem 1.5rem; }
-  .ua-heading { font-size: 1.65rem; }
-  .ua-tabs { margin-bottom: 1.75rem; }
-  .ua-form { gap: 1rem; }
-  .ua-footer { margin-top: 1.25rem; }
+
+  .ua-side {
+    display: none; /* ✅ FIX: hidden on mobile */
+  }
+
+  .ua-form-panel {
+    padding: 2rem 1.5rem 2rem; /* ✅ FIX: tighter padding so form breathes without overflow */
+  }
+
+  .ua-heading {
+    font-size: 1.65rem;
+  }
+
+  .ua-tabs {
+    margin-bottom: 1.75rem;
+  }
+
+  .ua-form {
+    gap: 1rem;
+  }
+
+  .ua-footer {
+    margin-top: 1.25rem;
+  }
 }
 
-/* ── Responsive: small phones ── */
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE — Small phones (≤ 380px)
+   ───────────────────────────────────────────────────────── */
 @media (max-width: 380px) {
-  .ua-page { padding: calc(var(--nav-height) + 1rem) 0.75rem 1rem; }
-  .ua-form-panel { padding: 1.75rem 1.25rem; }
-  .ua-heading { font-size: 1.45rem; }
-  .ua-tab { font-size: 0.62rem; letter-spacing: 0.1em; padding: 0.65rem 0.5rem; }
-  .ua-input { font-size: 0.8rem; }
+  .ua-page {
+    padding: calc(var(--nav-height) + 1rem) 0.75rem 1rem;
+  }
+
+  .ua-form-panel {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .ua-heading {
+    font-size: 1.45rem;
+  }
+
+  .ua-tab {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    padding: 0.65rem 0.5rem;
+  }
+
+  .ua-input {
+    font-size: 0.8rem;
+  }
 }

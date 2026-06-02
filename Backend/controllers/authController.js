@@ -1,6 +1,5 @@
 const jwt  = require("jsonwebtoken");
 const User = require("../models/User");
-const { sendVerificationEmail } = require("../config/email");
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -19,121 +18,23 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
 
     const existing = await User.findOne({ email });
-    if (existing) {
-      // If account exists but was never verified, resend a fresh code instead of blocking
-      if (!existing.isVerified) {
-        const code    = Math.floor(100000 + Math.random() * 900000).toString();
-        const expires = new Date(Date.now() + 10 * 60 * 1000);
-        existing.verifyCode        = code;
-        existing.verifyCodeExpires = expires;
-        await existing.save();
-        try {
-          await sendVerificationEmail(email, existing.name, code);
-        } catch (emailErr) {
-          console.error("Email send failed (re-register):", emailErr.message);
-        }
-        return res.status(200).json({
-          message: "A new verification code has been sent to your email.",
-          userId:  existing._id,
-        });
-      }
+    if (existing)
       return res.status(409).json({ message: "An account with this email already exists" });
-    }
-
-    const code    = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(Date.now() + 10 * 60 * 1000);
 
     const user = await User.create({
       name, email, password, phone,
-      verifyCode:        code,
-      verifyCodeExpires: expires,
-      isVerified:        false,
+      isVerified: true,
     });
-
-    try {
-      await sendVerificationEmail(email, name, code);
-    } catch (emailErr) {
-      console.error("Email send failed (register):", emailErr.message);
-      // Still return success — user can request a resend
-    }
-
-    res.status(201).json({
-      message: "Account created. Please check your email for a verification code.",
-      userId:  user._id,
-    });
-
-  } catch (error) {
-    console.error("Register error:", error.message);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-// ── POST /api/auth/verify ─────────────────────────────────
-const verifyEmail = async (req, res) => {
-  try {
-    const { userId, code } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user)
-      return res.status(404).json({ message: "User not found" });
-
-    if (user.isVerified)
-      return res.status(400).json({ message: "Email already verified" });
-
-    if (user.verifyCode !== code)
-      return res.status(400).json({ message: "Invalid verification code" });
-
-    if (user.verifyCodeExpires < new Date())
-      return res.status(400).json({ message: "Code has expired. Please request a new one." });
-
-    user.isVerified        = true;
-    user.verifyCode        = undefined;
-    user.verifyCodeExpires = undefined;
-    await user.save();
 
     const token = signToken(user._id);
 
-    res.json({
+    res.status(201).json({
       token,
       user: { id: user._id, name: user.name, email: user.email, phone: user.phone },
     });
 
   } catch (error) {
-    console.error("Verify error:", error.message);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-// ── POST /api/auth/resend-code ────────────────────────────
-const resendVerificationCode = async (req, res) => {
-  try {
-    const { userId } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user)
-      return res.status(404).json({ message: "User not found" });
-
-    if (user.isVerified)
-      return res.status(400).json({ message: "Email is already verified" });
-
-    const code    = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(Date.now() + 10 * 60 * 1000);
-
-    user.verifyCode        = code;
-    user.verifyCodeExpires = expires;
-    await user.save();
-
-    try {
-      await sendVerificationEmail(user.email, user.name, code);
-    } catch (emailErr) {
-      console.error("Email send failed (resend):", emailErr.message);
-      return res.status(500).json({ message: "Failed to send email. Please try again shortly." });
-    }
-
-    res.json({ message: "A new verification code has been sent to your email." });
-
-  } catch (error) {
-    console.error("ResendCode error:", error.message);
+    console.error("Register error:", error.message);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -153,27 +54,6 @@ const loginUser = async (req, res) => {
 
     if (!user.isActive)
       return res.status(403).json({ message: "Your account has been deactivated. Please contact support." });
-
-    // ── Block unverified users and guide them to verify ──
-    if (!user.isVerified) {
-      // Issue a fresh code so they can complete verification
-      const code    = Math.floor(100000 + Math.random() * 900000).toString();
-      const expires = new Date(Date.now() + 10 * 60 * 1000);
-      user.verifyCode        = code;
-      user.verifyCodeExpires = expires;
-      await user.save();
-      try {
-        await sendVerificationEmail(user.email, user.name, code);
-      } catch (emailErr) {
-        console.error("Email send failed (login):", emailErr.message);
-      }
-
-      return res.status(403).json({
-        message:        "Please verify your email before logging in. We've sent a new code.",
-        requiresVerify: true,
-        userId:         user._id,
-      });
-    }
 
     const token = signToken(user._id);
 
@@ -312,8 +192,6 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
   registerUser,
-  verifyEmail,
-  resendVerificationCode,
   loginUser,
   getMe,
   updateProfile,
