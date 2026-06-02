@@ -1,48 +1,32 @@
-// controllers/authController.js
-
 const jwt  = require("jsonwebtoken");
 const User = require("../models/User");
 const { sendVerificationEmail } = require("../config/email");
 
-// ── Helper: sign JWT ──────────────────────────────────────────────────────────
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || "7d",
   });
 
-// ── POST /api/auth/register ───────────────────────────────────────────────────
+// ── POST /api/auth/register ───────────────────────────────
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        message: "Name, email, and password are required",
-      });
-    }
+    if (!name || !email || !password)
+      return res.status(400).json({ message: "Name, email, and password are required" });
 
-    if (password.length < 6) {
-      return res.status(400).json({
-        message: "Password must be at least 6 characters",
-      });
-    }
+    if (password.length < 6)
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
 
     const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(409).json({
-        message: "An account with this email already exists",
-      });
-    }
+    if (existing)
+      return res.status(409).json({ message: "An account with this email already exists" });
 
-    // Generate 6-digit verification code
     const code    = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const expires = new Date(Date.now() + 10 * 60 * 1000);
 
     const user = await User.create({
-      name,
-      email,
-      password,
-      phone,
+      name, email, password, phone,
       verifyCode:        code,
       verifyCodeExpires: expires,
       isVerified:        false,
@@ -61,32 +45,24 @@ const registerUser = async (req, res) => {
   }
 };
 
-// ── POST /api/auth/verify ─────────────────────────────────────────────────────
+// ── POST /api/auth/verify ─────────────────────────────────
 const verifyEmail = async (req, res) => {
   try {
     const { userId, code } = req.body;
 
     const user = await User.findById(userId);
-
-    if (!user) {
+    if (!user)
       return res.status(404).json({ message: "User not found" });
-    }
 
-    if (user.isVerified) {
+    if (user.isVerified)
       return res.status(400).json({ message: "Email already verified" });
-    }
 
-    if (user.verifyCode !== code) {
+    if (user.verifyCode !== code)
       return res.status(400).json({ message: "Invalid verification code" });
-    }
 
-    if (user.verifyCodeExpires < new Date()) {
-      return res.status(400).json({
-        message: "Code has expired. Please register again.",
-      });
-    }
+    if (user.verifyCodeExpires < new Date())
+      return res.status(400).json({ message: "Code has expired. Please register again." });
 
-    // Mark verified and clear the code
     user.isVerified        = true;
     user.verifyCode        = undefined;
     user.verifyCodeExpires = undefined;
@@ -96,12 +72,7 @@ const verifyEmail = async (req, res) => {
 
     res.json({
       token,
-      user: {
-        id:    user._id,
-        name:  user.name,
-        email: user.email,
-        phone: user.phone,
-      },
+      user: { id: user._id, name: user.name, email: user.email, phone: user.phone },
     });
 
   } catch (error) {
@@ -110,49 +81,28 @@ const verifyEmail = async (req, res) => {
   }
 };
 
-// ── POST /api/auth/login ──────────────────────────────────────────────────────
+// ── POST /api/auth/login ──────────────────────────────────
+// No verification check — user can login with email+password freely
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({
-        message: "Please provide email and password",
-      });
-    }
+    if (!email || !password)
+      return res.status(400).json({ message: "Please provide email and password" });
 
     const user = await User.findOne({ email }).select("+password");
 
-    if (!user || !(await user.matchPassword(password))) {
-      return res.status(401).json({
-        message: "Invalid email or password",
-      });
-    }
+    if (!user || !(await user.matchPassword(password)))
+      return res.status(401).json({ message: "Invalid email or password" });
 
-    // Block unverified users
-    if (!user.isVerified) {
-      return res.status(403).json({
-        message: "Please verify your email before logging in.",
-        userId:  user._id,
-      });
-    }
-
-    if (!user.isActive) {
-      return res.status(403).json({
-        message: "Your account has been deactivated. Please contact support.",
-      });
-    }
+    if (!user.isActive)
+      return res.status(403).json({ message: "Your account has been deactivated. Please contact support." });
 
     const token = signToken(user._id);
 
     res.json({
       token,
-      user: {
-        id:    user._id,
-        name:  user.name,
-        email: user.email,
-        phone: user.phone,
-      },
+      user: { id: user._id, name: user.name, email: user.email, phone: user.phone },
     });
 
   } catch (error) {
@@ -161,14 +111,11 @@ const loginUser = async (req, res) => {
   }
 };
 
-// ── GET /api/auth/me ──────────────────────────────────────────────────────────
+// ── GET /api/auth/me ──────────────────────────────────────
 const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     res.json({
       id:        user._id,
@@ -178,150 +125,108 @@ const getMe = async (req, res) => {
       addresses: user.addresses,
       createdAt: user.createdAt,
     });
-
   } catch (error) {
     console.error("GetMe error:", error.message);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ── PATCH /api/auth/profile ───────────────────────────────────────────────────
+// ── PATCH /api/auth/profile ───────────────────────────────
 const updateProfile = async (req, res) => {
   try {
     const { name, phone } = req.body;
-
     const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { name, phone },
-      { new: true, runValidators: true }
+      req.user.id, { name, phone }, { new: true, runValidators: true }
     );
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.json({
-      id:    user._id,
-      name:  user.name,
-      email: user.email,
-      phone: user.phone,
-    });
-
+    res.json({ id: user._id, name: user.name, email: user.email, phone: user.phone });
   } catch (error) {
     console.error("UpdateProfile error:", error.message);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ── PATCH /api/auth/password ──────────────────────────────────────────────────
+// ── PATCH /api/auth/password ──────────────────────────────
 const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        message: "Both current and new password are required",
-      });
-    }
+    if (!currentPassword || !newPassword)
+      return res.status(400).json({ message: "Both current and new password are required" });
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({
-        message: "New password must be at least 6 characters",
-      });
-    }
+    if (newPassword.length < 6)
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
 
     const user = await User.findById(req.user.id).select("+password");
 
-    if (!user || !(await user.matchPassword(currentPassword))) {
+    if (!user || !(await user.matchPassword(currentPassword)))
       return res.status(401).json({ message: "Current password is incorrect" });
-    }
 
     user.password = newPassword;
     await user.save();
 
     res.json({ message: "Password updated successfully" });
-
   } catch (error) {
     console.error("ChangePassword error:", error.message);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ── POST /api/auth/address ────────────────────────────────────────────────────
+// ── POST /api/auth/address ────────────────────────────────
 const addAddress = async (req, res) => {
   try {
     const { label, line1, line2, city, state, pincode, isDefault } = req.body;
-
     const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (isDefault) {
-      user.addresses.forEach((a) => (a.isDefault = false));
-    }
+    if (isDefault) user.addresses.forEach((a) => (a.isDefault = false));
 
     user.addresses.push({ label, line1, line2, city, state, pincode, isDefault });
     await user.save();
 
     res.status(201).json({ addresses: user.addresses });
-
   } catch (error) {
     console.error("AddAddress error:", error.message);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ── DELETE /api/auth/address/:addressId ──────────────────────────────────────
+// ── DELETE /api/auth/address/:addressId ──────────────────
 const deleteAddress = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     user.addresses = user.addresses.filter(
       (a) => a._id.toString() !== req.params.addressId
     );
-
     await user.save();
 
     res.json({ addresses: user.addresses });
-
   } catch (error) {
     console.error("DeleteAddress error:", error.message);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ── GET /api/auth/users  (admin only) ────────────────────────────────────────
+// ── GET /api/auth/users (admin only) ─────────────────────
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({})
-      .select("-password")
-      .sort({ createdAt: -1 });
-
+    const users = await User.find({}).select("-password").sort({ createdAt: -1 });
     res.json(users);
-
   } catch (error) {
     console.error("GetAllUsers error:", error.message);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ── DELETE /api/auth/users/:id  (admin only) ─────────────────────────────────
+// ── DELETE /api/auth/users/:id (admin only) ──────────────
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
+    if (!user) return res.status(404).json({ message: "User not found" });
     res.json({ message: "User deleted successfully" });
-
   } catch (error) {
     console.error("DeleteUser error:", error.message);
     res.status(500).json({ message: "Server error" });

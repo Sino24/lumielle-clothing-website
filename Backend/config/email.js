@@ -4,11 +4,15 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // gmail app password, not your real password
+    pass: process.env.EMAIL_PASS,
   },
 });
 
 const sendVerificationEmail = async (email, name, code) => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.warn("EMAIL_USER or EMAIL_PASS not set — skipping email send");
+    return;
+  }
   await transporter.sendMail({
     from:    `"Lumielle" <${process.env.EMAIL_USER}>`,
     to:      email,
