@@ -39,7 +39,7 @@ const DEFAULTS: AboutData = {
 };
 
 function About() {
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/";
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
   const [data, setData] = useState<AboutData>(DEFAULTS);
   const [loading, setLoading] = useState(true);
 
