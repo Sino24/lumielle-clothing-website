@@ -2,6 +2,7 @@
 
 const jwt  = require("jsonwebtoken");
 const User = require("../models/User");
+const { sendVerificationEmail } = require("../config/email");
 
 // ── Helper: sign JWT ──────────────────────────────────────────────────────────
 const signToken = (id) =>
@@ -33,10 +34,67 @@ const registerUser = async (req, res) => {
       });
     }
 
-    const user  = await User.create({ name, email, password, phone });
-    const token = signToken(user._id);
+    // Generate 6-digit verification code
+    const code    = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone,
+      verifyCode:        code,
+      verifyCodeExpires: expires,
+      isVerified:        false,
+    });
+
+    await sendVerificationEmail(email, name, code);
 
     res.status(201).json({
+      message: "Account created. Please check your email for a verification code.",
+      userId:  user._id,
+    });
+
+  } catch (error) {
+    console.error("Register error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ── POST /api/auth/verify ─────────────────────────────────────────────────────
+const verifyEmail = async (req, res) => {
+  try {
+    const { userId, code } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: "Email already verified" });
+    }
+
+    if (user.verifyCode !== code) {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
+
+    if (user.verifyCodeExpires < new Date()) {
+      return res.status(400).json({
+        message: "Code has expired. Please register again.",
+      });
+    }
+
+    // Mark verified and clear the code
+    user.isVerified        = true;
+    user.verifyCode        = undefined;
+    user.verifyCodeExpires = undefined;
+    await user.save();
+
+    const token = signToken(user._id);
+
+    res.json({
       token,
       user: {
         id:    user._id,
@@ -47,7 +105,7 @@ const registerUser = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Register error:", error.message);
+    console.error("Verify error:", error.message);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -68,6 +126,14 @@ const loginUser = async (req, res) => {
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({
         message: "Invalid email or password",
+      });
+    }
+
+    // Block unverified users
+    if (!user.isVerified) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in.",
+        userId:  user._id,
       });
     }
 
@@ -153,11 +219,15 @@ const changePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ message: "Both current and new password are required" });
+      return res.status(400).json({
+        message: "Both current and new password are required",
+      });
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ message: "New password must be at least 6 characters" });
+      return res.status(400).json({
+        message: "New password must be at least 6 characters",
+      });
     }
 
     const user = await User.findById(req.user.id).select("+password");
@@ -260,6 +330,7 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
   registerUser,
+  verifyEmail,
   loginUser,
   getMe,
   updateProfile,

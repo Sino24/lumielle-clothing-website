@@ -5,6 +5,7 @@ const router  = express.Router();
 
 const {
   registerUser,
+  verifyEmail,
   loginUser,
   getMe,
   updateProfile,
@@ -20,6 +21,7 @@ const { protect }     = require("../middleware/authMiddleware");     // admin JW
 
 // ── Public ────────────────────────────────────────────────────────────────────
 router.post("/register", registerUser);
+router.post("/verify",   verifyEmail);
 router.post("/login",    loginUser);
 
 // ── User-protected (user JWT required) ───────────────────────────────────────

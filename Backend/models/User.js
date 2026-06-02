@@ -21,10 +21,10 @@ const userSchema = new mongoose.Schema(
     },
 
     password: {
-      type:     String,
-      required: [true, "Password is required"],
+      type:      String,
+      required:  [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
-      select:   false, // never returned unless explicitly .select("+password")
+      select:    false,
     },
 
     phone: {
@@ -36,13 +36,13 @@ const userSchema = new mongoose.Schema(
     // Saved delivery addresses
     addresses: [
       {
-        label:    { type: String, default: "Home" }, // e.g. "Home", "Office"
-        line1:    { type: String, required: true },
-        line2:    { type: String, default: "" },
-        city:     { type: String, required: true },
-        state:    { type: String, required: true },
-        pincode:  { type: String, required: true },
-        isDefault:{ type: Boolean, default: false },
+        label:     { type: String, default: "Home" },
+        line1:     { type: String, required: true },
+        line2:     { type: String, default: "" },
+        city:      { type: String, required: true },
+        state:     { type: String, required: true },
+        pincode:   { type: String, required: true },
+        isDefault: { type: Boolean, default: false },
       },
     ],
 
@@ -51,23 +51,35 @@ const userSchema = new mongoose.Schema(
       default: true,
     },
 
+    // ── Email verification ────────────────────────────────
+    isVerified: {
+      type:    Boolean,
+      default: false,
+    },
+    verifyCode: {
+      type: String,
+    },
+    verifyCodeExpires: {
+      type: Date,
+    },
+
     // For future use (password reset)
     resetPasswordToken:   String,
     resetPasswordExpires: Date,
   },
   {
-    timestamps: true, // createdAt, updatedAt
+    timestamps: true,
   }
 );
 
-// ── Hash password before save ─────────────────────────────────────────────────
+// ── Hash password before save ─────────────────────────────
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
-// ── Instance method: compare password ────────────────────────────────────────
+// ── Instance method: compare password ────────────────────
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return bcrypt.compare(enteredPassword, this.password);
 };
