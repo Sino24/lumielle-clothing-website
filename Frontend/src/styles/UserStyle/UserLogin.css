@@ -424,6 +424,31 @@
 .ua-arrow { transition: transform 0.2s; }
 .ua-submit:hover:not(:disabled) .ua-arrow { transform: translateX(4px); }
 
+/* ── Resend code button ── */
+.ua-resend-btn {
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--lum-gold);
+  cursor: pointer;
+  padding: 0.4rem 0;
+  text-align: center;
+  transition: color 0.2s, opacity 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ua-resend-btn:hover:not(:disabled) { color: var(--lum-dark); }
+.ua-resend-btn:disabled {
+  color: var(--lum-muted);
+  cursor: default;
+  text-decoration: none;
+  opacity: 0.7;
+}
+
 /* ── Back button ── */
 .ua-back-btn {
   background: none;

@@ -19,8 +19,22 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
 
     const existing = await User.findOne({ email });
-    if (existing)
+    if (existing) {
+      // If account exists but was never verified, resend a fresh code instead of blocking
+      if (!existing.isVerified) {
+        const code    = Math.floor(100000 + Math.random() * 900000).toString();
+        const expires = new Date(Date.now() + 10 * 60 * 1000);
+        existing.verifyCode        = code;
+        existing.verifyCodeExpires = expires;
+        await existing.save();
+        await sendVerificationEmail(email, existing.name, code);
+        return res.status(200).json({
+          message: "A new verification code has been sent to your email.",
+          userId:  existing._id,
+        });
+      }
       return res.status(409).json({ message: "An account with this email already exists" });
+    }
 
     const code    = Math.floor(100000 + Math.random() * 900000).toString();
     const expires = new Date(Date.now() + 10 * 60 * 1000);
@@ -61,7 +75,7 @@ const verifyEmail = async (req, res) => {
       return res.status(400).json({ message: "Invalid verification code" });
 
     if (user.verifyCodeExpires < new Date())
-      return res.status(400).json({ message: "Code has expired. Please register again." });
+      return res.status(400).json({ message: "Code has expired. Please request a new one." });
 
     user.isVerified        = true;
     user.verifyCode        = undefined;
@@ -81,8 +95,36 @@ const verifyEmail = async (req, res) => {
   }
 };
 
+// ── POST /api/auth/resend-code ────────────────────────────
+const resendVerificationCode = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user)
+      return res.status(404).json({ message: "User not found" });
+
+    if (user.isVerified)
+      return res.status(400).json({ message: "Email is already verified" });
+
+    const code    = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 10 * 60 * 1000);
+
+    user.verifyCode        = code;
+    user.verifyCodeExpires = expires;
+    await user.save();
+
+    await sendVerificationEmail(user.email, user.name, code);
+
+    res.json({ message: "A new verification code has been sent to your email." });
+
+  } catch (error) {
+    console.error("ResendCode error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // ── POST /api/auth/login ──────────────────────────────────
-// No verification check — user can login with email+password freely
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -97,6 +139,23 @@ const loginUser = async (req, res) => {
 
     if (!user.isActive)
       return res.status(403).json({ message: "Your account has been deactivated. Please contact support." });
+
+    // ── Block unverified users and guide them to verify ──
+    if (!user.isVerified) {
+      // Issue a fresh code so they can complete verification
+      const code    = Math.floor(100000 + Math.random() * 900000).toString();
+      const expires = new Date(Date.now() + 10 * 60 * 1000);
+      user.verifyCode        = code;
+      user.verifyCodeExpires = expires;
+      await user.save();
+      await sendVerificationEmail(user.email, user.name, code);
+
+      return res.status(403).json({
+        message:        "Please verify your email before logging in. We've sent a new code.",
+        requiresVerify: true,
+        userId:         user._id,
+      });
+    }
 
     const token = signToken(user._id);
 
@@ -236,6 +295,7 @@ const deleteUser = async (req, res) => {
 module.exports = {
   registerUser,
   verifyEmail,
+  resendVerificationCode,
   loginUser,
   getMe,
   updateProfile,

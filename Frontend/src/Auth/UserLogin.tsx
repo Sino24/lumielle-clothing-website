@@ -32,10 +32,11 @@ const UserAuth: React.FC = () => {
   const [error,      setError]      = useState<string | null>(null);
   const [success,    setSuccess]    = useState<string | null>(null);
 
-  // verify state — only used after signup
+  // verify state
   const [verifyMode, setVerifyMode] = useState(false);
   const [userId,     setUserId]     = useState("");
   const [verifyCode, setVerifyCode] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const switchMode = (m: Mode) => {
     setMode(m);
@@ -62,6 +63,17 @@ const UserAuth: React.FC = () => {
     return null;
   };
 
+  // Start a 60-second resend cooldown
+  const startCooldown = () => {
+    setResendCooldown(60);
+    const interval = setInterval(() => {
+      setResendCooldown((s) => {
+        if (s <= 1) { clearInterval(interval); return 0; }
+        return s - 1;
+      });
+    }, 1000);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const err = validate();
@@ -84,16 +96,23 @@ const UserAuth: React.FC = () => {
       });
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.message || "Something went wrong");
-
-      if (mode === "signup") {
-        // Show verify screen after registration
-        setUserId(data.userId);
-        setVerifyMode(true);
-      } else {
-        // Login — go straight in, no verify step
+      if (mode === "login") {
+        // Login: check for requiresVerify flag (unverified account)
+        if (res.status === 403 && data.requiresVerify) {
+          setUserId(data.userId);
+          setVerifyMode(true);
+          startCooldown();
+          return;
+        }
+        if (!res.ok) throw new Error(data.message || "Something went wrong");
         login(data.token, data.user);
         navigate(from, { replace: true });
+      } else {
+        // Signup
+        if (!res.ok) throw new Error(data.message || "Something went wrong");
+        setUserId(data.userId);
+        setVerifyMode(true);
+        startCooldown();
       }
 
     } catch (err: unknown) {
@@ -130,7 +149,30 @@ const UserAuth: React.FC = () => {
     }
   };
 
-  // ── Verify screen (only shown after signup) ───────────
+  const handleResend = async () => {
+    if (resendCooldown > 0 || loading) return;
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/resend-code`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ userId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to resend code");
+      setSuccess("A new code has been sent to your email.");
+      startCooldown();
+    } catch (err: unknown) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Verify screen ─────────────────────────────────────
   if (verifyMode) {
     return (
       <div className="ua-page">
@@ -169,7 +211,7 @@ const UserAuth: React.FC = () => {
                     className="ua-input ua-input--code"
                     maxLength={6}
                     value={verifyCode}
-                    onChange={(e) => { setVerifyCode(e.target.value); setError(null); }}
+                    onChange={(e) => { setVerifyCode(e.target.value.replace(/\D/g, "")); setError(null); }}
                     disabled={loading}
                     autoComplete="one-time-code"
                     autoFocus
@@ -187,6 +229,17 @@ const UserAuth: React.FC = () => {
                     <line x1="12" y1="16" x2="12.01" y2="16"/>
                   </svg>
                   <span>{error}</span>
+                </div>
+              )}
+
+              {success && (
+                <div className="ua-success" role="status">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
+                       width="14" height="14" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                  </svg>
+                  <span>{success}</span>
                 </div>
               )}
 
@@ -210,8 +263,19 @@ const UserAuth: React.FC = () => {
 
               <button
                 type="button"
+                className="ua-resend-btn"
+                onClick={handleResend}
+                disabled={resendCooldown > 0 || loading}
+              >
+                {resendCooldown > 0
+                  ? `Resend code in ${resendCooldown}s`
+                  : "Didn't get the email? Resend code"}
+              </button>
+
+              <button
+                type="button"
                 className="ua-back-btn"
-                onClick={() => { setVerifyMode(false); setError(null); setVerifyCode(""); switchMode("login"); }}
+                onClick={() => { setVerifyMode(false); setError(null); setSuccess(null); setVerifyCode(""); switchMode("login"); }}
               >
                 ← Back to sign in
               </button>
