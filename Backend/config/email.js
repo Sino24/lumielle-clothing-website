@@ -9,7 +9,7 @@ const sendVerificationEmail = async (email, name, code) => {
   }
 
   await resend.emails.send({
-    from:    "Lumielle <onboarding@resend.dev>",
+   from: "Lumielle <onboarding@yavoere.resend.app>",
     to:      email,
     subject: "Verify your Lumielle account",
     html: `
