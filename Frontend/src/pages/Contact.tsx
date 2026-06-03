@@ -91,7 +91,7 @@ function Contact() {
 
           <div className="contact__info-item">
             <span>Hours</span>
-          // ✅ fix it to this
+         
           <p>24x7 Customer Support</p>
           </div>
         </div>

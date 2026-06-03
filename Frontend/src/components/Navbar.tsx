@@ -1,7 +1,7 @@
 // src/components/Navbar/Navbar.tsx
 
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -11,18 +11,24 @@ import "../styles/ComponentStyle/Navbar.css";
 import logo from "../assets/newlogo2.png";
 
 function Navbar() {
-  const [scrolled,      setScrolled]      = useState(false);
-  const [menuOpen,      setMenuOpen]      = useState(false);
-  const [searchOpen,    setSearchOpen]    = useState(false);
-  const [userMenuOpen,  setUserMenuOpen]  = useState(false);
-  const [query,         setQuery]         = useState("");
+  const [scrolled,   setScrolled]   = useState(false);
+  const [menuOpen,   setMenuOpen]   = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query,      setQuery]      = useState("");
 
-  const { cart }                         = useCart();
-  const { user, isLoggedIn, logout }     = useAuth();
-  const navigate                         = useNavigate();
-  const searchInputRef                   = useRef<HTMLInputElement>(null);
-  const userMenuRef                      = useRef<HTMLDivElement>(null);
-  const mobileMenuRef                    = useRef<HTMLDivElement>(null);
+  const { cart }                     = useCart();
+  const { user, isLoggedIn, logout } = useAuth();
+  const navigate                     = useNavigate();
+  const location                     = useLocation();
+  const searchInputRef               = useRef<HTMLInputElement>(null);
+
+  // ── Hoisted so useEffect below can reference it ──────────────
+  const closeMenu = () => setMenuOpen(false);
+
+  // Close mobile menu on any route change
+  useEffect(() => {
+    closeMenu();
+  }, [location.pathname]);
 
   // Scroll listener
   useEffect(() => {
@@ -36,18 +42,6 @@ function Navbar() {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
 
-  // Apply/remove inert on mobile menu instead of aria-hidden
-  // inert correctly hides content from AT AND prevents focus trapping
-  useEffect(() => {
-    const el = mobileMenuRef.current;
-    if (!el) return;
-    if (menuOpen) {
-      el.removeAttribute("inert");
-    } else {
-      el.setAttribute("inert", "");
-    }
-  }, [menuOpen]);
-
   // Close mobile menu on resize to desktop
   useEffect(() => {
     const onResize = () => {
@@ -55,17 +49,6 @@ function Navbar() {
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  // Close user dropdown when clicking outside
-  useEffect(() => {
-    const onClickOutside = (e: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setUserMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
   const submitSearch = (q: string) => {
@@ -94,8 +77,6 @@ function Navbar() {
     }
   };
 
-  const closeMenu = () => setMenuOpen(false);
-
   const toggleSearch = () => {
     setSearchOpen((v) => !v);
     if (searchOpen) setQuery("");
@@ -103,13 +84,12 @@ function Navbar() {
 
   const handleLogout = () => {
     logout();
-    setUserMenuOpen(false);
     setMenuOpen(false);
     navigate("/");
   };
 
-  // First name only for display
-  const firstName = user?.name?.split(" ")[0] ?? "";
+  const firstName  = user?.name?.split(" ")[0] ?? "";
+  const initials   = firstName.charAt(0).toUpperCase();
 
   return (
     <>
@@ -158,7 +138,7 @@ function Navbar() {
           />
         </form>
 
-        {/* ── Right Icons ── */}
+        {/* ── Desktop Right Icons ── */}
         <div className="navbar__icons">
 
           {/* Search toggle */}
@@ -180,45 +160,20 @@ function Navbar() {
             )}
           </button>
 
-          {/* ── User icon / dropdown ── */}
+          {/* User */}
           {isLoggedIn ? (
-            <div className="navbar__user-wrap" ref={userMenuRef}>
-              <button
-                className="navbar__icon-btn navbar__user-btn"
-                aria-label="Account menu"
-                aria-expanded={userMenuOpen}
-                onClick={() => setUserMenuOpen((v) => !v)}
-              >
-                <span className="navbar__avatar">{firstName.charAt(0).toUpperCase()}</span>
-              </button>
-
-              {userMenuOpen && (
-                <div className="navbar__user-dropdown">
-                  <div className="navbar__user-greeting">
-                    Hi, {firstName}
-                  </div>
-                  <Link
-                    className="navbar__user-item"
-                    to="/account"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    My Account
-                  </Link>
-                  <button
-                    className="navbar__user-item navbar__user-logout"
-                    onClick={handleLogout}
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
             <Link
-              to="/login"
-              className="navbar__icon-btn"
-              aria-label="Sign in"
+              to="/account"
+              className="navbar__icon-btn navbar__user-btn"
+              aria-label="My account"
             >
+              <span className="navbar__avatar" title={user?.name ?? "Account"}>
+                {initials}
+                <span className="navbar__avatar-ring" aria-hidden="true" />
+              </span>
+            </Link>
+          ) : (
+            <Link to="/login" className="navbar__icon-btn" aria-label="Sign in">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
@@ -245,29 +200,68 @@ function Navbar() {
           </Link>
         </div>
 
-        {/* ── Mobile Hamburger ── */}
-        <button
-          className={`navbar__hamburger${menuOpen ? " open" : ""}`}
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen}
-          aria-controls="navbar-mobile-menu"
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
+        {/* ── Mobile Right Group ── */}
+        <div className="navbar__mobile-right">
+
+          {/* Mobile User */}
+          {isLoggedIn ? (
+            <Link
+              to="/account"
+              className="navbar__icon-btn navbar__user-btn"
+              aria-label="My account"
+            >
+              <span className="navbar__avatar" title={user?.name ?? "Account"}>
+                {initials}
+                <span className="navbar__avatar-ring" aria-hidden="true" />
+              </span>
+            </Link>
+          ) : (
+            <Link to="/login" className="navbar__icon-btn" aria-label="Sign in">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </Link>
+          )}
+
+          {/* Mobile Cart */}
+          <Link
+            to="/cart"
+            className="navbar__icon-btn navbar__cart-link"
+            aria-label={`Cart — ${cart.length} items`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+            {cart.length > 0 && (
+              <span className="navbar__cart-badge" aria-hidden="true">
+                {cart.length}
+              </span>
+            )}
+          </Link>
+
+          {/* Hamburger */}
+          <button
+            className={`navbar__hamburger${menuOpen ? " open" : ""}`}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="navbar-mobile-menu"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
       </nav>
 
-      {/* ── Mobile Menu ──
-          Uses `inert` (set via useEffect) instead of aria-hidden.
-          inert prevents focus reaching hidden links AND hides from screen readers,
-          without the "aria-hidden on ancestor of focused element" console error. -->
-      */}
+      {/* ── Mobile Menu ── */}
       <div
         id="navbar-mobile-menu"
-        ref={mobileMenuRef}
         className={`navbar__mobile-menu${menuOpen ? " open" : ""}`}
+        aria-hidden={!menuOpen}
       >
         {/* Mobile Search */}
         <form
@@ -309,52 +303,23 @@ function Navbar() {
           </div>
         </form>
 
-        {/* Mobile Nav Links */}
-        <Link className="navbar__mobile-link" to="/" onClick={closeMenu}>Home</Link>
-        <Link className="navbar__mobile-link" to="/product" onClick={closeMenu}>Collections</Link>
-        <Link className="navbar__mobile-link" to="/lookbook" onClick={closeMenu}>Lookbook</Link>
+        {/* Nav links */}
+        <Link className="navbar__mobile-link" to="/"               onClick={closeMenu}>Home</Link>
+        <Link className="navbar__mobile-link" to="/product"        onClick={closeMenu}>Collections</Link>
+        <Link className="navbar__mobile-link" to="/lookbook"       onClick={closeMenu}>Lookbook</Link>
         <Link className="navbar__mobile-link" to="/ClientProjects" onClick={closeMenu}>Client Projects</Link>
-        <Link className="navbar__mobile-link" to="/about" onClick={closeMenu}>About</Link>
-        <Link className="navbar__mobile-link" to="/contact" onClick={closeMenu}>Contact</Link>
+        <Link className="navbar__mobile-link" to="/about"          onClick={closeMenu}>About</Link>
+        <Link className="navbar__mobile-link" to="/contact"        onClick={closeMenu}>Contact</Link>
 
-        {/* Mobile User */}
-        {isLoggedIn ? (
-          <>
-            <Link
-              className="navbar__mobile-link"
-              to="/account"
-              onClick={closeMenu}
-            >
-              My Account
-            </Link>
-            <button
-              className="navbar__mobile-link navbar__mobile-logout"
-              onClick={handleLogout}
-            >
-              Sign Out ({firstName})
+        {/* Mobile menu account row */}
+        {isLoggedIn && (
+          <div className="navbar__mobile-account">
+            <span className="navbar__mobile-account-name">Hi, {firstName}</span>
+            <button className="navbar__mobile-logout" onClick={handleLogout}>
+              Sign out
             </button>
-          </>
-        ) : (
-          <Link
-            className="navbar__mobile-link navbar__mobile-signin"
-            to="/login"
-            onClick={closeMenu}
-          >
-            Sign In
-          </Link>
+          </div>
         )}
-
-        {/* Mobile Cart */}
-        <Link
-          className="navbar__mobile-link navbar__mobile-cart"
-          to="/cart"
-          onClick={closeMenu}
-        >
-          <span>Cart</span>
-          {cart.length > 0 && (
-            <span className="navbar__mobile-cart-count">{cart.length}</span>
-          )}
-        </Link>
       </div>
     </>
   );

@@ -1,4 +1,5 @@
 const jwt  = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 
 const signToken = (id) =>
@@ -21,8 +22,12 @@ const registerUser = async (req, res) => {
     if (existing)
       return res.status(409).json({ message: "An account with this email already exists" });
 
+    // Do NOT pre-hash here — the pre("save") hook handles it
     const user = await User.create({
-      name, email, password, phone,
+      name,
+      email,
+      password, // raw — hook will hash it
+      phone,
       isVerified: true,
     });
 
@@ -47,9 +52,24 @@ const loginUser = async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ message: "Please provide email and password" });
 
-    const user = await User.findOne({ email }).select("+password");
+    // CRITICAL: must include "+password" since it's select:false in schema
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select("+password");
 
-    if (!user || !(await user.matchPassword(password)))
+    if (!user) {
+      console.log(`[login] No user found for email: ${email}`);
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    if (!user.password) {
+      console.error(`[login] User ${email} has no password field — was it fetched with select("+password")?`);
+      return res.status(500).json({ message: "Server error" });
+    }
+
+    // Direct bcrypt compare as a safety net (bypasses any matchPassword issues)
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log(`[login] password match for ${email}: ${isMatch}`);
+
+    if (!isMatch)
       return res.status(401).json({ message: "Invalid email or password" });
 
     if (!user.isActive)
@@ -92,6 +112,7 @@ const getMe = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { name, phone } = req.body;
+    // Use findByIdAndUpdate so the pre("save") password hook does NOT fire
     const user = await User.findByIdAndUpdate(
       req.user.id, { name, phone }, { new: true, runValidators: true }
     );
@@ -117,9 +138,10 @@ const changePassword = async (req, res) => {
 
     const user = await User.findById(req.user.id).select("+password");
 
-    if (!user || !(await user.matchPassword(currentPassword)))
+    if (!user || !(await bcrypt.compare(currentPassword, user.password)))
       return res.status(401).json({ message: "Current password is incorrect" });
 
+    // Assign raw — pre("save") hook will hash it
     user.password = newPassword;
     await user.save();
 
