@@ -16,6 +16,8 @@ interface Address {
 }
 
 interface ProfileData {
+  name:      string;
+  phone:     string;
   addresses: Address[];
 }
 
@@ -23,7 +25,6 @@ const parsePrice = (str: string) =>
   parseInt(str.replace(/[₹,\s]/g, ""), 10) || 0;
 
 // ── Cart Skeleton ─────────────────────────────────────────────────────────────
-// Shown while auth is resolving (prevents flash of login gate for logged-in users)
 function CartSkeleton() {
   return (
     <main className="cart-skeleton">
@@ -33,7 +34,6 @@ function CartSkeleton() {
         <div className="csk csk-count" />
       </div>
       <div className="cart-skeleton__layout">
-        {/* Items column */}
         <div className="cart-skeleton__items">
           {[0, 1, 2].map((i) => (
             <div className="cart-skeleton__item" key={i}>
@@ -47,7 +47,6 @@ function CartSkeleton() {
             </div>
           ))}
         </div>
-        {/* Summary sidebar */}
         <div className="cart-skeleton__summary">
           <div className="csk csk-sum-label" />
           <div className="csk csk-sum-row" />
@@ -65,11 +64,11 @@ function CartSkeleton() {
 
 function Cart() {
   const { cart, removeFromCart, updateQty, clearCart, cartLoading } = useCart();
-  // Destructure `loading` from auth so we know when auth hydration is done
   const { token, loading: authLoading } = useAuth();
-  const navigate   = useNavigate();
-  const API_BASE   = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const navigate = useNavigate();
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
+  const [profile,      setProfile]      = useState<ProfileData | null>(null);
   const [addresses,    setAddresses]    = useState<Address[]>([]);
   const [selectedAddr, setSelectedAddr] = useState<string>("");
   const [addrLoading,  setAddrLoading]  = useState(false);
@@ -83,7 +82,7 @@ function Cart() {
   const cartSnapshot = useRef(cart);
   useEffect(() => { cartSnapshot.current = cart; }, [cart]);
 
-  // Fetch saved addresses when logged in
+  // Fetch profile (name, phone) + saved addresses when logged in
   useEffect(() => {
     if (!token) return;
     setAddrLoading(true);
@@ -92,6 +91,7 @@ function Cart() {
     })
       .then((r) => r.json())
       .then((data: ProfileData) => {
+        setProfile(data);
         const addrs = data.addresses ?? [];
         setAddresses(addrs);
         const def = addrs.find((a) => a.isDefault);
@@ -105,34 +105,54 @@ function Cart() {
   const total     = cart.reduce((sum, item) => sum + parsePrice(item.price) * item.quantity, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  // ── Build WhatsApp message (includes customer name & phone) ──────────────
   const buildWhatsAppMsg = (
-    items    = cartSnapshot.current,
-    addrId   = selectedAddr,
-    addrList = addresses,
+    items      = cartSnapshot.current,
+    addrId     = selectedAddr,
+    addrList   = addresses,
+    userProfile = profile,
   ) => {
-    let msg = "Hello Lumielle,%0A%0AI would like to order:%0A%0A";
+    let msg = "Hello Lumielle,%0A%0A";
+
+    // Customer details
+    if (userProfile?.name) {
+      msg += `*Customer:* ${userProfile.name}%0A`;
+    }
+    if (userProfile?.phone) {
+      msg += `*Phone:* ${userProfile.phone}%0A`;
+    }
+    msg += "%0A";
+
+    msg += "I would like to order:%0A%0A";
+
     items.forEach((item, i) => {
       msg += `${i + 1}. ${item.name}%0A`;
       msg += `Size: ${item.size}%0A`;
       msg += `Qty: ${item.quantity}%0A`;
       msg += `Price: ${item.price}%0A%0A`;
     });
-    const orderTotal = items.reduce((s, it) => s + parsePrice(it.price) * it.quantity, 0);
-    msg += `Total: ₹${orderTotal.toLocaleString("en-IN")}%0A%0A`;
+
+    const orderTotal = items.reduce(
+      (s, it) => s + parsePrice(it.price) * it.quantity,
+      0,
+    );
+    msg += `*Total: ₹${orderTotal.toLocaleString("en-IN")}*%0A%0A`;
+
     if (addrId) {
       const addr = addrList.find((a) => a._id === addrId);
       if (addr) {
-        msg += `Delivery to:%0A`;
+        msg += `*Delivery to:*%0A`;
         msg += `${addr.line1}${addr.line2 ? `, ${addr.line2}` : ""}%0A`;
         msg += `${addr.city}, ${addr.state} — ${addr.pincode}%0A%0A`;
       }
     }
+
     return msg;
   };
 
   const selectedAddrObj = addresses.find((a) => a._id === selectedAddr) ?? null;
 
-  // ── Checkout ─────────────────────────────────────────────────────────────
+  // ── Checkout ──────────────────────────────────────────────────────────────
   const checkout = async () => {
     if (checkingOut || !token) return;
 
@@ -155,7 +175,8 @@ function Cart() {
       quantity:  item.quantity,
     }));
     const orderTotal = cartSnapshot.current.reduce(
-      (s, it) => s + parsePrice(it.price) * it.quantity, 0,
+      (s, it) => s + parsePrice(it.price) * it.quantity,
+      0,
     );
     const addrId  = selectedAddr;
     const addrObj = {
@@ -166,8 +187,9 @@ function Cart() {
       state:   selectedAddrObj.state,
       pincode: selectedAddrObj.pincode,
     };
-    const addrListSnapshot = [...addresses];
-    const cartAtCheckout   = [...cartSnapshot.current];
+    const addrListSnapshot  = [...addresses];
+    const cartAtCheckout    = [...cartSnapshot.current];
+    const profileAtCheckout = profile; // snapshot so clearCart can't affect it
 
     try {
       const res = await fetch(`${API_BASE}/api/cart/checkout`, {
@@ -199,7 +221,12 @@ function Cart() {
       const newOrderId = data.order?._id ?? data._id ?? "";
 
       window.open(
-        `https://wa.me/+917561032017?text=${buildWhatsAppMsg(cartAtCheckout, addrId, addrListSnapshot)}`,
+        `https://wa.me/+917561032017?text=${buildWhatsAppMsg(
+          cartAtCheckout,
+          addrId,
+          addrListSnapshot,
+          profileAtCheckout,
+        )}`,
         "_blank",
       );
 
@@ -207,9 +234,9 @@ function Cart() {
 
       setOrderId(newOrderId);
       setOrderSuccess(true);
-
     } catch (err) {
-      const errMsg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      const errMsg =
+        err instanceof Error ? err.message : "Something went wrong. Please try again.";
       setOrderError(errMsg);
       console.error("Checkout error:", err);
     } finally {
@@ -217,12 +244,12 @@ function Cart() {
     }
   };
 
-  // ── Auth still resolving → show skeleton (prevents login-gate flash) ──────
+  // ── Auth still resolving → show skeleton ─────────────────────────────────
   if (authLoading || cartLoading) {
     return <CartSkeleton />;
   }
 
-  // ── Login gate ───────────────────────────────────────────────────────────
+  // ── Login gate ────────────────────────────────────────────────────────────
   if (!token) {
     return (
       <main className="cart-gate">
@@ -248,7 +275,7 @@ function Cart() {
     );
   }
 
-  // ── Order success ────────────────────────────────────────────────────────
+  // ── Order success ─────────────────────────────────────────────────────────
   if (orderSuccess) {
     return (
       <main className="cart-success">
@@ -280,7 +307,7 @@ function Cart() {
     );
   }
 
-  // ── Empty ────────────────────────────────────────────────────────────────
+  // ── Empty ─────────────────────────────────────────────────────────────────
   if (cart.length === 0) {
     return (
       <main className="cart-empty">
@@ -292,7 +319,7 @@ function Cart() {
     );
   }
 
-  // ── Main cart ────────────────────────────────────────────────────────────
+  // ── Main cart ─────────────────────────────────────────────────────────────
   return (
     <main className="cart">
 
@@ -411,15 +438,15 @@ function Cart() {
                     Please select a delivery address to continue.
                   </p>
                 )}
-            <p className="cart__addr-hint">
-  <Link
-    to="/account"
-    state={{ tab: "addresses" }}
-    className="cart__addr-link"
-  >
-    Manage addresses →
-  </Link>
-</p>
+                <p className="cart__addr-hint">
+                  <Link
+                    to="/account"
+                    state={{ tab: "addresses" }}
+                    className="cart__addr-link"
+                  >
+                    Manage addresses →
+                  </Link>
+                </p>
               </>
             ) : (
               <div className="cart__addr-nudge">
@@ -433,13 +460,13 @@ function Cart() {
                 <p className="cart__addr-nudge-text">
                   You need a saved address to place an order.
                 </p>
-               <Link
-  to="/account"
-  state={{ tab: "addresses" }}
-  className="cart__addr-nudge-cta"
->
-  Add Address →
-</Link>
+                <Link
+                  to="/account"
+                  state={{ tab: "addresses" }}
+                  className="cart__addr-nudge-cta"
+                >
+                  Add Address →
+                </Link>
               </div>
             )}
           </div>
@@ -477,14 +504,14 @@ function Cart() {
           {addresses.length === 0 && !addrLoading && (
             <p className="cart__checkout-note">
               Add a delivery address in your{" "}
-             <Link
-  to="/account"
-  state={{ tab: "addresses" }}
-  className="cart__addr-link"
->
-  account
-</Link>
-              to place an order.
+              <Link
+                to="/account"
+                state={{ tab: "addresses" }}
+                className="cart__addr-link"
+              >
+                account
+              </Link>
+              {" "}to place an order.
             </p>
           )}
 
