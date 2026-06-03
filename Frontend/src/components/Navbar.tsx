@@ -22,31 +22,22 @@ function Navbar() {
   const location                     = useLocation();
   const searchInputRef               = useRef<HTMLInputElement>(null);
 
-  // ── Hoisted so useEffect below can reference it ──────────────
   const closeMenu = () => setMenuOpen(false);
 
-  // Close mobile menu on any route change
-  useEffect(() => {
-    closeMenu();
-  }, [location.pathname]);
+  useEffect(() => { closeMenu(); }, [location.pathname]);
 
-  // Scroll listener
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Focus desktop search input when search opens
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
 
-  // Close mobile menu on resize to desktop
   useEffect(() => {
-    const onResize = () => {
-      if (window.innerWidth > 768) setMenuOpen(false);
-    };
+    const onResize = () => { if (window.innerWidth > 768) setMenuOpen(false); };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -71,10 +62,7 @@ function Navbar() {
   };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setSearchOpen(false);
-      setQuery("");
-    }
+    if (e.key === "Escape") { setSearchOpen(false); setQuery(""); }
   };
 
   const toggleSearch = () => {
@@ -88,8 +76,8 @@ function Navbar() {
     navigate("/");
   };
 
-  const firstName  = user?.name?.split(" ")[0] ?? "";
-  const initials   = firstName.charAt(0).toUpperCase();
+  const firstName = user?.name?.split(" ")[0] ?? "";
+  const initials  = firstName.charAt(0).toUpperCase();
 
   return (
     <>
@@ -140,8 +128,6 @@ function Navbar() {
 
         {/* ── Desktop Right Icons ── */}
         <div className="navbar__icons">
-
-          {/* Search toggle */}
           <button
             className="navbar__icon-btn"
             aria-label={searchOpen ? "Close search" : "Open search"}
@@ -160,13 +146,8 @@ function Navbar() {
             )}
           </button>
 
-          {/* User */}
           {isLoggedIn ? (
-            <Link
-              to="/account"
-              className="navbar__icon-btn navbar__user-btn"
-              aria-label="My account"
-            >
+            <Link to="/account" className="navbar__icon-btn navbar__user-btn" aria-label="My account">
               <span className="navbar__avatar" title={user?.name ?? "Account"}>
                 {initials}
                 <span className="navbar__avatar-ring" aria-hidden="true" />
@@ -181,7 +162,6 @@ function Navbar() {
             </Link>
           )}
 
-          {/* Cart */}
           <Link
             to="/cart"
             className="navbar__icon-btn navbar__cart-link"
@@ -193,9 +173,7 @@ function Navbar() {
               <path d="M16 10a4 4 0 0 1-8 0" />
             </svg>
             {cart.length > 0 && (
-              <span className="navbar__cart-badge" aria-hidden="true">
-                {cart.length}
-              </span>
+              <span className="navbar__cart-badge" aria-hidden="true">{cart.length}</span>
             )}
           </Link>
         </div>
@@ -203,13 +181,8 @@ function Navbar() {
         {/* ── Mobile Right Group ── */}
         <div className="navbar__mobile-right">
 
-          {/* Mobile User */}
           {isLoggedIn ? (
-            <Link
-              to="/account"
-              className="navbar__icon-btn navbar__user-btn"
-              aria-label="My account"
-            >
+            <Link to="/account" className="navbar__icon-btn navbar__user-btn" aria-label="My account">
               <span className="navbar__avatar" title={user?.name ?? "Account"}>
                 {initials}
                 <span className="navbar__avatar-ring" aria-hidden="true" />
@@ -224,7 +197,6 @@ function Navbar() {
             </Link>
           )}
 
-          {/* Mobile Cart */}
           <Link
             to="/cart"
             className="navbar__icon-btn navbar__cart-link"
@@ -236,13 +208,10 @@ function Navbar() {
               <path d="M16 10a4 4 0 0 1-8 0" />
             </svg>
             {cart.length > 0 && (
-              <span className="navbar__cart-badge" aria-hidden="true">
-                {cart.length}
-              </span>
+              <span className="navbar__cart-badge" aria-hidden="true">{cart.length}</span>
             )}
           </Link>
 
-          {/* Hamburger */}
           <button
             className={`navbar__hamburger${menuOpen ? " open" : ""}`}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -263,12 +232,7 @@ function Navbar() {
         className={`navbar__mobile-menu${menuOpen ? " open" : ""}`}
         aria-hidden={!menuOpen}
       >
-        {/* Mobile Search */}
-        <form
-          className="navbar__mobile-search"
-          onSubmit={handleMobileSearchSubmit}
-          role="search"
-        >
+        <form className="navbar__mobile-search" onSubmit={handleMobileSearchSubmit} role="search">
           <div className="navbar__mobile-search-wrap">
             <svg
               className="navbar__mobile-search-icon"
@@ -292,18 +256,13 @@ function Navbar() {
               autoComplete="search"
             />
             {query && (
-              <button
-                type="submit"
-                className="navbar__mobile-search-btn"
-                aria-label="Submit search"
-              >
+              <button type="submit" className="navbar__mobile-search-btn" aria-label="Submit search">
                 Go
               </button>
             )}
           </div>
         </form>
 
-        {/* Nav links */}
         <Link className="navbar__mobile-link" to="/"               onClick={closeMenu}>Home</Link>
         <Link className="navbar__mobile-link" to="/product"        onClick={closeMenu}>Collections</Link>
         <Link className="navbar__mobile-link" to="/lookbook"       onClick={closeMenu}>Lookbook</Link>
@@ -311,13 +270,10 @@ function Navbar() {
         <Link className="navbar__mobile-link" to="/about"          onClick={closeMenu}>About</Link>
         <Link className="navbar__mobile-link" to="/contact"        onClick={closeMenu}>Contact</Link>
 
-        {/* Mobile menu account row */}
         {isLoggedIn && (
           <div className="navbar__mobile-account">
             <span className="navbar__mobile-account-name">Hi, {firstName}</span>
-            <button className="navbar__mobile-logout" onClick={handleLogout}>
-              Sign out
-            </button>
+            <button className="navbar__mobile-logout" onClick={handleLogout}>Sign out</button>
           </div>
         )}
       </div>

@@ -75,32 +75,19 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
 const parsePrice = (str: string) =>
   parseInt(str.replace(/[₹,\s]/g, ""), 10) || 0;
 
-// ── Skeleton ──────────────────────────────────────────────
-const AccountSkeleton: React.FC = () => (
-  <>
+// ── Content skeleton (only the content zone, not the whole page) ──
+const ContentSkeleton: React.FC = () => (
+  <div className="acc-content-zone">
     <style>{`
       @keyframes acc-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
       .aps-sk { background: linear-gradient(90deg,rgba(26,23,20,.06) 25%,rgba(26,23,20,.11) 50%,rgba(26,23,20,.06) 75%);background-size:200% 100%;animation:acc-shimmer 1.4s ease infinite;border-radius:2px; }
-      .aps-sk-light { background: linear-gradient(90deg,rgba(255,255,255,.08) 25%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.08) 75%);background-size:200% 100%;animation:acc-shimmer 1.4s ease infinite;border-radius:2px; }
     `}</style>
-    <div style={{ paddingTop: "var(--nav-height,76px)", minHeight: "100vh", background: "#F8F5F0" }}>
-      <div style={{ width:"100%", minHeight:130, background:"#1A1714", display:"flex", alignItems:"center", gap:"1.5rem", padding:"2rem max(2rem,5vw)", boxSizing:"border-box" }}>
-        <div className="aps-sk-light" style={{ width:68, height:68, borderRadius:"50%", flexShrink:0 }} />
-        <div style={{ display:"flex", flexDirection:"column", gap:"0.6rem", flex:1 }}>
-          <div className="aps-sk-light" style={{ height:26, width:"min(220px,55%)" }} />
-          <div className="aps-sk-light" style={{ height:13, width:"min(320px,80%)", opacity:0.6 }} />
-        </div>
-      </div>
-      <div style={{ width:"100%", background:"#fff", borderBottom:"1px solid rgba(26,23,20,.1)", display:"flex", gap:"0.5rem", padding:"0.75rem max(2rem,5vw)", boxSizing:"border-box" }}>
-        {[130,110,110,100,90].map((w,i) => <div key={i} className="aps-sk" style={{ height:36, width:w, flexShrink:0 }} />)}
-      </div>
-      <div style={{ maxWidth:1400, margin:"0 auto", padding:"2.5rem max(2rem,5vw) 5rem", boxSizing:"border-box", display:"flex", flexDirection:"column", gap:"1rem" }}>
-        <div className="aps-sk" style={{ height:160 }} />
-        <div className="aps-sk" style={{ height:90 }} />
-        <div className="aps-sk" style={{ height:90 }} />
-      </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div className="aps-sk" style={{ height: 160 }} />
+      <div className="aps-sk" style={{ height: 90 }} />
+      <div className="aps-sk" style={{ height: 90 }} />
     </div>
-  </>
+  </div>
 );
 
 // ── Order card ────────────────────────────────────────────
@@ -181,9 +168,7 @@ const CartSection: React.FC = () => {
   if (cart.length === 0) {
     return (
       <div className="acc-empty">
-        <div className="acc-empty-icon">
-          <IoCartOutline size={26} />
-        </div>
+        <div className="acc-empty-icon"><IoCartOutline size={26} /></div>
         <div className="acc-empty-title">Your bag is empty</div>
         <p className="acc-empty-desc">
           Add items from the collection and they'll appear here, ready for checkout.
@@ -285,9 +270,13 @@ const AccountPage: React.FC = () => {
 
   const navState = location.state as { tab?: Tab; refreshOrders?: boolean } | null;
 
+  // Read desired tab from nav state ONCE at mount time for initial value.
+  // We deliberately do NOT re-read location.state in the main render —
+  // doing so caused the skeleton to re-flash when state was cleared via navigate().
+  const initialTab = useRef<Tab>(navState?.tab ?? "cart");
   const pendingRefreshOrders = useRef<boolean>(navState?.refreshOrders === true);
 
-  const [activeTab,       setActiveTab]       = useState<Tab>(navState?.tab ?? "cart");
+  const [activeTab,       setActiveTab]       = useState<Tab>(initialTab.current);
   const [profile,         setProfile]         = useState<ProfileData | null>(null);
   const [loading,         setLoading]         = useState(true);
   const [saving,          setSaving]          = useState(false);
@@ -310,13 +299,16 @@ const AccountPage: React.FC = () => {
     Authorization:  `Bearer ${token}`,
   }), [token]);
 
-  // ── KEY FIX: respond to location.state changes even when already mounted ──
-  // This handles the case where the user is already on /account (e.g. on the
-  // "cart" tab) and clicks "Manage addresses →" in Cart.tsx — React won't
-  // remount AccountPage, so useState never re-runs. This effect picks up the
-  // new state and switches the tab accordingly.
+  // ── Handle subsequent navigations to /account with a new tab in state ──
+  // e.g. navigate("/account", { state: { tab: "addresses" } }) from Cart.tsx
+  // We use a ref to track the previous state object so we only act on genuine
+  // new navigations, not on the state-clearing replace() we do below.
+  const prevNavState = useRef(navState);
   useEffect(() => {
+    // Skip if state hasn't changed or if it was already cleared
     if (!navState?.tab) return;
+    if (navState === prevNavState.current) return;
+    prevNavState.current = navState;
 
     setActiveTab(navState.tab);
     setMsg(null);
@@ -325,12 +317,17 @@ const AccountPage: React.FC = () => {
       pendingRefreshOrders.current = true;
     }
 
-    // Clear the state from history so a page refresh doesn't re-apply it
-    navigate("/account", { replace: true, state: null });
-  // location.state is the dependency — re-run whenever the state object changes
+    // Clear location state so a hard refresh doesn't re-apply it.
+    // Use a timeout so the state update above settles first — this avoids
+    // the double-render that caused the navbar flicker.
+    const t = setTimeout(() => {
+      navigate("/account", { replace: true, state: null });
+    }, 0);
+    return () => clearTimeout(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state]);
 
+  // ── Fetch profile once on mount ──
   useEffect(() => {
     if (!token) return;
     fetch(`${API_BASE}/api/auth/me`, { headers: authHeaders() })
@@ -341,7 +338,8 @@ const AccountPage: React.FC = () => {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [token, API_BASE, authHeaders]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const fetchOrders = useCallback(() => {
     if (!token) return;
@@ -454,8 +452,7 @@ const AccountPage: React.FC = () => {
     { id: "profile",   label: "Profile Settings", Icon: IconUser },
   ];
 
-  if (loading) return <AccountSkeleton />;
-
+  // ── Derive display values (safe even while loading) ──
   const initials    = profile?.name?.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase() ?? "?";
   const memberSince = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString("en-IN", { month: "long", year: "numeric" })
@@ -464,18 +461,27 @@ const AccountPage: React.FC = () => {
   return (
     <div className="acc-page">
 
-      {/* Hero */}
+      {/* ── Hero — always rendered, never skeleton ── */}
       <div className="acc-hero">
         <div className="acc-hero-inner">
           <div className="acc-hero-left">
             <div className="acc-avatar">{initials}</div>
             <div className="acc-hero-info">
-              <h1 className="acc-hero-name">{profile?.name}</h1>
-              <div className="acc-hero-meta">
-                <span className="acc-hero-meta-item"><IconMail />{profile?.email}</span>
-                {profile?.phone && <span className="acc-hero-meta-item"><IconPhone />{profile.phone}</span>}
-                <span className="acc-hero-meta-item"><IconCalendar />Member since {memberSince}</span>
-              </div>
+              {loading ? (
+                <>
+                  <div style={{ height: 26, width: 180, background: "rgba(255,255,255,0.12)", borderRadius: 2, marginBottom: 8 }} />
+                  <div style={{ height: 13, width: 260, background: "rgba(255,255,255,0.07)", borderRadius: 2 }} />
+                </>
+              ) : (
+                <>
+                  <h1 className="acc-hero-name">{profile?.name}</h1>
+                  <div className="acc-hero-meta">
+                    <span className="acc-hero-meta-item"><IconMail />{profile?.email}</span>
+                    {profile?.phone && <span className="acc-hero-meta-item"><IconPhone />{profile.phone}</span>}
+                    <span className="acc-hero-meta-item"><IconCalendar />Member since {memberSince}</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
           <button className="acc-logout-btn" onClick={handleLogout}>
@@ -484,7 +490,7 @@ const AccountPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* ── Tab bar — always rendered ── */}
       <div className="acc-tabs-bar">
         <div className="acc-tabs-inner">
           {tabs.map(({ id, label, Icon }) => (
@@ -507,247 +513,251 @@ const AccountPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="acc-content-zone">
+      {/* ── Content — skeleton only the inner zone ── */}
+      {loading ? (
+        <ContentSkeleton />
+      ) : (
+        <div className="acc-content-zone">
 
-        {msg && (
-          <div className={`acc-flash acc-flash--${msg.type}`} role="alert">
-            {msg.type === "success" ? <IconCheck /> : <IconAlert />}
-            <span>{msg.text}</span>
-          </div>
-        )}
-
-        {/* ── Cart / My Bag ── */}
-        {activeTab === "cart" && (
-          <section className="acc-section" key="cart">
-            <div className="acc-section-hd">
-              <h2 className="acc-section-title">My Bag</h2>
-              <p className="acc-section-sub">Items currently in your shopping bag</p>
+          {msg && (
+            <div className={`acc-flash acc-flash--${msg.type}`} role="alert">
+              {msg.type === "success" ? <IconCheck /> : <IconAlert />}
+              <span>{msg.text}</span>
             </div>
-            <CartSection />
-          </section>
-        )}
+          )}
 
-        {/* ── Orders ── */}
-        {activeTab === "orders" && (
-          <section className="acc-section" key="orders">
-            <div className="acc-section-hd">
-              <h2 className="acc-section-title">My Orders</h2>
-              <p className="acc-section-sub">Your complete order history</p>
-            </div>
-            {ordersLoading && (
-              <div className="acc-orders-loading">
-                <div className="acc-orders-spinner" />
-                <p>Loading orders…</p>
+          {/* Cart */}
+          {activeTab === "cart" && (
+            <section className="acc-section" key="cart">
+              <div className="acc-section-hd">
+                <h2 className="acc-section-title">My Bag</h2>
+                <p className="acc-section-sub">Items currently in your shopping bag</p>
               </div>
-            )}
-            {!ordersLoading && orders.length === 0 && (
-              <div className="acc-empty">
-                <div className="acc-empty-icon"><IconShopping /></div>
-                <div className="acc-empty-title">No orders yet</div>
-                <p className="acc-empty-desc">Once you place an order via WhatsApp it will appear here with full tracking details.</p>
-                <Link className="acc-btn acc-btn--primary" to="/product">Browse Collections</Link>
-              </div>
-            )}
-            {!ordersLoading && orders.length > 0 && (
-              <div className="acc-orders-list">
-                {orders.map((order) => <OrderCard key={order._id} order={order} />)}
-              </div>
-            )}
-          </section>
-        )}
+              <CartSection />
+            </section>
+          )}
 
-        {/* ── Addresses ── */}
-        {activeTab === "addresses" && (
-          <section className="acc-section" key="addresses">
-            <div className="acc-section-hd">
-              <h2 className="acc-section-title">Saved Addresses</h2>
-              <p className="acc-section-sub">Manage your delivery addresses</p>
-            </div>
-            {(profile?.addresses?.length ?? 0) > 0 && (
-              <div className="acc-address-list">
-                {profile!.addresses.map((addr) => (
-                  <div key={addr._id} className={`acc-address-card${addr.isDefault ? " acc-address-card--default" : ""}`}>
-                    <div className="acc-address-card-top">
-                      <span className="acc-address-label-icon">
-                        {addr.label === "Home" ? <IconHome /> : addr.label === "Office" ? <IconBriefcase /> : <IconMapPin />}
-                      </span>
-                      <span className="acc-address-label">{addr.label}</span>
-                      {addr.isDefault && <span className="acc-address-badge">Default</span>}
-                      <button className="acc-address-delete" onClick={() => deleteAddress(addr._id)} type="button" aria-label="Remove address">
-                        <IconTrash />
-                      </button>
-                    </div>
-                    <p className="acc-address-text">{addr.line1}{addr.line2 ? `, ${addr.line2}` : ""}</p>
-                    <p className="acc-address-text">{addr.city}, {addr.state} — {addr.pincode}</p>
-                  </div>
-                ))}
+          {/* Orders */}
+          {activeTab === "orders" && (
+            <section className="acc-section" key="orders">
+              <div className="acc-section-hd">
+                <h2 className="acc-section-title">My Orders</h2>
+                <p className="acc-section-sub">Your complete order history</p>
               </div>
-            )}
-            {!showAddressForm && (profile?.addresses?.length ?? 0) === 0 && (
-              <div className="acc-empty">
-                <div className="acc-empty-icon"><IconMapPin /></div>
-                <div className="acc-empty-title">No addresses saved</div>
-                <p className="acc-empty-desc">Add a delivery address to speed up checkout.</p>
-              </div>
-            )}
-            {showAddressForm ? (
-              <form className="acc-form acc-address-form" onSubmit={addAddress}>
-                <div className="acc-section-hd acc-section-hd--sub">
-                  <h3 className="acc-section-title acc-section-title--sm">New Address</h3>
+              {ordersLoading && (
+                <div className="acc-orders-loading">
+                  <div className="acc-orders-spinner" />
+                  <p>Loading orders…</p>
                 </div>
+              )}
+              {!ordersLoading && orders.length === 0 && (
+                <div className="acc-empty">
+                  <div className="acc-empty-icon"><IconShopping /></div>
+                  <div className="acc-empty-title">No orders yet</div>
+                  <p className="acc-empty-desc">Once you place an order via WhatsApp it will appear here with full tracking details.</p>
+                  <Link className="acc-btn acc-btn--primary" to="/product">Browse Collections</Link>
+                </div>
+              )}
+              {!ordersLoading && orders.length > 0 && (
+                <div className="acc-orders-list">
+                  {orders.map((order) => <OrderCard key={order._id} order={order} />)}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Addresses */}
+          {activeTab === "addresses" && (
+            <section className="acc-section" key="addresses">
+              <div className="acc-section-hd">
+                <h2 className="acc-section-title">Saved Addresses</h2>
+                <p className="acc-section-sub">Manage your delivery addresses</p>
+              </div>
+              {(profile?.addresses?.length ?? 0) > 0 && (
+                <div className="acc-address-list">
+                  {profile!.addresses.map((addr) => (
+                    <div key={addr._id} className={`acc-address-card${addr.isDefault ? " acc-address-card--default" : ""}`}>
+                      <div className="acc-address-card-top">
+                        <span className="acc-address-label-icon">
+                          {addr.label === "Home" ? <IconHome /> : addr.label === "Office" ? <IconBriefcase /> : <IconMapPin />}
+                        </span>
+                        <span className="acc-address-label">{addr.label}</span>
+                        {addr.isDefault && <span className="acc-address-badge">Default</span>}
+                        <button className="acc-address-delete" onClick={() => deleteAddress(addr._id)} type="button" aria-label="Remove address">
+                          <IconTrash />
+                        </button>
+                      </div>
+                      <p className="acc-address-text">{addr.line1}{addr.line2 ? `, ${addr.line2}` : ""}</p>
+                      <p className="acc-address-text">{addr.city}, {addr.state} — {addr.pincode}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {!showAddressForm && (profile?.addresses?.length ?? 0) === 0 && (
+                <div className="acc-empty">
+                  <div className="acc-empty-icon"><IconMapPin /></div>
+                  <div className="acc-empty-title">No addresses saved</div>
+                  <p className="acc-empty-desc">Add a delivery address to speed up checkout.</p>
+                </div>
+              )}
+              {showAddressForm ? (
+                <form className="acc-form acc-address-form" onSubmit={addAddress}>
+                  <div className="acc-section-hd acc-section-hd--sub">
+                    <h3 className="acc-section-title acc-section-title--sm">New Address</h3>
+                  </div>
+                  <div className="acc-fields-grid">
+                    <div className="acc-field">
+                      <label className="acc-label" htmlFor="addr-label">Label</label>
+                      <select id="addr-label" name="label" className="acc-input acc-select"
+                        value={addressForm.label}
+                        onChange={(e) => setAddressForm((p) => ({ ...p, label: e.target.value }))}>
+                        <option>Home</option><option>Office</option><option>Other</option>
+                      </select>
+                    </div>
+                    <div className="acc-field acc-field--check">
+                      <label className="acc-check-label">
+                        <input type="checkbox" name="isDefault" checked={addressForm.isDefault}
+                          onChange={(e) => setAddressForm((p) => ({ ...p, isDefault: e.target.checked }))} />
+                        Set as default address
+                      </label>
+                    </div>
+                    <div className="acc-field acc-field--full">
+                      <label className="acc-label" htmlFor="addr-line1">Address Line 1 *</label>
+                      <input id="addr-line1" name="address-line1" className="acc-input" type="text"
+                        placeholder="House / flat / street" value={addressForm.line1} disabled={saving} autoComplete="address-line1"
+                        onChange={(e) => setAddressForm((p) => ({ ...p, line1: e.target.value }))} />
+                    </div>
+                    <div className="acc-field acc-field--full">
+                      <label className="acc-label" htmlFor="addr-line2">Address Line 2 <span className="acc-optional">(optional)</span></label>
+                      <input id="addr-line2" name="address-line2" className="acc-input" type="text"
+                        placeholder="Area / landmark" value={addressForm.line2} disabled={saving} autoComplete="address-line2"
+                        onChange={(e) => setAddressForm((p) => ({ ...p, line2: e.target.value }))} />
+                    </div>
+                    <div className="acc-field">
+                      <label className="acc-label" htmlFor="addr-city">City *</label>
+                      <input id="addr-city" name="city" className="acc-input" type="text"
+                        value={addressForm.city} disabled={saving} autoComplete="address-level2"
+                        onChange={(e) => setAddressForm((p) => ({ ...p, city: e.target.value }))} />
+                    </div>
+                    <div className="acc-field">
+                      <label className="acc-label" htmlFor="addr-state">State *</label>
+                      <input id="addr-state" name="state" className="acc-input" type="text"
+                        value={addressForm.state} disabled={saving} autoComplete="address-level1"
+                        onChange={(e) => setAddressForm((p) => ({ ...p, state: e.target.value }))} />
+                    </div>
+                    <div className="acc-field">
+                      <label className="acc-label" htmlFor="addr-pincode">Pincode *</label>
+                      <input id="addr-pincode" name="postal-code" className="acc-input" type="text"
+                        placeholder="600001" value={addressForm.pincode} disabled={saving} autoComplete="postal-code"
+                        onChange={(e) => setAddressForm((p) => ({ ...p, pincode: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div className="acc-form-footer">
+                    <button className="acc-btn acc-btn--primary" type="submit" disabled={saving}>Save Address</button>
+                    <button className="acc-btn acc-btn--ghost" type="button"
+                      onClick={() => { setShowAddressForm(false); setAddressForm({ ...BLANK_ADDRESS }); }}>
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <button className="acc-btn acc-btn--outline acc-add-addr-btn" type="button" onClick={() => setShowAddressForm(true)}>
+                  <IconPlus /><span>Add New Address</span>
+                </button>
+              )}
+            </section>
+          )}
+
+          {/* Password */}
+          {activeTab === "password" && (
+            <section className="acc-section" key="password">
+              <div className="acc-section-hd">
+                <h2 className="acc-section-title">Change Password</h2>
+                <p className="acc-section-sub">Choose a strong password of at least 6 characters</p>
+              </div>
+              <form className="acc-form" onSubmit={changePassword}>
+                <div className="acc-fields-grid acc-fields-grid--narrow">
+                  {(["current", "next", "confirm"] as const).map((field, i) => (
+                    <div className="acc-field acc-field--full" key={field}>
+                      <label className="acc-label" htmlFor={`pw-${field}`}>
+                        {field === "current" ? "Current Password" : field === "next" ? "New Password" : "Confirm New Password"}
+                      </label>
+                      <div className="acc-input-wrap">
+                        <span className="acc-input-icon"><IconLock /></span>
+                        <input id={`pw-${field}`}
+                          name={field === "current" ? "current-password" : "new-password"}
+                          className="acc-input acc-input--pw"
+                          type={showPw ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={pwForm[field]}
+                          onChange={(e) => setPwForm((p) => ({ ...p, [field]: e.target.value }))}
+                          disabled={saving}
+                          autoComplete={field === "current" ? "current-password" : "new-password"}
+                        />
+                        {i === 0 && (
+                          <button type="button" className="acc-toggle-pw"
+                            onClick={() => setShowPw((v) => !v)}
+                            aria-label={showPw ? "Hide password" : "Show password"}>
+                            {showPw ? <IconEyeOff /> : <IconEye />}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="acc-form-footer">
+                  <button className="acc-btn acc-btn--primary" type="submit" disabled={saving}>Update Password</button>
+                </div>
+              </form>
+            </section>
+          )}
+
+          {/* Profile Settings */}
+          {activeTab === "profile" && (
+            <section className="acc-section" key="profile">
+              <div className="acc-section-hd">
+                <h2 className="acc-section-title">Profile Settings</h2>
+                <p className="acc-section-sub">Update your name and contact details</p>
+              </div>
+              <form className="acc-form" onSubmit={saveProfile}>
                 <div className="acc-fields-grid">
                   <div className="acc-field">
-                    <label className="acc-label" htmlFor="addr-label">Label</label>
-                    <select id="addr-label" name="label" className="acc-input acc-select"
-                      value={addressForm.label}
-                      onChange={(e) => setAddressForm((p) => ({ ...p, label: e.target.value }))}>
-                      <option>Home</option><option>Office</option><option>Other</option>
-                    </select>
-                  </div>
-                  <div className="acc-field acc-field--check">
-                    <label className="acc-check-label">
-                      <input type="checkbox" name="isDefault" checked={addressForm.isDefault}
-                        onChange={(e) => setAddressForm((p) => ({ ...p, isDefault: e.target.checked }))} />
-                      Set as default address
-                    </label>
-                  </div>
-                  <div className="acc-field acc-field--full">
-                    <label className="acc-label" htmlFor="addr-line1">Address Line 1 *</label>
-                    <input id="addr-line1" name="address-line1" className="acc-input" type="text"
-                      placeholder="House / flat / street" value={addressForm.line1} disabled={saving} autoComplete="address-line1"
-                      onChange={(e) => setAddressForm((p) => ({ ...p, line1: e.target.value }))} />
-                  </div>
-                  <div className="acc-field acc-field--full">
-                    <label className="acc-label" htmlFor="addr-line2">Address Line 2 <span className="acc-optional">(optional)</span></label>
-                    <input id="addr-line2" name="address-line2" className="acc-input" type="text"
-                      placeholder="Area / landmark" value={addressForm.line2} disabled={saving} autoComplete="address-line2"
-                      onChange={(e) => setAddressForm((p) => ({ ...p, line2: e.target.value }))} />
+                    <label className="acc-label" htmlFor="pf-name">Full Name</label>
+                    <div className="acc-input-wrap">
+                      <span className="acc-input-icon"><IconUser /></span>
+                      <input id="pf-name" name="name" className="acc-input" type="text"
+                        value={profileForm.name} disabled={saving} autoComplete="name"
+                        onChange={(e) => setProfileForm((p) => ({ ...p, name: e.target.value }))} />
+                    </div>
                   </div>
                   <div className="acc-field">
-                    <label className="acc-label" htmlFor="addr-city">City *</label>
-                    <input id="addr-city" name="city" className="acc-input" type="text"
-                      value={addressForm.city} disabled={saving} autoComplete="address-level2"
-                      onChange={(e) => setAddressForm((p) => ({ ...p, city: e.target.value }))} />
+                    <label className="acc-label" htmlFor="pf-email">Email Address</label>
+                    <div className="acc-input-wrap">
+                      <span className="acc-input-icon"><IconMail /></span>
+                      <input id="pf-email" name="email" className="acc-input acc-input--readonly"
+                        type="email" value={profile?.email ?? ""} readOnly title="Email cannot be changed" />
+                    </div>
+                    <p className="acc-field-hint">Email address cannot be changed.</p>
                   </div>
                   <div className="acc-field">
-                    <label className="acc-label" htmlFor="addr-state">State *</label>
-                    <input id="addr-state" name="state" className="acc-input" type="text"
-                      value={addressForm.state} disabled={saving} autoComplete="address-level1"
-                      onChange={(e) => setAddressForm((p) => ({ ...p, state: e.target.value }))} />
-                  </div>
-                  <div className="acc-field">
-                    <label className="acc-label" htmlFor="addr-pincode">Pincode *</label>
-                    <input id="addr-pincode" name="postal-code" className="acc-input" type="text"
-                      placeholder="600001" value={addressForm.pincode} disabled={saving} autoComplete="postal-code"
-                      onChange={(e) => setAddressForm((p) => ({ ...p, pincode: e.target.value }))} />
+                    <label className="acc-label" htmlFor="pf-phone">Phone <span className="acc-optional">(optional)</span></label>
+                    <div className="acc-input-wrap">
+                      <span className="acc-input-icon"><IconPhone /></span>
+                      <input id="pf-phone" name="phone" className="acc-input" type="tel"
+                        placeholder="+91 98765 43210" value={profileForm.phone} disabled={saving} autoComplete="tel"
+                        onChange={(e) => setProfileForm((p) => ({ ...p, phone: e.target.value }))} />
+                    </div>
                   </div>
                 </div>
                 <div className="acc-form-footer">
-                  <button className="acc-btn acc-btn--primary" type="submit" disabled={saving}>Save Address</button>
-                  <button className="acc-btn acc-btn--ghost" type="button"
-                    onClick={() => { setShowAddressForm(false); setAddressForm({ ...BLANK_ADDRESS }); }}>
-                    Cancel
-                  </button>
+                  <button className="acc-btn acc-btn--primary" type="submit" disabled={saving}>Save Changes</button>
                 </div>
               </form>
-            ) : (
-              <button className="acc-btn acc-btn--outline acc-add-addr-btn" type="button" onClick={() => setShowAddressForm(true)}>
-                <IconPlus /><span>Add New Address</span>
-              </button>
-            )}
-          </section>
-        )}
+            </section>
+          )}
 
-        {/* ── Password ── */}
-        {activeTab === "password" && (
-          <section className="acc-section" key="password">
-            <div className="acc-section-hd">
-              <h2 className="acc-section-title">Change Password</h2>
-              <p className="acc-section-sub">Choose a strong password of at least 6 characters</p>
-            </div>
-            <form className="acc-form" onSubmit={changePassword}>
-              <div className="acc-fields-grid acc-fields-grid--narrow">
-                {(["current", "next", "confirm"] as const).map((field, i) => (
-                  <div className="acc-field acc-field--full" key={field}>
-                    <label className="acc-label" htmlFor={`pw-${field}`}>
-                      {field === "current" ? "Current Password" : field === "next" ? "New Password" : "Confirm New Password"}
-                    </label>
-                    <div className="acc-input-wrap">
-                      <span className="acc-input-icon"><IconLock /></span>
-                      <input id={`pw-${field}`}
-                        name={field === "current" ? "current-password" : "new-password"}
-                        className="acc-input acc-input--pw"
-                        type={showPw ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={pwForm[field]}
-                        onChange={(e) => setPwForm((p) => ({ ...p, [field]: e.target.value }))}
-                        disabled={saving}
-                        autoComplete={field === "current" ? "current-password" : "new-password"}
-                      />
-                      {i === 0 && (
-                        <button type="button" className="acc-toggle-pw"
-                          onClick={() => setShowPw((v) => !v)}
-                          aria-label={showPw ? "Hide password" : "Show password"}>
-                          {showPw ? <IconEyeOff /> : <IconEye />}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="acc-form-footer">
-                <button className="acc-btn acc-btn--primary" type="submit" disabled={saving}>Update Password</button>
-              </div>
-            </form>
-          </section>
-        )}
-
-        {/* ── Profile Settings ── */}
-        {activeTab === "profile" && (
-          <section className="acc-section" key="profile">
-            <div className="acc-section-hd">
-              <h2 className="acc-section-title">Profile Settings</h2>
-              <p className="acc-section-sub">Update your name and contact details</p>
-            </div>
-            <form className="acc-form" onSubmit={saveProfile}>
-              <div className="acc-fields-grid">
-                <div className="acc-field">
-                  <label className="acc-label" htmlFor="pf-name">Full Name</label>
-                  <div className="acc-input-wrap">
-                    <span className="acc-input-icon"><IconUser /></span>
-                    <input id="pf-name" name="name" className="acc-input" type="text"
-                      value={profileForm.name} disabled={saving} autoComplete="name"
-                      onChange={(e) => setProfileForm((p) => ({ ...p, name: e.target.value }))} />
-                  </div>
-                </div>
-                <div className="acc-field">
-                  <label className="acc-label" htmlFor="pf-email">Email Address</label>
-                  <div className="acc-input-wrap">
-                    <span className="acc-input-icon"><IconMail /></span>
-                    <input id="pf-email" name="email" className="acc-input acc-input--readonly"
-                      type="email" value={profile?.email ?? ""} readOnly title="Email cannot be changed" />
-                  </div>
-                  <p className="acc-field-hint">Email address cannot be changed.</p>
-                </div>
-                <div className="acc-field">
-                  <label className="acc-label" htmlFor="pf-phone">Phone <span className="acc-optional">(optional)</span></label>
-                  <div className="acc-input-wrap">
-                    <span className="acc-input-icon"><IconPhone /></span>
-                    <input id="pf-phone" name="phone" className="acc-input" type="tel"
-                      placeholder="+91 98765 43210" value={profileForm.phone} disabled={saving} autoComplete="tel"
-                      onChange={(e) => setProfileForm((p) => ({ ...p, phone: e.target.value }))} />
-                  </div>
-                </div>
-              </div>
-              <div className="acc-form-footer">
-                <button className="acc-btn acc-btn--primary" type="submit" disabled={saving}>Save Changes</button>
-              </div>
-            </form>
-          </section>
-        )}
-
-      </div>
+        </div>
+      )}
     </div>
   );
 };
