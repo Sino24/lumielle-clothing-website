@@ -69,6 +69,7 @@ function Cart() {
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
   const [profile,      setProfile]      = useState<ProfileData | null>(null);
+  const profileRef = useRef<ProfileData | null>(null);
   const [addresses,    setAddresses]    = useState<Address[]>([]);
   const [selectedAddr, setSelectedAddr] = useState<string>("");
   const [addrLoading,  setAddrLoading]  = useState(false);
@@ -91,7 +92,9 @@ function Cart() {
     })
       .then((r) => r.json())
       .then((data: ProfileData) => {
+        console.log("[Cart] /api/auth/me response:", data);
         setProfile(data);
+        profileRef.current = data;
         const addrs = data.addresses ?? [];
         setAddresses(addrs);
         const def = addrs.find((a) => a.isDefault);
@@ -105,25 +108,13 @@ function Cart() {
   const total     = cart.reduce((sum, item) => sum + parsePrice(item.price) * item.quantity, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // ── Build WhatsApp message (includes customer name & phone) ──────────────
+  // ── Build WhatsApp message ────────────────────────────────────────────────
   const buildWhatsAppMsg = (
-    items      = cartSnapshot.current,
-    addrId     = selectedAddr,
-    addrList   = addresses,
-    userProfile = profile,
+    items    = cartSnapshot.current,
+    addrId   = selectedAddr,
+    addrList = addresses,
   ) => {
-    let msg = "Hello Lumielle,%0A%0A";
-
-    // Customer details
-    if (userProfile?.name) {
-      msg += `*Customer:* ${userProfile.name}%0A`;
-    }
-    if (userProfile?.phone) {
-      msg += `*Phone:* ${userProfile.phone}%0A`;
-    }
-    msg += "%0A";
-
-    msg += "I would like to order:%0A%0A";
+    let msg = "Hello Lumielle,%0A%0AI would like to order:%0A%0A";
 
     items.forEach((item, i) => {
       msg += `${i + 1}. ${item.name}%0A`;
@@ -136,16 +127,21 @@ function Cart() {
       (s, it) => s + parsePrice(it.price) * it.quantity,
       0,
     );
-    msg += `*Total: ₹${orderTotal.toLocaleString("en-IN")}*%0A%0A`;
+    msg += `Total: ₹${orderTotal.toLocaleString("en-IN")}%0A%0A`;
 
     if (addrId) {
       const addr = addrList.find((a) => a._id === addrId);
       if (addr) {
-        msg += `*Delivery to:*%0A`;
+        msg += `Delivery to:%0A`;
         msg += `${addr.line1}${addr.line2 ? `, ${addr.line2}` : ""}%0A`;
-        msg += `${addr.city}, ${addr.state} — ${addr.pincode}%0A%0A`;
+        msg += `${addr.city}, ${addr.state} — ${addr.pincode}%0A`;
       }
     }
+
+    // Customer name & phone just below address
+    const p = profileRef.current;
+    if (p?.name)  msg += `Name: ${p.name}%0A`;
+    if (p?.phone) msg += `Phone: ${p.phone}%0A`;
 
     return msg;
   };
@@ -189,7 +185,6 @@ function Cart() {
     };
     const addrListSnapshot  = [...addresses];
     const cartAtCheckout    = [...cartSnapshot.current];
-    const profileAtCheckout = profile; // snapshot so clearCart can't affect it
 
     try {
       const res = await fetch(`${API_BASE}/api/cart/checkout`, {
@@ -225,7 +220,6 @@ function Cart() {
           cartAtCheckout,
           addrId,
           addrListSnapshot,
-          profileAtCheckout,
         )}`,
         "_blank",
       );
@@ -403,6 +397,21 @@ function Cart() {
           <p className="cart__summary-note">
             Inclusive of all taxes · Free shipping above ₹999
           </p>
+
+          {/* Customer info — above address, always rendered once token exists */}
+          <div className="cart__customer-info">
+            {addrLoading ? (
+              <>
+                <p className="cart__customer-row cart__customer-row--loading"><span>Name</span><span className="cart__customer-shimmer" /></p>
+                <p className="cart__customer-row cart__customer-row--loading"><span>Phone</span><span className="cart__customer-shimmer" /></p>
+              </>
+            ) : (
+              <>
+                <p className="cart__customer-row"><span>Name</span><span>{profile?.name || "—"}</span></p>
+                {profile?.phone && <p className="cart__customer-row"><span>Phone</span><span>{profile.phone}</span></p>}
+              </>
+            )}
+          </div>
 
           {/* Address selector */}
           <div
