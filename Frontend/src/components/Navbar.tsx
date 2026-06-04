@@ -21,6 +21,7 @@ function Navbar() {
   const navigate                     = useNavigate();
   const location                     = useLocation();
   const searchInputRef               = useRef<HTMLInputElement>(null);
+  const mobileSearchInputRef         = useRef<HTMLInputElement>(null);
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -34,6 +35,13 @@ function Navbar() {
 
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
+
+  // Focus mobile search input when it opens
+  useEffect(() => {
+    if (searchOpen && window.innerWidth <= 768) {
+      mobileSearchInputRef.current?.focus();
+    }
   }, [searchOpen]);
 
   useEffect(() => {
@@ -56,7 +64,7 @@ function Navbar() {
     submitSearch(query);
   };
 
-  const handleMobileSearchSubmit = (e: React.FormEvent) => {
+  const handleMobileNavSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     submitSearch(query);
   };
@@ -83,8 +91,9 @@ function Navbar() {
     <>
       <nav className={`navbar${scrolled ? " scrolled" : ""}`}>
 
-        {/* ── Brand ── */}
+        {/* ── Brand — desktop shows logo + text, mobile shows text only ── */}
         <Link className="navbar__brand" to="/" aria-label="Lumielle home">
+          {/* Desktop logo + divider + tagline */}
           <img className="navbar__logo-img" src={logo} alt="Lumielle logo" />
           <div className="navbar__brand-divider" aria-hidden="true" />
           <div className="navbar__brand-text">
@@ -93,6 +102,9 @@ function Navbar() {
             </span>
             <span className="navbar__tagline">Pure Cotton · Made in India</span>
           </div>
+
+          {/* Mobile-only wordmark */}
+          <span className="navbar__mobile-wordmark">Lumielle</span>
         </Link>
 
         {/* ── Desktop Links ── */}
@@ -181,6 +193,46 @@ function Navbar() {
         {/* ── Mobile Right Group ── */}
         <div className="navbar__mobile-right">
 
+          {/* Mobile inline search bar (expands) */}
+          <form
+            className={`navbar__mobile-search-inline${searchOpen ? " open" : ""}`}
+            onSubmit={handleMobileNavSearchSubmit}
+            role="search"
+          >
+            <input
+              ref={mobileSearchInputRef}
+              id="navbar-search-mobile-inline"
+              name="q"
+              className="navbar__mobile-search-inline-input"
+              type="search"
+              placeholder="Search…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              aria-label="Search products"
+              autoComplete="search"
+            />
+          </form>
+
+          {/* Search toggle */}
+          <button
+            className="navbar__icon-btn"
+            aria-label={searchOpen ? "Close search" : "Open search"}
+            onClick={toggleSearch}
+          >
+            {searchOpen ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            )}
+          </button>
+
           {isLoggedIn ? (
             <Link to="/account" className="navbar__icon-btn navbar__user-btn" aria-label="My account">
               <span className="navbar__avatar" title={user?.name ?? "Account"}>
@@ -232,37 +284,6 @@ function Navbar() {
         className={`navbar__mobile-menu${menuOpen ? " open" : ""}`}
         aria-hidden={!menuOpen}
       >
-        <form className="navbar__mobile-search" onSubmit={handleMobileSearchSubmit} role="search">
-          <div className="navbar__mobile-search-wrap">
-            <svg
-              className="navbar__mobile-search-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              id="navbar-search-mobile"
-              name="q"
-              className="navbar__mobile-search-input"
-              type="search"
-              placeholder="Search products…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              aria-label="Search products"
-              autoComplete="search"
-            />
-            {query && (
-              <button type="submit" className="navbar__mobile-search-btn" aria-label="Submit search">
-                Go
-              </button>
-            )}
-          </div>
-        </form>
-
         <Link className="navbar__mobile-link" to="/"               onClick={closeMenu}>Home</Link>
         <Link className="navbar__mobile-link" to="/product"        onClick={closeMenu}>Collections</Link>
         <Link className="navbar__mobile-link" to="/lookbook"       onClick={closeMenu}>Lookbook</Link>
