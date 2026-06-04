@@ -75,7 +75,7 @@ function ShareMenu({ productName }: { productName: string }) {
 
   const handleInstagram = async () => {
     try { await navigator.clipboard.writeText(currentUrl); } catch { /* noop */ }
-    window.open("https://www.instagram.com", "_blank", "noopener,noreferrer");
+    window.open("https://www.instagram.com/direct/inbox/", "_blank", "noopener,noreferrer");
     setOpen(false);
   };
 

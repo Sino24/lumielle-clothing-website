@@ -229,7 +229,7 @@ function ClientProjects() {
             We work with teams, schools, brands, and businesses to bring
             custom apparel to life — exactly as you imagined it.
           </p>
-          <a className="cp__cta-btn" href="mailto:hello@lumielle.com">
+          <a className="cp__cta-btn" href="mailto:lumiecart.com">
             Get in Touch
           </a>
         </div>

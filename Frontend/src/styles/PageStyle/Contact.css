@@ -10,6 +10,8 @@
   --surface:#f0ece6;
   --dark:   #1a1714;
   --border: rgba(17,17,16,0.1);
+  --wa-green: #25D366;
+  --wa-dark:  #000000;
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: "Jost", sans-serif;
 
@@ -131,6 +133,68 @@
   letter-spacing: 0.04em;
 }
 
+/* ── WhatsApp info item ── */
+.contact__wa-item {
+  padding-top: 0.25rem;
+}
+
+.contact__wa-desc {
+  color: var(--muted) !important;
+  margin-bottom: 1rem !important;
+  line-height: 1.7 !important;
+}
+.contact__wa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: var(--wa-green);
+  color: #fff;
+  text-decoration: none;
+  padding: 0.65rem 1.2rem;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.35s ease, transform 0.15s ease;
+  z-index: 1;
+}
+
+.contact__wa-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--wa-dark);
+  transform: translateX(-101%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+
+.contact__wa-btn:hover::after {
+  transform: translateX(0);
+}
+
+.contact__wa-btn:hover {
+  color: var(--bg); /* Change text color on hover */
+}
+
+.contact__wa-btn span,
+.contact__wa-icon {
+  position: relative;
+  z-index: 1;
+}
+
+.contact__wa-icon {
+  width: 18px;
+  height: 18px;
+  fill: #fff;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
 /* ── Form ── */
 .contact__form {
   display: flex;
@@ -204,7 +268,6 @@
   margin: 0;
   letter-spacing: 0.03em;
 }
-
 /* ── Submit ── */
 .contact__submit {
   align-self: flex-start;
@@ -221,9 +284,10 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
   position: relative;
   overflow: hidden;
+  transition: color 0.35s ease, transform 0.15s ease;
+  z-index: 1;
 }
 
 .contact__submit::after {
@@ -232,16 +296,27 @@
   inset: 0;
   background: var(--accent);
   transform: translateX(-101%);
-  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
 }
 
-.contact__submit:hover:not(:disabled)::after { transform: translateX(0); }
-.contact__submit:disabled { opacity: 0.55; cursor: not-allowed; }
+.contact__submit:hover:not(:disabled)::after {
+  transform: translateX(0);
+}
+
+.contact__submit:hover:not(:disabled) {
+  color: var(--bg); /* text color on hover */
+}
+
+.contact__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 
 .contact__arrow,
 .contact__submit span:not(.contact__spinner) {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .contact__arrow {
@@ -264,6 +339,51 @@
 
 @keyframes contact-spin { to { transform: rotate(360deg); } }
 
+/* ── Floating WhatsApp bubble ── */
+.contact__wa-float {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--wa-green);
+  color: #fff;
+  text-decoration: none;
+  padding: 0.75rem 1.25rem 0.75rem 0.9rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 20px rgba(37,211,102,0.35), 0 2px 8px rgba(0,0,0,0.12);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+  animation: wa-float-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+.contact__wa-float svg {
+  width: 22px;
+  height: 22px;
+  fill: #fff;
+  flex-shrink: 0;
+}
+
+.contact__wa-float-label {
+  white-space: nowrap;
+}
+
+.contact__wa-float:hover {
+  transform: scale(1.06) translateY(-2px);
+  box-shadow: 0 8px 28px rgba(37,211,102,0.45), 0 4px 12px rgba(0,0,0,0.15);
+}
+
+@keyframes wa-float-in {
+  from { opacity: 0; transform: scale(0.7) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 /* ── Responsive ── */
 @media (max-width: 960px) {
   .contact__hero {
@@ -279,4 +399,15 @@
   }
 
   .contact__submit { width: 100%; justify-content: center; }
+
+  .contact__wa-float {
+    bottom: 1.25rem;
+    right: 1.25rem;
+    padding: 0.7rem;
+    border-radius: 50%;
+  }
+
+  .contact__wa-float-label {
+    display: none;
+  }
 }
