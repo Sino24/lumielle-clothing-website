@@ -89,7 +89,7 @@ function Navbar() {
 
   return (
     <>
-      <nav className={`navbar${scrolled ? " scrolled" : ""}`}>
+      <nav className={`navbar${scrolled ? " scrolled" : ""}${searchOpen ? " navbar--search-open" : ""}`}>
 
         {/* ── Brand — desktop shows logo + text, mobile shows text only ── */}
         <Link className="navbar__brand" to="/" aria-label="Lumielle home">

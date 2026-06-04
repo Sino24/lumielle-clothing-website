@@ -321,6 +321,19 @@
   opacity: 1;
 }
 
+/* Hide the "Lumielle" wordmark when mobile search is open */
+.navbar--search-open .navbar__mobile-wordmark {
+  opacity: 0;
+  visibility: hidden;
+  width: 0;
+  overflow: hidden;
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s, width 0s linear 0.2s;
+}
+
+.navbar__mobile-wordmark {
+  transition: opacity 0.2s ease;
+}
+
 .navbar__mobile-search-inline-input {
   width: 100%;
   background: transparent;
@@ -484,15 +497,21 @@
     display: block;
   }
 
-  /* Resize logo for mobile navbar */
+  /* Resize logo for mobile navbar — slightly bigger */
   .navbar__logo-img {
-    height: 44px;
+    height: 65px;
     margin-top: 0;
+  }
+
+  /* Smaller wordmark on mobile */
+  .navbar__mobile-wordmark {
+    font-size: 1.05rem;
+    letter-spacing: 0.22em;
   }
 
   /* Tighten brand gap so logo + name sit close together */
   .navbar__brand {
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
 
   /* Hide desktop links, icons, and search form */
