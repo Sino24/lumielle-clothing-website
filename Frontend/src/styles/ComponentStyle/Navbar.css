@@ -255,8 +255,8 @@
 
 .navbar__avatar {
   position: relative;
-   width: 23px;
-  height: 23px;
+   width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--lum-gold) 0%, #b8924a 100%);
   color: #fff;
