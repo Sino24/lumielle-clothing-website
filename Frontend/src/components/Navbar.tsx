@@ -91,7 +91,7 @@ function Navbar() {
     <>
       <nav className={`navbar${scrolled ? " scrolled" : ""}${searchOpen ? " navbar--search-open" : ""}`}>
 
-        {/* ── Brand — desktop shows logo + text, mobile shows text only ── */}
+        {/* ── Brand — desktop shows logo + text, mobile shows logo + stacked wordmark ── */}
         <Link className="navbar__brand" to="/" aria-label="Lumielle home">
           {/* Desktop logo + divider + tagline */}
           <img className="navbar__logo-img" src={logo} alt="Lumielle logo" />
@@ -103,8 +103,11 @@ function Navbar() {
             <span className="navbar__tagline">Pure Cotton · Made in India</span>
           </div>
 
-          {/* Mobile-only wordmark */}
-          <span className="navbar__mobile-wordmark">Lumielle</span>
+          {/* Mobile-only wordmark: "Lumielle" on top, tagline below */}
+          <span className="navbar__mobile-wordmark">
+            Lumielle
+            <span className="navbar__tagline">wear your light</span>
+          </span>
         </Link>
 
         {/* ── Desktop Links ── */}
