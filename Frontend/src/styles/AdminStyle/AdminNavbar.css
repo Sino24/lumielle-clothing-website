@@ -3,18 +3,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Jost:wght@300;400;500&display=swap');
 
 :root {
-  --anb-h:      56px;
-  --anb-dark:   #1A1714;
-  --anb-gold:   #C9A96E;
-  --anb-border: rgba(201, 169, 110, 0.18);
+  --anb-h:        56px;
+  --anb-dark:     #1A1714;
+  --anb-gold:     #C9A96E;
+  --anb-border:   rgba(201, 169, 110, 0.18);
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-body:    'Jost', sans-serif;
+
+  /* Total height of BOTH fixed navbars — every admin page wrapper uses this */
+  --admin-offset: calc(var(--nav-height, 60px) + var(--anb-h));
 }
 
 /* ── Bar ─────────────────────────────────────────────────────────────────── */
 .anb {
   position: fixed;
-  top: var(--nav-height);   /* sits below the main public navbar */
+  top: var(--nav-height, 60px);
   left: 0;
   right: 0;
   z-index: 800;
@@ -28,46 +31,22 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem;
-
   display: flex;
-  justify-content: center;
   align-items: center;
-
   width: 100%;
   height: 100%;
-}
-
-/* ── Brand ───────────────────────────────────────────────────────────────── */
-.anb-brand {
-  display: flex;
-  align-items: center;
   gap: 0.5rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  margin-right: 2rem;
-  flex-shrink: 0;
 }
-
-.anb-brand-mark  { color: var(--anb-gold); font-size: 0.85rem; }
-.anb-brand-name  { font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0.18em; color: #fff; }
-.anb-brand-sep   { color: rgba(255,255,255,0.2); font-size: 0.7rem; margin: 0 0.1rem; }
-.anb-brand-admin { font-size: 0.58rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--anb-gold); }
 
 /* ── Desktop links ───────────────────────────────────────────────────────── */
 .anb-links {
   display: flex;
   align-items: center;
-  justify-content: center; /* center the links */
-  gap: 0.5rem;
-
+  gap: 0.25rem;
   overflow-x: auto;
   scrollbar-width: none;
-
   flex: 1;
 }
-
 
 .anb-links::-webkit-scrollbar { display: none; }
 
@@ -94,6 +73,31 @@
 .anb-link.active { color: var(--anb-gold); border-bottom-color: var(--anb-gold); }
 .anb-link-icon   { font-size: 0.95rem; }
 
+/* ── Logout button — desktop ─────────────────────────────────────────────── */
+.anb-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: 1px solid rgba(201, 169, 110, 0.25);
+  cursor: pointer;
+  padding: 0.4rem 0.9rem;
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color 0.18s, color 0.18s, background 0.18s;
+}
+
+.anb-logout:hover {
+  border-color: #c0392b;
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.08);
+}
+
 /* ── Hamburger ───────────────────────────────────────────────────────────── */
 .anb-burger {
   display: none;
@@ -102,14 +106,15 @@
   color: rgba(255,255,255,0.7);
   cursor: pointer;
   padding: 0.35rem;
-  margin-left: auto;
+  margin-left: 0.5rem;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   transition: border-color 0.18s, color 0.18s;
 }
 .anb-burger:hover { border-color: var(--anb-gold); color: var(--anb-gold); }
 
-/* ── Backdrop ────────────────────────────────────────────────────────────── */
+/* ── Mobile drawer backdrop ──────────────────────────────────────────────── */
 .anb-backdrop {
   position: fixed;
   inset: 0;
@@ -121,8 +126,7 @@
 /* ── Mobile drawer ───────────────────────────────────────────────────────── */
 .anb-drawer {
   position: fixed;
-  /* starts below BOTH the main navbar AND the admin bar */
-  top: calc(var(--nav-height) + var(--anb-h));
+  top: var(--admin-offset);
   left: 0;
   bottom: 0;
   z-index: 810;
@@ -140,33 +144,6 @@
 
 .anb-drawer.open { transform: translateX(0); }
 
-/* Drawer header row */
-.anb-drawer-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(201,169,110,0.12);
-  flex-shrink: 0;
-}
-
-.anb-drawer-brand-mark  { color: var(--anb-gold); font-size: 0.8rem; }
-.anb-drawer-brand-name  { font-family: var(--font-display); font-size: 1rem; letter-spacing: 0.15em; color: #fff; flex: 1; }
-.anb-drawer-brand-admin { font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--anb-gold); margin-right: auto; }
-
-.anb-drawer-close {
-  background: none;
-  border: none;
-  color: rgba(255,255,255,0.5);
-  cursor: pointer;
-  padding: 0.25rem;
-  display: flex;
-  align-items: center;
-  transition: color 0.18s;
-}
-.anb-drawer-close:hover { color: var(--anb-gold); }
-
-/* Drawer links */
 .anb-drawer-links {
   display: flex;
   flex-direction: column;
@@ -207,9 +184,128 @@
 .anb-drawer-icon { flex-shrink: 0; opacity: 0.85; }
 .anb-drawer-link.active .anb-drawer-icon { opacity: 1; }
 
+.anb-drawer-logout {
+  margin-top: auto;
+  border-top: 1px solid rgba(201, 169, 110, 0.12);
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.anb-drawer-logout:hover {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.08);
+}
+
+/* ── Logout confirm modal ────────────────────────────────────────────────── */
+/* z-index 950/960 — above everything including page modals (900) */
+.anb-logout-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: rgba(26, 23, 20, 0.65);
+  backdrop-filter: blur(3px);
+}
+
+.anb-logout-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 960;
+  background: var(--anb-dark);
+  border: 1px solid var(--anb-border);
+  padding: 2.5rem 2rem 2rem;
+  width: min(360px, 90vw);
+  text-align: center;
+  font-family: var(--font-body);
+}
+
+.anb-logout-ico {
+  color: var(--anb-gold);
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.anb-logout-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.6rem;
+}
+
+.anb-logout-msg {
+  font-size: 0.73rem;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.anb-logout-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.anb-logout-cancel,
+.anb-logout-confirm {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  padding: 0.7rem 1.6rem;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.anb-logout-cancel {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.5);
+}
+
+.anb-logout-cancel:hover {
+  border-color: rgba(255,255,255,0.35);
+  color: rgba(255,255,255,0.8);
+}
+
+.anb-logout-confirm {
+  background: #c0392b;
+  color: #fff;
+}
+
+.anb-logout-confirm:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+/* ── Admin page overlap fix ──────────────────────────────────────────────────
+   All admin page wrappers get padding-top = both navbar heights combined.
+   z-index reference:
+     800  — admin navbar
+     810  — mobile drawer
+     900  — page modals (lookbook, products, etc.)
+     950  — logout backdrop
+     960  — logout modal
+────────────────────────────────────────────────────────────────────────────── */
+.adm-page,
+.pm-page,
+.alb-page,
+.ach-page,
+.abt-page,
+.aor-page,
+.ausr-page,
+.acp-page,
+.ahero-page {
+  padding-top: var(--admin-offset) !important;
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .anb-links  { display: none; }
+  .anb-logout { display: none; }
   .anb-burger { display: inline-flex; }
 }
 
@@ -218,7 +314,5 @@
 }
 
 @media (max-width: 480px) {
-  .anb-brand-admin { display: none; }
-  .anb-brand-sep   { display: none; }
-  .anb-drawer      { width: 100%; border-right: none; }
+  .anb-drawer { width: 100%; border-right: none; }
 }
