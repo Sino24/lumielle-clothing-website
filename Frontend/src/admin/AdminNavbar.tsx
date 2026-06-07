@@ -14,7 +14,6 @@ import {
   MdInventory2,
   MdMenu,
   MdClose,
-  MdLogout,
 } from "react-icons/md";
 import "../styles/AdminStyle/AdminNavbar.css";
 
@@ -34,14 +33,8 @@ const AdminNavBar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
-  const [confirmLogout, setConfirmLogout] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
-
-  const handleLogout = () => {
-    localStorage.removeItem("adminToken");
-    navigate("/admin/login");
-  };
 
   return (
     <>
@@ -65,17 +58,7 @@ const AdminNavBar: React.FC = () => {
             })}
           </div>
 
-          {/* Logout — desktop */}
-          <button
-            className="anb-logout"
-            onClick={() => setConfirmLogout(true)}
-            title="Log out"
-          >
-            <MdLogout size={16} />
-            <span>Logout</span>
-          </button>
-
-          {/* Hamburger */}
+          {/* Hamburger — mobile only */}
           <button className="anb-burger" onClick={() => setOpen((v) => !v)}>
             {open ? <MdClose size={22} /> : <MdMenu size={22} />}
           </button>
@@ -103,35 +86,8 @@ const AdminNavBar: React.FC = () => {
               </button>
             );
           })}
-
-          {/* Logout — mobile drawer */}
-          <button
-            className="anb-drawer-link anb-drawer-logout"
-            onClick={() => { setOpen(false); setConfirmLogout(true); }}
-          >
-            <MdLogout size={18} className="anb-drawer-icon" />
-            <span>Logout</span>
-          </button>
         </div>
       </div>
-
-      {/* Logout confirm modal */}
-      {confirmLogout && (
-        <>
-          <div className="anb-logout-backdrop" onClick={() => setConfirmLogout(false)} />
-          <div className="anb-logout-modal">
-            <div className="anb-logout-ico">
-              <MdLogout size={28} />
-            </div>
-            <div className="anb-logout-title">Log out?</div>
-            <div className="anb-logout-msg">You'll need to sign in again to access the admin panel.</div>
-            <div className="anb-logout-actions">
-              <button className="anb-logout-cancel" onClick={() => setConfirmLogout(false)}>Cancel</button>
-              <button className="anb-logout-confirm" onClick={handleLogout}>Log Out</button>
-            </div>
-          </div>
-        </>
-      )}
     </>
   );
 };

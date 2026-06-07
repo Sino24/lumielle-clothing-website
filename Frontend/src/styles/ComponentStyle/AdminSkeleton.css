@@ -1,4 +1,8 @@
+/* src/styles/ComponentStyle/AdminSkeleton.css */
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   SHIMMER ANIMATION
+───────────────────────────────────────────────────────────────────────────── */
 @keyframes ask-shimmer {
   0%   { background-position: -700px 0; }
   100% { background-position:  700px 0; }
@@ -18,7 +22,9 @@
   flex-shrink: 0;
 }
 
-/* ── Page wrapper ───────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   PAGE WRAPPER
+───────────────────────────────────────────────────────────────────────────── */
 .ask-page {
   display: flex;
   flex-direction: column;
@@ -30,122 +36,215 @@
   box-sizing: border-box;
 }
 
-/* ── Shared header ──────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   SHARED HEADER
+   FIX: hd-right gets padding-top so buttons align with the title baseline,
+   not the bottom of the taller left column.
+───────────────────────────────────────────────────────────────────────────── */
 .ask-hd {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start;   /* always top-align so right never drifts */
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
 }
-.ask-hd-left  { display: flex; flex-direction: column; gap: 10px; }
-.ask-hd-right { display: flex; gap: 10px; align-items: center; }
 
-.ask-title     { height: 32px; width: 200px; }
-.ask-sub       { height: 13px; width: 170px; }
-.ask-btn       { height: 36px; width: 130px; border-radius: 4px; }
-.ask-btn-ghost { height: 36px; width: 100px; border-radius: 4px; }
+.ask-hd-left  { display: flex; flex-direction: column; gap: 8px; }
+.ask-hd-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 6px;          /* FIX: nudges buttons flush with title */
+  flex-shrink: 0;
+}
 
-/* ── Dashboard nav strip ────────────────────────────────────────────────────── */
-.ask-nav { display: flex; flex-wrap: wrap; gap: 8px; }
-.ask-nav-pill { height: 34px; width: 100px; border-radius: 8px; }
+.ask-title     { height: 30px; width: 200px; }
+.ask-sub       { height: 11px; width: 160px; }
+.ask-btn       { height: 34px; width: 120px; border-radius: 3px; }
+.ask-btn-ghost { height: 34px; width: 95px;  border-radius: 3px; }
 
-/* ── Stats row ──────────────────────────────────────────────────────────────── */
-.ask-stats { display: grid; gap: 1rem; }
+/* ─────────────────────────────────────────────────────────────────────────────
+   DASHBOARD — PROFILE CARD SKELETON
+   FIX: Padding is now on .ask-profile-sk-inner, not on the card root.
+   This keeps the gold bar flush to the left edge with no indent.
+───────────────────────────────────────────────────────────────────────────── */
+.ask-profile-sk {
+  display: flex;
+  align-items: stretch;      /* bar stretches to full card height */
+  position: relative;
+  background: #fff;
+  border: 1px solid rgba(26, 23, 20, 0.10);
+  width: fit-content;
+  margin-top: 8px;
+  overflow: hidden;
+  /* No padding here — padding lives on .ask-profile-sk-inner */
+}
+
+/* Gold accent bar — flush left, no gap */
+.ask-profile-sk-bar {
+  width: 3px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #C9A96E 0%, #b8924a 100%);
+  opacity: 0.35;
+}
+
+/* Inner wrapper carries all the padding so the bar stays edge-to-edge */
+.ask-profile-sk-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 44px 10px 12px;  /* right pad makes room for the online dot */
+}
+
+/* Circle avatar */
+.ask-profile-sk-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50% !important;
+  flex-shrink: 0;
+}
+
+/* Info lines column */
+.ask-profile-sk-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ask-profile-sk-name  { height: 11px; width: 115px; }
+.ask-profile-sk-email { height: 9px;  width: 160px; }
+.ask-profile-sk-role  { height: 7px;  width: 52px;  border-radius: 2px; }
+
+/* Online dot — absolute top-right corner of card */
+.ask-profile-sk-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50% !important;
+  background: #ede9e2;
+  animation: none;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DASHBOARD — NAV STRIP
+───────────────────────────────────────────────────────────────────────────── */
+.ask-nav      { display: flex; flex-wrap: wrap; gap: 7px; }
+.ask-nav-pill { height: 32px; width: 95px; border-radius: 3px; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   STATS ROW
+───────────────────────────────────────────────────────────────────────────── */
+.ask-stats {
+  display: grid;
+  gap: 1rem;
+}
+
 .ask-stat-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 1.25rem 1rem;
-  border-radius: 12px;
-  background: #FAF8F5;
-  border: 1px solid #EDE9E3;
+  gap: 9px;
+  padding: 1.5rem 1rem;
+  background: #fff;
+  border: 1px solid rgba(26, 23, 20, 0.10);
 }
-.ask-stat-emoji { height: 28px; width: 28px; border-radius: 50%; }
-.ask-stat-num   { height: 22px; width: 60px; }
-.ask-stat-label { height: 11px; width: 80px; }
 
-/* ── Section label ──────────────────────────────────────────────────────────── */
-.ask-section-label { height: 13px; width: 80px; }
-.ask-mt { margin-top: 0.75rem; }
+.ask-stat-emoji { height: 26px; width: 26px; border-radius: 50% !important; }
+.ask-stat-num   { height: 20px; width: 55px; }
+.ask-stat-label { height: 9px;  width: 72px; }
 
-/* ── Dashboard quick-link cards ─────────────────────────────────────────────── */
-.ask-links { display: flex; flex-direction: column; gap: 8px; }
+/* ─────────────────────────────────────────────────────────────────────────────
+   SECTION LABEL
+───────────────────────────────────────────────────────────────────────────── */
+.ask-section-label { height: 8px; width: 75px; border-radius: 2px; }
+.ask-mt            { margin-top: 0.5rem; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DASHBOARD — QUICK-LINK CARDS
+───────────────────────────────────────────────────────────────────────────── */
+.ask-links { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; }
+
 .ask-link-card {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
-  border-radius: 10px;
-  background: #FAF8F5;
-  border: 1px solid #EDE9E3;
+  gap: 12px;
+  padding: 1.2rem 1rem;
+  background: #fff;
+  border: 1px solid rgba(26, 23, 20, 0.10);
 }
-.ask-link-icon  { height: 28px; width: 28px; border-radius: 8px; }
-.ask-link-text  { flex: 1; display: flex; flex-direction: column; gap: 7px; }
-.ask-link-title { height: 13px; width: 120px; }
-.ask-link-desc  { height: 11px; width: 180px; }
-.ask-link-arrow { height: 20px; width: 14px; margin-left: auto; }
 
-/* ── Dashboard recent rows ──────────────────────────────────────────────────── */
-.ask-recent { display: flex; flex-direction: column; gap: 6px; }
+.ask-link-icon  { height: 24px; width: 24px; border-radius: 5px; }
+.ask-link-text  { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ask-link-title { height: 10px; width: 65%; }
+.ask-link-desc  { height: 8px;  width: 88%; }
+.ask-link-arrow { height: 16px; width: 10px; margin-left: auto; border-radius: 2px; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DASHBOARD — RECENT PRODUCTS
+───────────────────────────────────────────────────────────────────────────── */
+.ask-recent { background: #fff; border: 1px solid rgba(26, 23, 20, 0.10); }
+
 .ask-recent-row {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: #FAF8F5;
-  border: 1px solid #EDE9E3;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid rgba(26, 23, 20, 0.07);
 }
-.ask-thumb        { height: 46px; width: 46px; border-radius: 8px; }
-.ask-recent-meta  { flex: 1; display: flex; flex-direction: column; gap: 7px; }
-.ask-recent-name  { height: 13px; width: 150px; }
-.ask-recent-cat   { height: 10px; width: 90px; }
-.ask-recent-price { height: 14px; width: 60px; }
 
-/* ── Generic toolbar ────────────────────────────────────────────────────────── */
+.ask-recent-row:last-child { border-bottom: none; }
+
+.ask-thumb        { height: 44px; width: 44px; border-radius: 2px; }
+.ask-recent-meta  { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ask-recent-name  { height: 10px; width: 52%; }
+.ask-recent-cat   { height: 8px;  width: 33%; }
+.ask-recent-price { height: 10px; width: 48px; margin-left: auto; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GENERIC TOOLBAR
+───────────────────────────────────────────────────────────────────────────── */
 .ask-toolbar { display: flex; gap: 10px; align-items: center; }
 .ask-search  { height: 38px; flex: 1; max-width: 320px; }
 
-/* ═══════════════════════════════════════════════════════════════════
-   PRODUCTS skeleton  — mirrors pm-page exactly
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* toolbar: full-width search on top, then row with filter select + count */
+/* ─────────────────────────────────────────────────────────────────────────────
+   PRODUCTS SKELETON  — mirrors pm-page exactly
+───────────────────────────────────────────────────────────────────────────── */
 .ask-pm-toolbar {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
-.ask-pm-search  { height: 40px; width: 100%; border-radius: 0; }
+
+.ask-pm-search { height: 40px; width: 100%; border-radius: 0; }
+
 .ask-pm-toolbar-row2 {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
+
 .ask-pm-select { height: 38px; flex: 1; max-width: 200px; }
 .ask-pm-count  { height: 13px; width: 60px; }
 
-/* product grid — auto-fill same as pm-grid */
 .ask-pm-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1.25rem;
 }
 
-/* individual product card */
 .ask-pm-card {
   display: flex;
   flex-direction: column;
   background: #fff;
-  border: 1px solid #EDE9E3;
+  border: 1px solid rgba(26, 23, 20, 0.10);
 }
 
-/* 3:4 hero image */
 .ask-pm-img { aspect-ratio: 3/4; border-radius: 0; }
 
-/* body section: category pill, name, price, swatches */
 .ask-pm-body {
   display: flex;
   flex-direction: column;
@@ -153,149 +252,173 @@
   padding: 0.75rem 1rem 0.6rem;
   flex: 1;
 }
+
 .ask-pm-cat   { height: 9px;  width: 40%; }
-.ask-pm-name  { height: 15px; width: 80%; }
-.ask-pm-price { height: 12px; width: 32%; }
+.ask-pm-name  { height: 14px; width: 80%; }
+.ask-pm-price { height: 11px; width: 32%; }
 
-/* colour swatches row */
 .ask-pm-swatches { display: flex; gap: 5px; margin-top: 2px; }
-.ask-pm-swatch   { height: 14px; width: 14px; border-radius: 50%; }
+.ask-pm-swatch   { height: 14px; width: 14px; border-radius: 50% !important; }
 
-/* footer: size tags + img count */
 .ask-pm-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
   padding: 0.5rem 1rem 0.75rem;
-  border-top: 1px solid #EDE9E3;
+  border-top: 1px solid rgba(26, 23, 20, 0.08);
   flex-wrap: wrap;
 }
+
 .ask-pm-sizes    { display: flex; gap: 4px; }
 .ask-pm-size-tag { height: 18px; width: 28px; }
 .ask-pm-img-count{ height: 11px; width: 36px; }
 
-/* ═══════════════════════════════════════════════════════════════════
-   LOOKBOOK skeleton  — mirrors alb-grid exactly
-   ═══════════════════════════════════════════════════════════════════ */
-
+/* ─────────────────────────────────────────────────────────────────────────────
+   LOOKBOOK SKELETON
+───────────────────────────────────────────────────────────────────────────── */
 .ask-lb-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1.25rem;
 }
+
 .ask-lb-card {
   display: flex;
   flex-direction: column;
   background: #fff;
-  border: 1px solid #EDE9E3;
+  border: 1px solid rgba(26, 23, 20, 0.10);
 }
+
 .ask-lb-img       { aspect-ratio: 3/4; border-radius: 0; }
 .ask-lb-card-body { display: flex; flex-direction: column; gap: 8px; padding: 0.75rem 1rem; }
 .ask-lb-order     { height: 9px;  width: 24px; }
-.ask-lb-title     { height: 14px; width: 65%; }
+.ask-lb-title     { height: 13px; width: 65%; }
 .ask-lb-sub       { height: 10px; width: 45%; }
 
-/* ── Form panels (about / hero) ─────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   FORM PANELS  — about / hero / client-projects
+───────────────────────────────────────────────────────────────────────────── */
 .ask-panel {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   padding: 1.5rem;
-  border-radius: 4px;
-  background: #FAF8F5;
-  border: 1px solid #EDE9E3;
+  background: #fff;
+  border: 1px solid rgba(26, 23, 20, 0.10);
 }
-.ask-panel-title { height: 14px; width: 120px; }
+
+.ask-panel-title { height: 13px; width: 120px; }
+
 .ask-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
+
 .ask-input     { height: 38px; }
 .ask-textarea  { height: 80px; }
 .ask-input-num { height: 38px; width: 64px; }
-.ask-upload-box{ height: 72px; border-radius: 6px; }
+.ask-upload-box{ height: 72px; border-radius: 4px; }
 .ask-full      { grid-column: 1 / -1; }
 .ask-flex1     { flex: 1; height: 38px; }
 .ask-value-row { display: flex; gap: 10px; align-items: center; width: 100%; }
 
-/* ── Hero preview ───────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   HERO PREVIEW BANNER
+───────────────────────────────────────────────────────────────────────────── */
 .ask-hero-preview {
   width: 100%;
   height: clamp(160px, 25vw, 260px);
-  border-radius: 4px;
+  border-radius: 0;
 }
 
-/* ── Contact message list ───────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   CONTACT — MESSAGE LIST
+───────────────────────────────────────────────────────────────────────────── */
 .ask-msg-list { display: flex; flex-direction: column; gap: 6px; }
+
 .ask-msg-row {
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
-  border-radius: 10px;
-  background: #FAF8F5;
-  border: 1px solid #EDE9E3;
+  background: #fff;
+  border: 1px solid rgba(26, 23, 20, 0.10);
 }
-.ask-avatar      { height: 38px; width: 38px; border-radius: 50%; }
-.ask-msg-meta    { display: flex; flex-direction: column; gap: 7px; min-width: 130px; }
-.ask-msg-name    { height: 13px; width: 110px; }
-.ask-msg-email   { height: 10px; width: 90px; }
-.ask-msg-preview { flex: 1; height: 11px; }
-.ask-msg-right   { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
-.ask-msg-date    { height: 10px; width: 70px; }
-.ask-status-pill { height: 20px; width: 56px; border-radius: 20px; }
 
-/* ── Users / Orders table ───────────────────────────────────────────────────── */
+.ask-avatar      { height: 38px; width: 38px; border-radius: 50% !important; flex-shrink: 0; }
+.ask-msg-meta    { display: flex; flex-direction: column; gap: 7px; min-width: 130px; }
+.ask-msg-name    { height: 12px; width: 110px; }
+.ask-msg-email   { height: 9px;  width: 90px; }
+.ask-msg-preview { flex: 1; height: 10px; }
+.ask-msg-right   { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.ask-msg-date    { height: 9px;  width: 70px; }
+.ask-status-pill { height: 18px; width: 56px; border-radius: 20px !important; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   USERS / ORDERS — TABLE
+───────────────────────────────────────────────────────────────────────────── */
 .ask-table { display: flex; flex-direction: column; }
+
 .ask-table-head {
   display: flex;
   gap: 12px;
   padding: 10px 16px;
-  border-bottom: 1px solid #EDE9E3;
+  border-bottom: 1px solid rgba(26, 23, 20, 0.08);
+  background: #fff;
 }
-.ask-th { height: 11px; flex: 1; }
+
+.ask-th { height: 10px; flex: 1; }
+
 .ask-table-row {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  border-bottom: 1px solid #F5F2EE;
-  background: #FAF8F5;
+  border-bottom: 1px solid rgba(26, 23, 20, 0.06);
+  background: #fff;
 }
-.ask-table-row:first-of-type { border-radius: 10px 10px 0 0; }
-.ask-table-row:last-of-type  { border-radius: 0 0 10px 10px; border-bottom: none; }
-.ask-td-name { height: 13px; flex: 1.5; }
-.ask-td-mid  { height: 12px; flex: 1; }
-.ask-td-pill { height: 20px; width: 64px; border-radius: 20px; }
 
-/* ── Responsive ─────────────────────────────────────────────────────────────── */
+.ask-table-row:last-of-type { border-bottom: none; }
+
+.ask-td-name { height: 12px; flex: 1.5; }
+.ask-td-mid  { height: 11px; flex: 1; }
+.ask-td-pill { height: 18px; width: 64px; border-radius: 20px !important; flex-shrink: 0; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .ask-links { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 900px) {
-  .ask-stats        { grid-template-columns: repeat(2, 1fr) !important; }
-  .ask-form-grid    { grid-template-columns: 1fr; }
-  .ask-full         { grid-column: unset; }
+  .ask-stats     { grid-template-columns: repeat(2, 1fr) !important; }
+  .ask-form-grid { grid-template-columns: 1fr; }
+  .ask-full      { grid-column: unset; }
 }
 
 @media (min-width: 640px) {
-  /* toolbar goes single row on tablet+ just like pm-toolbar does */
-  .ask-pm-toolbar {
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-  }
+  .ask-pm-toolbar     { flex-direction: row; align-items: center; flex-wrap: wrap; }
   .ask-pm-search      { flex: 1; min-width: 200px; width: auto; }
   .ask-pm-toolbar-row2{ flex: none; }
 }
 
-@media (max-width: 600px) {
-  .ask-page         { padding: 1.5rem 1rem 3rem; gap: 1.25rem; }
-  .ask-nav-pill     { width: 80px; }
-  .ask-msg-preview  { display: none; }
-  .ask-link-desc    { display: none; }
+@media (max-width: 640px) {
+  .ask-links { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 399px) {
-  /* matches pm-grid 2-col on very small screens */
+@media (max-width: 600px) {
+  .ask-page              { padding: 1.5rem 1rem 3rem; gap: 1.25rem; }
+  .ask-nav-pill          { width: 80px; }
+  .ask-msg-preview       { display: none; }
+  .ask-link-desc         { display: none; }
+  .ask-profile-sk        { width: 100%; box-sizing: border-box; }
+  .ask-profile-sk-inner  { width: 100%; box-sizing: border-box; padding-right: 36px; }
+}
+
+@media (max-width: 400px) {
+  .ask-links   { grid-template-columns: 1fr; }
   .ask-pm-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
 }

@@ -1,5 +1,7 @@
+// src/components/AdminSkeleton.tsx
 
-import "../styles//ComponentStyle/AdminSkeleton.css";
+import React from "react";
+import "../styles/ComponentStyle/AdminSkeleton.css";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -23,8 +25,49 @@ interface Props {
 // Shared building blocks
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Standard page header: title + subtitle on the left, 1-2 buttons on the right */
-function SkHeader({ buttons = 1 }: { buttons?: number }) {
+/**
+ * Standard page header skeleton.
+ * Dashboard variant renders the redesigned profile block (bar + avatar + lines)
+ * instead of the generic title+sub+buttons layout.
+ *
+ * FIX: Profile card now uses .ask-profile-sk-inner to isolate padding from the
+ * gold bar — previously padding on .ask-profile-sk pushed the bar inward.
+ */
+function SkHeader({ buttons = 1, isDashboard = false }: { buttons?: number; isDashboard?: boolean }) {
+  if (isDashboard) {
+    return (
+      <div className="ask-hd">
+        {/* LEFT — title, subtitle, profile card skeleton */}
+        <div className="ask-hd-left">
+          <div className="ask ask-title" />
+          <div className="ask ask-sub" />
+
+          {/* Profile card skeleton — mirrors redesigned .adm-profile */}
+          <div className="ask-profile-sk">
+            {/* Gold bar sits flush — no padding on parent, padding isolated to inner */}
+            <div className="ask-profile-sk-bar" />
+            <div className="ask-profile-sk-inner">
+              <div className="ask ask-profile-sk-avatar" />
+              <div className="ask-profile-sk-lines">
+                <div className="ask ask-profile-sk-name" />
+                <div className="ask ask-profile-sk-email" />
+                <div className="ask ask-profile-sk-role" />
+              </div>
+            </div>
+            {/* Online dot — absolute top-right of card */}
+            <div className="ask ask-profile-sk-dot" />
+          </div>
+        </div>
+
+        {/* RIGHT — action buttons, top-aligned with title */}
+        <div className="ask-hd-right">
+          <div className="ask ask-btn" />
+          <div className="ask ask-btn-ghost" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="ask-hd">
       <div className="ask-hd-left">
@@ -103,7 +146,7 @@ function SkPanel({
           <div className={`ask ask-input${inputs === 1 ? " ask-full" : ""}`} key={i} />
         ))}
         {hasTextarea && <div className="ask ask-textarea ask-full" />}
-        {hasUpload && <div className="ask ask-upload-box ask-full" />}
+        {hasUpload   && <div className="ask ask-upload-box ask-full" />}
         {hasRows &&
           Array.from({ length: 3 }).map((_, i) => (
             <div className="ask-value-row ask-full" key={i}>
@@ -124,12 +167,17 @@ function SkPanel({
 function DashboardBody() {
   return (
     <>
+      {/* Nav strip */}
       <div className="ask-nav">
         {Array.from({ length: 9 }).map((_, i) => (
           <div className="ask ask-nav-pill" key={i} />
         ))}
       </div>
+
+      {/* Stats */}
       <SkStats count={4} emoji />
+
+      {/* Quick links */}
       <div className="ask ask-section-label" />
       <div className="ask-links">
         {Array.from({ length: 8 }).map((_, i) => (
@@ -143,6 +191,8 @@ function DashboardBody() {
           </div>
         ))}
       </div>
+
+      {/* Recent products */}
       <div className="ask ask-section-label ask-mt" />
       <div className="ask-recent">
         {Array.from({ length: 5 }).map((_, i) => (
@@ -161,9 +211,6 @@ function DashboardBody() {
 }
 
 // ── Products ──
-// Mirrors pm-toolbar (full-width search bar + row2 with select+count)
-// then pm-grid (auto-fill minmax 200px) with full card anatomy:
-// 3:4 image → body (category chip, name, price, colour swatches) → footer (size tags + img count)
 function ProductsBody() {
   return (
     <>
@@ -207,8 +254,6 @@ function ProductsBody() {
 }
 
 // ── Lookbook ──
-// Mirrors alb-grid (auto-fill minmax 220px) with:
-// 3:4 image → card body (order badge, title, subtitle)
 function LookbookBody() {
   return (
     <div className="ask-lb-grid">
@@ -226,6 +271,7 @@ function LookbookBody() {
   );
 }
 
+// ── About ──
 function AboutBody() {
   return (
     <>
@@ -238,6 +284,7 @@ function AboutBody() {
   );
 }
 
+// ── Contact ──
 function ContactBody() {
   return (
     <>
@@ -262,6 +309,7 @@ function ContactBody() {
   );
 }
 
+// ── Hero ──
 function HeroBody() {
   return (
     <>
@@ -272,6 +320,7 @@ function HeroBody() {
   );
 }
 
+// ── Client Projects ──
 function ClientProjectsBody() {
   return (
     <>
@@ -294,6 +343,7 @@ function ClientProjectsBody() {
   );
 }
 
+// ── Users ──
 function UsersBody() {
   return (
     <>
@@ -307,6 +357,7 @@ function UsersBody() {
   );
 }
 
+// ── Orders ──
 function OrdersBody() {
   return (
     <>
@@ -322,7 +373,7 @@ function OrdersBody() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Main export
+// Route maps
 // ─────────────────────────────────────────────────────────────────────────────
 const BODY_MAP: Record<AdminSkeletonVariant, React.FC> = {
   dashboard:         DashboardBody,
@@ -337,20 +388,24 @@ const BODY_MAP: Record<AdminSkeletonVariant, React.FC> = {
 };
 
 const HEADER_BTNS: Partial<Record<AdminSkeletonVariant, number>> = {
-  about:             2,   // Refresh + Save
-  lookbook:          2,   // Refresh + Add Look
-  products:          2,   // Refresh icon + Add Product
+  about:             2,
+  lookbook:          2,
+  products:          2,
   hero:              2,
   "client-projects": 2,
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Main export
+// ─────────────────────────────────────────────────────────────────────────────
 export function AdminSkeleton({ variant }: Props) {
-  const Body = BODY_MAP[variant];
+  const Body    = BODY_MAP[variant];
   const buttons = HEADER_BTNS[variant] ?? 1;
+  const isDashboard = variant === "dashboard";
 
   return (
     <div className="ask-page">
-      <SkHeader buttons={buttons} />
+      <SkHeader buttons={buttons} isDashboard={isDashboard} />
       <Body />
     </div>
   );
