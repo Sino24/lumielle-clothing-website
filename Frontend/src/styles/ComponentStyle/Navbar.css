@@ -165,16 +165,27 @@
 .navbar__link:hover { color: var(--lum-gold); }
 .navbar__link:hover::after { width: 100%; }
 
-/* ── Desktop Search ─────────────────────────────────── */
-.navbar__search-form {
+/* ── Desktop Search wrapper (positions the dropdown) ── */
+.navbar__search-wrap {
+  position: relative;
   display: flex;
   align-items: center;
   flex: 0 0 0;
-  overflow: hidden;
   transition: flex-basis 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.navbar__search-form--open { flex: 1 1 220px; }
+/* Expand the wrapper when search is open */
+.navbar--search-open .navbar__search-wrap {
+  flex: 1 1 220px;
+}
+
+/* ── Desktop Search form ─────────────────────────────── */
+.navbar__search-form {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+}
 
 .navbar__search-input {
   width: 100%;
@@ -312,9 +323,15 @@
   flex-shrink: 0;
 }
 
+/* ── Mobile search wrapper (positions mobile dropdown) ── */
+.navbar__mobile-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 /* ── Mobile inline search (inside navbar) ─────────────── */
 .navbar__mobile-search-inline {
-  /* collapsed by default */
   width: 0;
   overflow: hidden;
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
@@ -490,42 +507,36 @@
     gap: 0.5rem;
   }
 
-  /* Hide divider and desktop brand text only */
   .navbar__brand-divider,
   .navbar__brand-text {
     display: none;
   }
 
-  /* Show mobile wordmark as a column (name + tagline stacked) */
   .navbar__mobile-wordmark {
     display: flex;
   }
 
-  /* Resize logo for mobile navbar */
   .navbar__logo-img {
     height: 65px;
     margin-top: 0;
   }
 
-  /* Smaller wordmark on mobile */
   .navbar__mobile-wordmark {
     font-size: 1.05rem;
     letter-spacing: 0.22em;
   }
 
-  /* Tighten brand gap so logo + name sit close together */
   .navbar__brand {
     gap: 0.4rem;
   }
 
-  /* Hide desktop links, icons, and search form */
   .navbar__links,
   .navbar__icons,
-  .navbar__search-form {
+  .navbar__search-form,
+  .navbar__search-wrap {
     display: none;
   }
 
-  /* Show mobile right group */
   .navbar__mobile-right {
     display: flex;
     align-items: center;
@@ -533,7 +544,6 @@
     flex-shrink: 0;
   }
 
-  /* Tighter tap padding on icon buttons inside mobile group */
   .navbar__mobile-right .navbar__icon-btn {
     padding: 6px;
   }
@@ -546,8 +556,163 @@
     font-size: 0.9rem;
   }
 
-  /* Slightly narrower search expand on very small screens */
   .navbar__mobile-search-inline.open {
     width: 110px;
   }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SEARCH SUGGESTIONS DROPDOWN
+   ═══════════════════════════════════════════════════════ */
+
+.navbar__suggestions {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 0;
+  right: 0;
+  min-width: 300px;
+  background: #fff;
+  border: 1px solid var(--lum-border);
+  border-radius: 4px;
+  box-shadow:
+    0 4px 24px rgba(26, 23, 20, 0.10),
+    0 1px 4px rgba(26, 23, 20, 0.06);
+  z-index: 200;
+  overflow: hidden;
+  animation: suggest-in 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile dropdown anchors differently — full width below nav */
+.navbar__suggestions--mobile {
+  position: fixed;
+  top: var(--nav-height);
+  left: 0;
+  right: 0;
+  min-width: unset;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  box-shadow: 0 6px 24px rgba(26, 23, 20, 0.10);
+}
+
+@keyframes suggest-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Each suggestion row ──────────────────────────── */
+.navbar__suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--lum-border);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.navbar__suggestion-item:last-of-type {
+  border-bottom: none;
+}
+
+.navbar__suggestion-item:hover,
+.navbar__suggestion-item.active {
+  background: var(--lum-cream);
+}
+
+/* Thumbnail */
+.navbar__suggestion-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f0ebe2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar__suggestion-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.navbar__suggestion-img-placeholder {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* Text block */
+.navbar__suggestion-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.navbar__suggestion-name {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--lum-dark);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navbar__suggestion-cat {
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lum-muted);
+}
+
+/* Highlight matched text */
+.navbar__suggestion-highlight {
+  background: none;
+  color: var(--lum-gold);
+  font-weight: 500;
+}
+
+/* ── "See all results" footer ─────────────────────── */
+.navbar__suggestion-see-all {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--lum-border);
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--lum-muted);
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.navbar__suggestion-see-all strong {
+  color: var(--lum-dark);
+  font-weight: 500;
+}
+
+.navbar__suggestion-see-all:hover {
+  background: var(--lum-cream);
+  color: var(--lum-gold);
+}
+
+.navbar__suggestion-see-all:hover strong {
+  color: var(--lum-gold);
 }
