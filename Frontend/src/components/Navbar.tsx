@@ -41,7 +41,7 @@ function highlightMatch(text: string, query: string): React.ReactNode {
 
 // ─── Suggestion Dropdown (standalone component, outside Navbar) ───────────────
 interface SuggestionDropdownProps {
-  refProp: React.RefObject<HTMLDivElement>;
+  refProp: React.RefObject<HTMLDivElement | null>;
   isMobile?: boolean;
   suggestOpen: boolean;
   suggestions: ProductSuggestion[];
@@ -213,7 +213,7 @@ function Navbar() {
     (q: string) => {
       const trimmed = q.trim();
       if (!trimmed) return;
-      navigate(`/product?q=${encodeURIComponent(trimmed)}`);
+      navigate(`/products?q=${encodeURIComponent(trimmed)}`);
       setSearchOpen(false);
       setMenuOpen(false);
       setQuery("");
@@ -327,7 +327,7 @@ function Navbar() {
           className={`navbar__links${searchOpen ? " navbar__links--hidden" : ""}`}
         >
           <Link className="navbar__link" to="/">Home</Link>
-          <Link className="navbar__link" to="/product">Collections</Link>
+          <Link className="navbar__link" to="/products">Collections</Link>
           <Link className="navbar__link" to="/lookbook">Lookbook</Link>
           <Link className="navbar__link" to="/ClientProjects">Client Projects</Link>
           <Link className="navbar__link" to="/about">About</Link>
@@ -553,7 +553,7 @@ function Navbar() {
         aria-hidden={!menuOpen}
       >
         <Link className="navbar__mobile-link" to="/"               onClick={closeMenu}>Home</Link>
-        <Link className="navbar__mobile-link" to="/product"        onClick={closeMenu}>Collections</Link>
+        <Link className="navbar__mobile-link" to="/products"        onClick={closeMenu}>Collections</Link>
         <Link className="navbar__mobile-link" to="/lookbook"       onClick={closeMenu}>Lookbook</Link>
         <Link className="navbar__mobile-link" to="/ClientProjects" onClick={closeMenu}>Client Projects</Link>
         <Link className="navbar__mobile-link" to="/about"          onClick={closeMenu}>About</Link>
