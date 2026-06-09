@@ -553,7 +553,7 @@ function Navbar() {
         aria-hidden={!menuOpen}
       >
         <Link className="navbar__mobile-link" to="/"               onClick={closeMenu}>Home</Link>
-        <Link className="navbar__mobile-link" to="/products"        onClick={closeMenu}>Collections</Link>
+        <Link className="navbar__mobile-link" to="/product"        onClick={closeMenu}>Collections</Link>
         <Link className="navbar__mobile-link" to="/lookbook"       onClick={closeMenu}>Lookbook</Link>
         <Link className="navbar__mobile-link" to="/ClientProjects" onClick={closeMenu}>Client Projects</Link>
         <Link className="navbar__mobile-link" to="/about"          onClick={closeMenu}>About</Link>
