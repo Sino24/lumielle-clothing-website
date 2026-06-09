@@ -327,7 +327,7 @@ function Navbar() {
           className={`navbar__links${searchOpen ? " navbar__links--hidden" : ""}`}
         >
           <Link className="navbar__link" to="/">Home</Link>
-          <Link className="navbar__link" to="/products">Collections</Link>
+          <Link className="navbar__link" to="/product">Collections</Link>
           <Link className="navbar__link" to="/lookbook">Lookbook</Link>
           <Link className="navbar__link" to="/ClientProjects">Client Projects</Link>
           <Link className="navbar__link" to="/about">About</Link>
