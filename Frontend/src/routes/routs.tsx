@@ -37,6 +37,7 @@ import AdminManageUsers from "../admin/AdminManageUsers";
 import AdminManageOrders from "../admin/AdminManageOrders";
 import SizeGuide from "../pages/SizeGuide";
 import AdminLayout from "../admin/AdminLayout";
+import Sales from "../pages/Sales";
 
 export default function AppRoutes() {
   return (
@@ -53,6 +54,7 @@ export default function AppRoutes() {
       <Route path="/ClientProjects" element={<ClientProjects />} />
       <Route path="/terms"          element={<TermsAndConditions />} />
       <Route path="/size-guide"     element={<SizeGuide />} />
+      <Route path="/sale"           element={<Sales />} />
 
       {/* ───────── User Login / Register ───────── */}
       <Route path="/login" element={<UserAuth />} />

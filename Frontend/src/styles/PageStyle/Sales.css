@@ -1,0 +1,656 @@
+/* src/styles/PageStyle/Sales.css */
+
+/* ── Tokens — mirrors ProductDetail / Products palette ─────────────────── */
+.sales {
+  --ink:        #111110;
+  --bg:         #faf8f5;
+  --accent:     #c8a97e;
+  --muted:      #9e9085;
+  --surface:    #f0ece6;
+  --border:     rgba(17, 17, 16, 0.1);
+  --dark:       #111110;
+  --dark-text:  #f5f0eb;
+  --sale-red:   #7a2020;
+  --sale-red-bg: rgba(122, 32, 32, 0.08);
+
+  --font-display: "Cormorant Garamond", "Georgia", serif;
+  --font-body:    "Jost", "Helvetica Neue", sans-serif;
+  --ease:         cubic-bezier(0.4, 0, 0.2, 1);
+  --transition:   0.28s var(--ease);
+  --navbar-height: 64px;
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+.sales {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  padding-top: var(--navbar-height);
+  animation: page-in 0.45s var(--ease) both;
+}
+
+@keyframes page-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Hero ───────────────────────────────────────────────────────────────── */
+.sales__hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: center;
+  padding: clamp(80px, 11vw, 140px) clamp(24px, 7vw, 100px) clamp(56px, 6vw, 80px);
+  border-bottom: 1px solid var(--border);
+  background: var(--dark);
+  color: var(--dark-text);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle texture stripe — the signature detail */
+.sales__hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -55deg,
+    transparent,
+    transparent 60px,
+    rgba(200, 169, 126, 0.03) 60px,
+    rgba(200, 169, 126, 0.03) 61px
+  );
+  pointer-events: none;
+}
+
+.sales__hero-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.sales__eyebrow {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+}
+
+.sales__hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 96px);
+  font-weight: 300;
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+  margin: 0;
+  color: var(--dark-text);
+}
+
+.sales__hero-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.sales__hero-sub {
+  font-size: clamp(13px, 1.3vw, 15px);
+  line-height: 1.85;
+  color: rgba(245, 240, 235, 0.65);
+  margin: 0;
+  max-width: 360px;
+  letter-spacing: 0.03em;
+}
+
+.sales__hero-cta {
+  display: inline-block;
+  align-self: flex-start;
+  border: 1px solid rgba(200, 169, 126, 0.6);
+  color: var(--accent);
+  text-decoration: none;
+  padding: 12px 32px;
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: all var(--transition);
+  margin-top: 0.5rem;
+}
+
+.sales__hero-cta:hover {
+  background: var(--accent);
+  color: var(--dark);
+  border-color: var(--accent);
+}
+
+/* ── Countdown ──────────────────────────────────────────────────────────── */
+.sales__countdown-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.sales__countdown-label {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(245, 240, 235, 0.5);
+  margin: 0;
+}
+
+.sales__countdown {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.sales__tick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.sales__tick-num {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 6vw, 80px);
+  font-weight: 300;
+  line-height: 1;
+  color: var(--dark-text);
+  letter-spacing: -0.03em;
+  min-width: 2ch;
+  text-align: center;
+}
+
+.sales__tick-unit {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245, 240, 235, 0.45);
+  margin-top: 6px;
+}
+
+.sales__tick-sep {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 300;
+  color: rgba(200, 169, 126, 0.35);
+  line-height: 1;
+  padding: 0 2px;
+  align-self: flex-start;
+}
+
+/* ── Section common ─────────────────────────────────────────────────────── */
+.sales__section-eyebrow {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.75rem;
+  display: block;
+}
+
+.sales__section-title {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3.5vw, 40px);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  margin: 0 0 clamp(28px, 4vw, 48px);
+  color: var(--ink);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Coupons ────────────────────────────────────────────────────────────── */
+.sales__coupons-section {
+  padding: clamp(48px, 7vw, 88px) clamp(24px, 7vw, 100px);
+  border-bottom: 1px solid var(--border);
+}
+
+.sales__coupons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(12px, 2vw, 20px);
+}
+
+.sales__coupon {
+  display: flex;
+  align-items: stretch;
+  border: 1px dashed rgba(200, 169, 126, 0.45);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.sales__coupon:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 24px rgba(200, 169, 126, 0.12);
+}
+
+.sales__coupon-left {
+  flex: 1;
+  padding: clamp(16px, 2vw, 22px);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-right: 1px dashed rgba(200, 169, 126, 0.35);
+}
+
+.sales__coupon-label {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: 500;
+  color: var(--sale-red);
+  line-height: 1;
+}
+
+.sales__coupon-desc {
+  font-size: 12px;
+  color: var(--ink);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.sales__coupon-min {
+  font-size: 10px;
+  color: var(--muted);
+  margin: 0;
+  letter-spacing: 0.06em;
+}
+
+.sales__coupon-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 18px;
+  min-width: 96px;
+  background: var(--bg);
+}
+
+.sales__coupon-code {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--ink);
+  text-transform: uppercase;
+  text-align: center;
+  word-break: break-all;
+}
+
+.sales__coupon-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.sales__coupon-copy:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.sales__coupon-copy--done {
+  border-color: #2c4a3e;
+  color: #2c4a3e;
+  pointer-events: none;
+}
+
+/* ── Grid Section ───────────────────────────────────────────────────────── */
+.sales__grid-section {
+  padding: clamp(48px, 7vw, 88px) clamp(24px, 7vw, 100px) clamp(64px, 10vw, 120px);
+}
+
+.sales__grid-header {
+  margin-bottom: clamp(28px, 4vw, 48px);
+}
+
+.sales__grid-count {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.sales__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(16px, 2vw, 28px);
+}
+
+/* ── Sale Card ──────────────────────────────────────────────────────────── */
+.sales__card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: card-in 0.5s var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sales__card-img-link { text-decoration: none; }
+
+.sales__card-img-wrap {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  aspect-ratio: 3 / 4;
+}
+
+.sales__card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.sales__card:hover .sales__card-img { transform: scale(1.04); }
+
+.sales__card-discount-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--sale-red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 4px 9px;
+  border-radius: 3px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.sales__card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0;
+  background: linear-gradient(to top, rgba(10, 10, 10, 0.52) 0%, transparent 55%);
+  opacity: 0;
+  transition: opacity var(--transition);
+  z-index: 3;
+}
+
+.sales__card-overlay--visible { opacity: 1; }
+
+.sales__card-cta {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(26, 23, 20, 0.88);
+  color: #f5f0e8;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0.9rem;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.28s ease, transform 0.28s ease, background 0.2s;
+  z-index: 4;
+}
+
+.sales__card-overlay--visible .sales__card-cta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sales__card-cta:hover {
+  background: var(--sale-red);
+}
+
+.sales__card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 2px;
+}
+
+.sales__card-category {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.sales__card-name {
+  font-family: var(--font-display);
+  font-size: clamp(16px, 1.5vw, 19px);
+  font-weight: 400;
+  color: var(--ink);
+  text-decoration: none;
+  line-height: 1.3;
+  transition: color var(--transition);
+}
+
+.sales__card-name:hover { color: var(--accent); }
+
+.sales__card-pricing {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.sales__card-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sale-red);
+}
+
+.sales__card-original {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+/* ── Empty State ────────────────────────────────────────────────────────── */
+.sales__empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--muted);
+}
+
+.sales__empty-title {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 300;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+
+.sales__empty-sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 28px;
+}
+
+.sales__empty-btn {
+  display: inline-block;
+  border: 1px solid var(--ink);
+  background: none;
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 11px 32px;
+  border-radius: 100px;
+  transition: all var(--transition);
+}
+
+.sales__empty-btn:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* ── Bottom CTA ─────────────────────────────────────────────────────────── */
+.sales__bottom {
+  background: var(--dark);
+  color: var(--dark-text);
+  text-align: center;
+  padding: clamp(56px, 10vw, 100px) clamp(20px, 5vw, 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.sales__bottom-text {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 300;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin: 0;
+  max-width: 540px;
+}
+
+.sales__bottom-text em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.sales__bottom-btn {
+  display: inline-block;
+  border: 1px solid rgba(245, 240, 235, 0.35);
+  color: var(--dark-text);
+  text-decoration: none;
+  padding: 13px 36px;
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: all var(--transition);
+}
+
+.sales__bottom-btn:hover {
+  background: var(--dark-text);
+  color: var(--dark);
+  border-color: var(--dark-text);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .sales__hero {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .sales__countdown-wrap {
+    align-items: flex-start;
+  }
+
+  .sales__coupons-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sales__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .sales {
+    --navbar-height: 56px;
+  }
+
+  .sales__hero {
+    padding: 72px 16px 48px;
+  }
+
+  .sales__coupons-section,
+  .sales__grid-section {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .sales__tick-num {
+    font-size: 44px;
+  }
+
+  .sales__tick-sep {
+    font-size: 36px;
+  }
+
+  .sales__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .sales__card-overlay {
+    opacity: 1;
+    background: linear-gradient(to top, rgba(10, 10, 10, 0.45) 0%, transparent 40%);
+  }
+
+  .sales__card-cta {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .sales__coupon {
+    flex-direction: column;
+  }
+
+  .sales__coupon-left {
+    border-right: none;
+    border-bottom: 1px dashed rgba(200, 169, 126, 0.35);
+  }
+
+  .sales__coupon-right {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 12px 16px;
+    min-width: unset;
+  }
+}
+
+@media (max-width: 380px) {
+  .sales__grid {
+    grid-template-columns: 1fr;
+  }
+}
