@@ -1,6 +1,6 @@
 // src/pages/Sales.tsx
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/PageStyle/Sales.css";
 import { PageSkeleton } from "../components/SkeletonLoader";
