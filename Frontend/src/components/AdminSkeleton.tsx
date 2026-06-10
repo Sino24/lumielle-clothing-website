@@ -25,49 +25,7 @@ interface Props {
 // Shared building blocks
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Standard page header skeleton.
- * Dashboard variant renders the redesigned profile block (bar + avatar + lines)
- * instead of the generic title+sub+buttons layout.
- *
- * FIX: Profile card now uses .ask-profile-sk-inner to isolate padding from the
- * gold bar — previously padding on .ask-profile-sk pushed the bar inward.
- */
-function SkHeader({ buttons = 1, isDashboard = false }: { buttons?: number; isDashboard?: boolean }) {
-  if (isDashboard) {
-    return (
-      <div className="ask-hd">
-        {/* LEFT — title, subtitle, profile card skeleton */}
-        <div className="ask-hd-left">
-          <div className="ask ask-title" />
-          <div className="ask ask-sub" />
-
-          {/* Profile card skeleton — mirrors redesigned .adm-profile */}
-          <div className="ask-profile-sk">
-            {/* Gold bar sits flush — no padding on parent, padding isolated to inner */}
-            <div className="ask-profile-sk-bar" />
-            <div className="ask-profile-sk-inner">
-              <div className="ask ask-profile-sk-avatar" />
-              <div className="ask-profile-sk-lines">
-                <div className="ask ask-profile-sk-name" />
-                <div className="ask ask-profile-sk-email" />
-                <div className="ask ask-profile-sk-role" />
-              </div>
-            </div>
-            {/* Online dot — absolute top-right of card */}
-            <div className="ask ask-profile-sk-dot" />
-          </div>
-        </div>
-
-        {/* RIGHT — action buttons, top-aligned with title */}
-        <div className="ask-hd-right">
-          <div className="ask ask-btn" />
-          <div className="ask ask-btn-ghost" />
-        </div>
-      </div>
-    );
-  }
-
+function SkHeader({ buttons = 1 }: { buttons?: number }) {
   return (
     <div className="ask-hd">
       <div className="ask-hd-left">
@@ -164,16 +122,11 @@ function SkPanel({
 // Per-variant bodies
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── Dashboard ──
+// No header, no nav — AdminDashboard renders its own header outside this component
 function DashboardBody() {
   return (
     <>
-      {/* Nav strip */}
-      <div className="ask-nav">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <div className="ask ask-nav-pill" key={i} />
-        ))}
-      </div>
-
       {/* Stats */}
       <SkStats count={4} emoji />
 
@@ -214,7 +167,6 @@ function DashboardBody() {
 function ProductsBody() {
   return (
     <>
-      {/* toolbar */}
       <div className="ask-pm-toolbar">
         <div className="ask ask-pm-search" />
         <div className="ask-pm-toolbar-row2">
@@ -223,7 +175,6 @@ function ProductsBody() {
         </div>
       </div>
 
-      {/* product grid */}
       <div className="ask-pm-grid">
         {Array.from({ length: 8 }).map((_, i) => (
           <div className="ask-pm-card" key={i}>
@@ -399,13 +350,14 @@ const HEADER_BTNS: Partial<Record<AdminSkeletonVariant, number>> = {
 // Main export
 // ─────────────────────────────────────────────────────────────────────────────
 export function AdminSkeleton({ variant }: Props) {
-  const Body    = BODY_MAP[variant];
-  const buttons = HEADER_BTNS[variant] ?? 1;
+  const Body       = BODY_MAP[variant];
+  const buttons    = HEADER_BTNS[variant] ?? 1;
   const isDashboard = variant === "dashboard";
 
   return (
     <div className="ask-page">
-      <SkHeader buttons={buttons} isDashboard={isDashboard} />
+      {/* Dashboard renders its own header — skip SkHeader to avoid duplication */}
+      {!isDashboard && <SkHeader buttons={buttons} />}
       <Body />
     </div>
   );

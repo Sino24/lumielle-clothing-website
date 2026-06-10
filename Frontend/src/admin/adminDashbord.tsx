@@ -1,7 +1,7 @@
 // src/pages/Admin/AdminDashboard.tsx
 
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../styles/AdminStyle/adminDashbord.css";
 import { AdminSkeleton } from "../components/AdminSkeleton";
 
@@ -23,7 +23,6 @@ interface AdminInfo {
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [products,      setProducts]      = useState<Product[]>([]);
   const [loading,       setLoading]       = useState(true);
@@ -104,8 +103,6 @@ const AdminDashboard: React.FC = () => {
     { path: "/admin/orders",          label: "Orders",          icon: "📦", desc: "View & manage orders" },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
-
   // Generate up-to-2-letter monogram from full name
   const initials =
     adminInfo?.name
@@ -131,43 +128,28 @@ const AdminDashboard: React.FC = () => {
             <div className="adm-identity">
               {adminLoading ? (
 
-                /* ── Skeleton while loading ── */
-                <div className="adm-identity-skeleton">
-                  <div className="adm-sk adm-sk-avatar-lg" />
-                  <div className="adm-identity-sk-lines">
-                    <div className="adm-sk adm-sk-id-name"  />
-                    <div className="adm-sk adm-sk-id-email" />
-                    <div className="adm-sk adm-sk-id-role"  />
+                /* ── Profile card skeleton — white card matching live layout ── */
+                <div className="adm-profile-sk">
+                  <div className="adm-profile-sk-bar" />
+                  <div className="adm-profile-sk-inner">
+                    <div className="adm-sk adm-profile-sk-avatar" />
+                    <div className="adm-profile-sk-lines">
+                      <div className="adm-sk adm-profile-sk-name"  />
+                      <div className="adm-sk adm-profile-sk-email" />
+                      <div className="adm-sk adm-profile-sk-role"  />
+                    </div>
                   </div>
+                  <span className="adm-profile-sk-dot" />
                 </div>
 
               ) : adminInfo ? (
 
-                /*
-                 * ── Live profile card ──
-                 *
-                 * DOM order matters for the layout:
-                 *  1. .adm-profile-bar   — gold bar (align-self:stretch, no padding)
-                 *  2. .adm-profile-inner — flex row: avatar | info column
-                 *  3. .adm-profile-online — absolute dot, top-right of card
-                 *
-                 * All padding lives on .adm-profile-inner so the bar stays flush
-                 * to the card's left edge.
-                 */
                 <div className="adm-profile">
-
-                  {/* 1. Gold left-edge bar */}
                   <div className="adm-profile-bar" />
-
-                  {/* 2. Content row: avatar + info side-by-side */}
                   <div className="adm-profile-inner">
-
-                    {/* Monogram avatar circle */}
                     <div className="adm-profile-avatar" aria-hidden="true">
                       {initials}
                     </div>
-
-                    {/* Text column: name / email / role */}
                     <div className="adm-profile-info">
                       <span className="adm-profile-name">{adminInfo.name}</span>
                       {adminInfo.email && (
@@ -175,12 +157,8 @@ const AdminDashboard: React.FC = () => {
                       )}
                       <span className="adm-profile-role">{adminInfo.role}</span>
                     </div>
-
                   </div>
-
-                  {/* 3. Online dot — positioned absolute inside card */}
                   <span className="adm-profile-online" title="Active" />
-
                 </div>
 
               ) : null}
@@ -213,20 +191,6 @@ const AdminDashboard: React.FC = () => {
             </button>
           </div>
         </div>
-
-        {/* ── Navigation ─────────────────────────────────────────────────────── */}
-        <nav className="adm-nav-links" aria-label="Admin navigation">
-          {navItems.map((item) => (
-            <button
-              key={item.path}
-              className={`adm-nav-btn${isActive(item.path) ? " active" : ""}`}
-              onClick={() => navigate(item.path)}
-            >
-              <span className="adm-nav-btn-icon">{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-        </nav>
 
         {/* ── Body ───────────────────────────────────────────────────────────── */}
         {loading ? (

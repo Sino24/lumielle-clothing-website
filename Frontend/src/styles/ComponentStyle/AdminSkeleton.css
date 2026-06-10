@@ -29,21 +29,16 @@
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  padding: 2.5rem 2.5rem 4rem;
-  max-width: 1400px;
-  margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   SHARED HEADER
-   FIX: hd-right gets padding-top so buttons align with the title baseline,
-   not the bottom of the taller left column.
+   SHARED HEADER  (non-dashboard pages only)
 ───────────────────────────────────────────────────────────────────────────── */
 .ask-hd {
   display: flex;
-  align-items: flex-start;   /* always top-align so right never drifts */
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
@@ -54,7 +49,7 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  padding-top: 6px;          /* FIX: nudges buttons flush with title */
+  padding-top: 6px;
   flex-shrink: 0;
 }
 
@@ -62,78 +57,6 @@
 .ask-sub       { height: 11px; width: 160px; }
 .ask-btn       { height: 34px; width: 120px; border-radius: 3px; }
 .ask-btn-ghost { height: 34px; width: 95px;  border-radius: 3px; }
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   DASHBOARD — PROFILE CARD SKELETON
-   FIX: Padding is now on .ask-profile-sk-inner, not on the card root.
-   This keeps the gold bar flush to the left edge with no indent.
-───────────────────────────────────────────────────────────────────────────── */
-.ask-profile-sk {
-  display: flex;
-  align-items: stretch;      /* bar stretches to full card height */
-  position: relative;
-  background: #fff;
-  border: 1px solid rgba(26, 23, 20, 0.10);
-  width: fit-content;
-  margin-top: 8px;
-  overflow: hidden;
-  /* No padding here — padding lives on .ask-profile-sk-inner */
-}
-
-/* Gold accent bar — flush left, no gap */
-.ask-profile-sk-bar {
-  width: 3px;
-  flex-shrink: 0;
-  background: linear-gradient(180deg, #C9A96E 0%, #b8924a 100%);
-  opacity: 0.35;
-}
-
-/* Inner wrapper carries all the padding so the bar stays edge-to-edge */
-.ask-profile-sk-inner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 44px 10px 12px;  /* right pad makes room for the online dot */
-}
-
-/* Circle avatar */
-.ask-profile-sk-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50% !important;
-  flex-shrink: 0;
-}
-
-/* Info lines column */
-.ask-profile-sk-lines {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.ask-profile-sk-name  { height: 11px; width: 115px; }
-.ask-profile-sk-email { height: 9px;  width: 160px; }
-.ask-profile-sk-role  { height: 7px;  width: 52px;  border-radius: 2px; }
-
-/* Online dot — absolute top-right corner of card */
-.ask-profile-sk-dot {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50% !important;
-  background: #ede9e2;
-  animation: none;
-  flex-shrink: 0;
-  box-shadow: 0 0 0 2px #fff;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   DASHBOARD — NAV STRIP
-───────────────────────────────────────────────────────────────────────────── */
-.ask-nav      { display: flex; flex-wrap: wrap; gap: 7px; }
-.ask-nav-pill { height: 32px; width: 95px; border-radius: 3px; }
 
 /* ─────────────────────────────────────────────────────────────────────────────
    STATS ROW
@@ -211,7 +134,7 @@
 .ask-search  { height: 38px; flex: 1; max-width: 320px; }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   PRODUCTS SKELETON  — mirrors pm-page exactly
+   PRODUCTS SKELETON
 ───────────────────────────────────────────────────────────────────────────── */
 .ask-pm-toolbar {
   display: flex;
@@ -297,7 +220,7 @@
 .ask-lb-sub       { height: 10px; width: 45%; }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   FORM PANELS  — about / hero / client-projects
+   FORM PANELS
 ───────────────────────────────────────────────────────────────────────────── */
 .ask-panel {
   display: flex;
@@ -410,12 +333,9 @@
 }
 
 @media (max-width: 600px) {
-  .ask-page              { padding: 1.5rem 1rem 3rem; gap: 1.25rem; }
-  .ask-nav-pill          { width: 80px; }
-  .ask-msg-preview       { display: none; }
-  .ask-link-desc         { display: none; }
-  .ask-profile-sk        { width: 100%; box-sizing: border-box; }
-  .ask-profile-sk-inner  { width: 100%; box-sizing: border-box; padding-right: 36px; }
+  .ask-page        { gap: 1.25rem; }
+  .ask-msg-preview { display: none; }
+  .ask-link-desc   { display: none; }
 }
 
 @media (max-width: 400px) {
