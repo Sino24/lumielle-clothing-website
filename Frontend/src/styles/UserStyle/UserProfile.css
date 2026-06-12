@@ -191,6 +191,16 @@
 
 .acc-section-hd { margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--lum-border); }
 .acc-section-hd--sub { margin-top: 2rem; padding-bottom: 1rem; }
+
+/* Row variant: title on left, action on right */
+.acc-section-hd--row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 .acc-section-title { font-family: var(--font-display); font-size: 1.65rem; font-weight: 300; color: var(--lum-dark); letter-spacing: .02em; margin: 0 0 .3rem; }
 .acc-section-title--sm { font-size: 1.2rem; margin: 0; }
 .acc-section-sub { font-size: .72rem; letter-spacing: .08em; color: var(--lum-muted); margin: 0; }
@@ -292,20 +302,59 @@
 ══════════════════════════════════════════════ */
 .acc-msg-list { display: flex; flex-direction: column; gap: 1rem; }
 
+/* Refresh button */
+.acc-msg-refresh-btn {
+  display: inline-flex; align-items: center; gap: .45rem;
+  background: none;
+  border: 1px solid var(--lum-border);
+  font-family: var(--font-body);
+  font-size: .62rem; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--lum-muted);
+  padding: .5rem 1rem;
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.acc-msg-refresh-btn:hover:not(:disabled) { border-color: var(--lum-gold); color: var(--lum-dark); }
+.acc-msg-refresh-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.acc-msg-refresh-icon { display: flex; align-items: center; }
+.acc-msg-refresh-icon svg { width: 12px; height: 12px; }
+.acc-msg-refresh-icon.spinning svg {
+  animation: spin .7s linear infinite;
+}
+
+/* Message card */
 .acc-msg-card {
   border: 1px solid var(--lum-border);
   background: #fff;
   padding: 1.5rem;
-  transition: box-shadow .2s;
+  transition: box-shadow .2s, border-color .2s;
 }
 .acc-msg-card:hover { box-shadow: 0 4px 18px rgba(26,23,20,.06); }
 
+/* Unread card: left accent line */
+.acc-msg-card--unread {
+  border-left: 3px solid var(--lum-gold);
+  background: rgba(201,169,110,.025);
+}
+
+/* Card header */
 .acc-msg-card-head {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: .85rem;
+  gap: .75rem;
+  flex-wrap: wrap;
 }
 .acc-msg-card-date { font-size: .66rem; letter-spacing: .1em; color: var(--lum-muted); }
 
+/* Right side of header: status pill + mark-as-read button */
+.acc-msg-card-head-right {
+  display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+}
+
+/* Status pill */
 .acc-msg-card-status {
   font-size: .58rem; letter-spacing: .14em; text-transform: uppercase;
   padding: .18rem .65rem;
@@ -314,6 +363,28 @@
 .acc-msg-card-status--read    { background: rgba(108,158,196,.15); color: #3a6a8c; }
 .acc-msg-card-status--replied { background: rgba(44,74,62,.10);    color: #2c4a3e; }
 
+/* Mark as read button */
+.acc-msg-mark-read-btn {
+  display: inline-flex; align-items: center; gap: .35rem;
+  background: none;
+  border: 1px solid var(--lum-border);
+  font-family: var(--font-body);
+  font-size: .58rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--lum-muted);
+  padding: .2rem .65rem;
+  cursor: pointer;
+  transition: border-color .2s, color .2s, background .2s;
+  white-space: nowrap;
+}
+.acc-msg-mark-read-btn svg { width: 11px; height: 11px; flex-shrink: 0; }
+.acc-msg-mark-read-btn:hover:not(:disabled) {
+  border-color: var(--lum-gold);
+  color: var(--lum-dark);
+  background: rgba(201,169,110,.06);
+}
+.acc-msg-mark-read-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* Message body */
 .acc-msg-card-body {
   font-size: .82rem; letter-spacing: .03em; color: var(--lum-dark);
   line-height: 1.7; margin: 0 0 1rem;
@@ -640,6 +711,10 @@
 
   /* Messages mobile */
   .acc-msg-card { padding: 1.1rem; }
+  .acc-section-hd--row { flex-direction: column; align-items: flex-start; }
+  .acc-msg-card-head { flex-direction: column; align-items: flex-start; gap: .5rem; }
+  .acc-msg-card-head-right { width: 100%; }
+  .acc-msg-mark-read-btn { width: 100%; justify-content: center; padding: .4rem; }
 }
 
 @media (max-width: 380px) {

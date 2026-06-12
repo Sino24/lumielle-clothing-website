@@ -35,6 +35,8 @@ const IconCalendar  = () => <svg viewBox="0 0 24 24" fill="none" stroke="current
 const IconTruck     = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>;
 const IconChevron   = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>;
 const IconMessage   = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
+const IconRefresh   = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>;
+const IconRead      = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
 
 // ── Types ─────────────────────────────────────────────────
 interface Address {
@@ -298,6 +300,8 @@ const AccountPage: React.FC = () => {
   const [messages,        setMessages]        = useState<ContactMsg[]>([]);
   const [msgsLoading,     setMsgsLoading]     = useState(false);
   const [msgsLoaded,      setMsgsLoaded]      = useState(false);
+  // Track which message IDs are being marked as read
+  const [markingRead,     setMarkingRead]     = useState<Set<string>>(new Set());
 
   const authHeaders = useCallback(() => ({
     Authorization: `Bearer ${token}`,
@@ -371,8 +375,8 @@ const AccountPage: React.FC = () => {
   }, [activeTab, token]);
 
   // ── Fetch messages ──
-  useEffect(() => {
-    if (activeTab !== "messages" || !token || msgsLoaded) return;
+  const fetchMessages = useCallback(() => {
+    if (!token) return;
     setMsgsLoading(true);
     fetch(`${API_BASE}/api/auth/messages`, { headers: authHeaders() })
       .then((r) => r.json())
@@ -382,8 +386,38 @@ const AccountPage: React.FC = () => {
       })
       .catch(() => setMsgsLoaded(true))
       .finally(() => setMsgsLoading(false));
+  }, [token, API_BASE, authHeaders]);
+
+  useEffect(() => {
+    if (activeTab !== "messages" || !token || msgsLoaded) return;
+    fetchMessages();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, token, msgsLoaded]);
+
+  // ── Mark message as read ──
+  const markAsRead = async (id: string) => {
+    if (markingRead.has(id)) return;
+    setMarkingRead((prev) => new Set(prev).add(id));
+    try {
+      const res = await fetch(`${API_BASE}/api/contact/${id}/status`, {
+        method: "PATCH",
+        headers: jsonHeaders(),
+        body: JSON.stringify({ status: "read" }),
+      });
+      if (!res.ok) throw new Error();
+      setMessages((prev) =>
+        prev.map((m) => m._id === id ? { ...m, status: "read" } : m)
+      );
+    } catch {
+      // silently fail — not critical
+    } finally {
+      setMarkingRead((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
+  };
 
   const flash = (type: "success"|"error", text: string) => {
     setMsg({ type, text });
@@ -461,7 +495,9 @@ const AccountPage: React.FC = () => {
   const handleLogout = () => { logout(); navigate("/"); };
 
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
-  const unreadMsgCount = messages.filter((m) => m.status === "replied" && m.reply).length;
+
+  // Badge: count messages that are unread (not yet seen by user)
+  const unreadMsgCount = messages.filter((m) => m.status === "unread").length;
 
   const tabs: { id: Tab; label: string; Icon: React.FC }[] = [
     { id: "cart",      label: "My Bag",     Icon: () => <IoBagOutline size={14} /> },
@@ -588,19 +624,37 @@ const AccountPage: React.FC = () => {
             </section>
           )}
 
-          {/* Messages */}
+          {/* ── Messages ── */}
           {activeTab === "messages" && (
             <section className="acc-section" key="messages">
-              <div className="acc-section-hd">
-                <h2 className="acc-section-title">My Messages</h2>
-                <p className="acc-section-sub">Your contact submissions and our replies</p>
+
+              {/* Section header with refresh button */}
+              <div className="acc-section-hd acc-section-hd--row">
+                <div>
+                  <h2 className="acc-section-title">My Messages</h2>
+                  <p className="acc-section-sub">Your contact submissions and replies from us</p>
+                </div>
+                <button
+                  className="acc-msg-refresh-btn"
+                  onClick={() => { setMsgsLoaded(false); fetchMessages(); }}
+                  disabled={msgsLoading}
+                  type="button"
+                  aria-label="Refresh messages"
+                >
+                  <span className={msgsLoading ? "acc-msg-refresh-icon spinning" : "acc-msg-refresh-icon"}>
+                    <IconRefresh />
+                  </span>
+                  <span>Refresh</span>
+                </button>
               </div>
+
               {msgsLoading && (
                 <div className="acc-orders-loading">
                   <div className="acc-orders-spinner" />
                   <p>Loading messages…</p>
                 </div>
               )}
+
               {!msgsLoading && messages.length === 0 && (
                 <div className="acc-empty">
                   <div className="acc-empty-icon"><IconMessage /></div>
@@ -611,21 +665,47 @@ const AccountPage: React.FC = () => {
                   <Link className="acc-btn acc-btn--primary" to="/contact">Contact Us</Link>
                 </div>
               )}
+
               {!msgsLoading && messages.length > 0 && (
                 <div className="acc-msg-list">
                   {messages.map((m) => (
-                    <div key={m._id} className="acc-msg-card">
+                    <div
+                      key={m._id}
+                      className={`acc-msg-card${m.status === "unread" ? " acc-msg-card--unread" : ""}`}
+                    >
+                      {/* Card header: date + status pill + mark-as-read button */}
                       <div className="acc-msg-card-head">
                         <span className="acc-msg-card-date">
                           {new Date(m.createdAt).toLocaleDateString("en-IN", {
                             day: "numeric", month: "short", year: "numeric",
                           })}
                         </span>
-                        <span className={`acc-msg-card-status acc-msg-card-status--${m.status}`}>
-                          {m.status}
-                        </span>
+                        <div className="acc-msg-card-head-right">
+                          <span className={`acc-msg-card-status acc-msg-card-status--${m.status}`}>
+                            {m.status === "unread" ? "Unread"
+                              : m.status === "read" ? "Read"
+                              : "Replied"}
+                          </span>
+                          {/* Show "Mark as Read" only when unread */}
+                          {m.status === "unread" && (
+                            <button
+                              className="acc-msg-mark-read-btn"
+                              onClick={() => markAsRead(m._id)}
+                              disabled={markingRead.has(m._id)}
+                              type="button"
+                              title="Mark as read"
+                            >
+                              <IconRead />
+                              <span>{markingRead.has(m._id) ? "Marking…" : "Mark as read"}</span>
+                            </button>
+                          )}
+                        </div>
                       </div>
+
+                      {/* Message body */}
                       <p className="acc-msg-card-body">{m.message}</p>
+
+                      {/* Reply block or pending notice */}
                       {m.reply ? (
                         <div className="acc-msg-reply">
                           <span className="acc-msg-reply-label">
