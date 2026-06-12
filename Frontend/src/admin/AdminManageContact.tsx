@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import "../styles/AdminStyle/AdminManageContact.css";
 import { AdminSkeleton } from "../components/AdminSkeleton";
 
-
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const getAuthHeader = () => ({
@@ -19,19 +18,70 @@ interface ContactMsg {
   email: string;
   message: string;
   status: "unread" | "read" | "replied";
+  reply?: string;
+  repliedAt?: string;
+  hasAccount: boolean;
   createdAt: string;
 }
 
 type ToastType = "success" | "error" | "info";
 interface Toast { id: number; msg: string; type: ToastType; }
 
+// ── Reply Box ─────────────────────────────────────────────────────────────────
+const ReplyBox: React.FC<{
+  contact: ContactMsg;
+  onReplied: (updated: ContactMsg) => void;
+  onError: () => void;
+}> = ({ contact, onReplied, onError }) => {
+  const [text, setText] = useState(contact.reply ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const send = async () => {
+    if (!text.trim()) return;
+    setSaving(true);
+    try {
+      const r = await fetch(`${API_BASE}/api/contact/${contact._id}/reply`, {
+        method: "PATCH",
+        headers: getAuthHeader(),
+        body: JSON.stringify({ reply: text }),
+      });
+      if (!r.ok) throw new Error();
+      onReplied(await r.json());
+    } catch {
+      onError();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="amc-reply-box">
+      <textarea
+        className="amc-reply-input"
+        placeholder="Write a reply…"
+        rows={3}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        disabled={saving}
+      />
+      <button
+        className="amc-btn gold sm"
+        onClick={send}
+        disabled={saving || !text.trim()}
+      >
+        {contact.reply ? "Update Reply" : "Send Reply"}
+      </button>
+    </div>
+  );
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 const AdminManageContact: React.FC = () => {
-  const [contacts,    setContacts]    = useState<ContactMsg[]>([]);
-  const [loading,     setLoading]     = useState(true);
-  const [expandedId,  setExpandedId]  = useState<string | null>(null);
-  const [deleteTarget,setDeleteTarget]= useState<string | null>(null);
-  const [toasts,      setToasts]      = useState<Toast[]>([]);
+  const [contacts,     setContacts]     = useState<ContactMsg[]>([]);
+  const [loading,      setLoading]      = useState(true);
+  const [expandedId,   setExpandedId]   = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [toasts,       setToasts]       = useState<Toast[]>([]);
   const toastId = useRef(0);
 
   const showToast = useCallback((msg: string, type: ToastType = "info") => {
@@ -99,11 +149,8 @@ const AdminManageContact: React.FC = () => {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    
     <div className="amc-page">
       <div className="amc-content">
-      
-
 
         {/* PAGE HEADER */}
         <div className="amc-page-hd">
@@ -139,7 +186,7 @@ const AdminManageContact: React.FC = () => {
 
         {/* MESSAGE LIST */}
         {loading ? (
-        <AdminSkeleton variant="contact" />
+          <AdminSkeleton variant="contact" />
         ) : contacts.length === 0 ? (
           <div className="amc-empty-state">
             <div className="amc-empty-icon">✉️</div>
@@ -155,7 +202,10 @@ const AdminManageContact: React.FC = () => {
                 <div className="amc-msg-head" onClick={() => setExpandedId(expandedId === c._id ? null : c._id)}>
                   <div className="amc-msg-avatar">{c.name[0].toUpperCase()}</div>
                   <div className="amc-msg-meta">
-                    <div className="amc-msg-name">{c.name}</div>
+                    <div className="amc-msg-name">
+                      {c.name}
+                      {!c.hasAccount && <span className="amc-guest-badge">Guest</span>}
+                    </div>
                     <div className="amc-msg-email">{c.email}</div>
                   </div>
                   <div className="amc-msg-preview">
@@ -174,9 +224,40 @@ const AdminManageContact: React.FC = () => {
                 {expandedId === c._id && (
                   <div className="amc-msg-body">
                     <p className="amc-msg-text">{c.message}</p>
+
+                    {/* Existing reply preview */}
+                    {c.reply && (
+                      <div className="amc-reply-bubble">
+                        <span className="amc-reply-label">Your reply</span>
+                        <p className="amc-reply-text">{c.reply}</p>
+                        {c.repliedAt && (
+                          <span className="amc-reply-date">{fmtDate(c.repliedAt)}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Reply composer — only for users with accounts */}
+                    {c.hasAccount ? (
+                      <ReplyBox
+                        contact={c}
+                        onReplied={(updated) => {
+                          setContacts((p) => p.map((x) => x._id === updated._id ? { ...updated, hasAccount: c.hasAccount } : x));
+                          showToast("Reply sent", "success");
+                        }}
+                        onError={() => showToast("Failed to send reply", "error")}
+                      />
+                    ) : (
+                      <p className="amc-guest-note">
+                        This is a guest submission — use "Reply via Email" below to respond.
+                      </p>
+                    )}
+
                     <div className="amc-msg-actions">
-                      <select className="amc-select" value={c.status}
-                        onChange={(e) => updateStatus(c._id, e.target.value as ContactMsg["status"])}>
+                      <select
+                        className="amc-select"
+                        value={c.status}
+                        onChange={(e) => updateStatus(c._id, e.target.value as ContactMsg["status"])}
+                      >
                         <option value="unread">Unread</option>
                         <option value="read">Read</option>
                         <option value="replied">Replied</option>

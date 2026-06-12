@@ -34,6 +34,7 @@ const IconShopping  = () => <svg viewBox="0 0 24 24" fill="none" stroke="current
 const IconCalendar  = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
 const IconTruck     = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>;
 const IconChevron   = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>;
+const IconMessage   = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
 
 // ── Types ─────────────────────────────────────────────────
 interface Address {
@@ -56,8 +57,16 @@ interface Order {
   address?:  { label: string; line1: string; line2?: string; city: string; state: string; pincode: string };
   createdAt: string;
 }
+interface ContactMsg {
+  _id: string;
+  message: string;
+  reply?: string;
+  repliedAt?: string;
+  status: "unread" | "read" | "replied";
+  createdAt: string;
+}
 
-type Tab = "profile" | "orders" | "addresses" | "password" | "cart";
+type Tab = "profile" | "orders" | "addresses" | "password" | "cart" | "messages";
 
 const BLANK_ADDRESS = {
   label: "Home", line1: "", line2: "",
@@ -75,7 +84,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
 const parsePrice = (str: string) =>
   parseInt(str.replace(/[₹,\s]/g, ""), 10) || 0;
 
-// ── Content skeleton (only the content zone, not the whole page) ──
+// ── Content skeleton ──────────────────────────────────────
 const ContentSkeleton: React.FC = () => (
   <div className="acc-content-zone">
     <style>{`
@@ -270,9 +279,6 @@ const AccountPage: React.FC = () => {
 
   const navState = location.state as { tab?: Tab; refreshOrders?: boolean } | null;
 
-  // Read desired tab from nav state ONCE at mount time for initial value.
-  // We deliberately do NOT re-read location.state in the main render —
-  // doing so caused the skeleton to re-flash when state was cleared via navigate().
   const initialTab = useRef<Tab>(navState?.tab ?? "cart");
   const pendingRefreshOrders = useRef<boolean>(navState?.refreshOrders === true);
 
@@ -289,6 +295,9 @@ const AccountPage: React.FC = () => {
   const [orders,          setOrders]          = useState<Order[]>([]);
   const [ordersLoading,   setOrdersLoading]   = useState(false);
   const [ordersLoaded,    setOrdersLoaded]    = useState(false);
+  const [messages,        setMessages]        = useState<ContactMsg[]>([]);
+  const [msgsLoading,     setMsgsLoading]     = useState(false);
+  const [msgsLoaded,      setMsgsLoaded]      = useState(false);
 
   const authHeaders = useCallback(() => ({
     Authorization: `Bearer ${token}`,
@@ -299,13 +308,9 @@ const AccountPage: React.FC = () => {
     Authorization:  `Bearer ${token}`,
   }), [token]);
 
-  // ── Handle subsequent navigations to /account with a new tab in state ──
-  // e.g. navigate("/account", { state: { tab: "addresses" } }) from Cart.tsx
-  // We use a ref to track the previous state object so we only act on genuine
-  // new navigations, not on the state-clearing replace() we do below.
+  // ── Handle subsequent navigations ──
   const prevNavState = useRef(navState);
   useEffect(() => {
-    // Skip if state hasn't changed or if it was already cleared
     if (!navState?.tab) return;
     if (navState === prevNavState.current) return;
     prevNavState.current = navState;
@@ -317,9 +322,6 @@ const AccountPage: React.FC = () => {
       pendingRefreshOrders.current = true;
     }
 
-    // Clear location state so a hard refresh doesn't re-apply it.
-    // Use a timeout so the state update above settles first — this avoids
-    // the double-render that caused the navbar flicker.
     const t = setTimeout(() => {
       navigate("/account", { replace: true, state: null });
     }, 0);
@@ -327,7 +329,7 @@ const AccountPage: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state]);
 
-  // ── Fetch profile once on mount ──
+  // ── Fetch profile ──
   useEffect(() => {
     if (!token) return;
     fetch(`${API_BASE}/api/auth/me`, { headers: authHeaders() })
@@ -341,6 +343,7 @@ const AccountPage: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
+  // ── Fetch orders ──
   const fetchOrders = useCallback(() => {
     if (!token) return;
     setOrdersLoading(true);
@@ -366,6 +369,21 @@ const AccountPage: React.FC = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, token]);
+
+  // ── Fetch messages ──
+  useEffect(() => {
+    if (activeTab !== "messages" || !token || msgsLoaded) return;
+    setMsgsLoading(true);
+    fetch(`${API_BASE}/api/auth/messages`, { headers: authHeaders() })
+      .then((r) => r.json())
+      .then((data) => {
+        setMessages(Array.isArray(data) ? data : []);
+        setMsgsLoaded(true);
+      })
+      .catch(() => setMsgsLoaded(true))
+      .finally(() => setMsgsLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, token, msgsLoaded]);
 
   const flash = (type: "success"|"error", text: string) => {
     setMsg({ type, text });
@@ -443,16 +461,17 @@ const AccountPage: React.FC = () => {
   const handleLogout = () => { logout(); navigate("/"); };
 
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
+  const unreadMsgCount = messages.filter((m) => m.status === "replied" && m.reply).length;
 
   const tabs: { id: Tab; label: string; Icon: React.FC }[] = [
-    { id: "cart",      label: "My Bag",           Icon: () => <IoBagOutline size={14} /> },
-    { id: "orders",    label: "My Orders",        Icon: IconPackage },
-    { id: "addresses", label: "Addresses",        Icon: IconMapPin },
-    { id: "password",  label: "Password",         Icon: IconLock },
-    { id: "profile",   label: "Profile Settings", Icon: IconUser },
+    { id: "cart",      label: "My Bag",     Icon: () => <IoBagOutline size={14} /> },
+    { id: "orders",    label: "My Orders",  Icon: IconPackage },
+    { id: "messages",  label: "Messages",   Icon: IconMessage },
+    { id: "addresses", label: "Addresses",  Icon: IconMapPin },
+    { id: "password",  label: "Password",   Icon: IconLock },
+    { id: "profile",   label: "Profile",    Icon: IconUser },
   ];
 
-  // ── Derive display values (safe even while loading) ──
   const initials    = profile?.name?.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase() ?? "?";
   const memberSince = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString("en-IN", { month: "long", year: "numeric" })
@@ -461,7 +480,7 @@ const AccountPage: React.FC = () => {
   return (
     <div className="acc-page">
 
-      {/* ── Hero — always rendered, never skeleton ── */}
+      {/* ── Hero ── */}
       <div className="acc-hero">
         <div className="acc-hero-inner">
           <div className="acc-hero-left">
@@ -490,7 +509,7 @@ const AccountPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Tab bar — always rendered ── */}
+      {/* ── Tab bar ── */}
       <div className="acc-tabs-bar">
         <div className="acc-tabs-inner">
           {tabs.map(({ id, label, Icon }) => (
@@ -508,12 +527,15 @@ const AccountPage: React.FC = () => {
               {id === "cart" && cartCount > 0 && (
                 <span className="acc-tab-badge acc-tab-badge--gold">{cartCount}</span>
               )}
+              {id === "messages" && unreadMsgCount > 0 && (
+                <span className="acc-tab-badge acc-tab-badge--gold">{unreadMsgCount}</span>
+              )}
             </button>
           ))}
         </div>
       </div>
 
-      {/* ── Content — skeleton only the inner zone ── */}
+      {/* ── Content ── */}
       {loading ? (
         <ContentSkeleton />
       ) : (
@@ -561,6 +583,68 @@ const AccountPage: React.FC = () => {
               {!ordersLoading && orders.length > 0 && (
                 <div className="acc-orders-list">
                   {orders.map((order) => <OrderCard key={order._id} order={order} />)}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Messages */}
+          {activeTab === "messages" && (
+            <section className="acc-section" key="messages">
+              <div className="acc-section-hd">
+                <h2 className="acc-section-title">My Messages</h2>
+                <p className="acc-section-sub">Your contact submissions and our replies</p>
+              </div>
+              {msgsLoading && (
+                <div className="acc-orders-loading">
+                  <div className="acc-orders-spinner" />
+                  <p>Loading messages…</p>
+                </div>
+              )}
+              {!msgsLoading && messages.length === 0 && (
+                <div className="acc-empty">
+                  <div className="acc-empty-icon"><IconMessage /></div>
+                  <div className="acc-empty-title">No messages yet</div>
+                  <p className="acc-empty-desc">
+                    Messages you send via the contact form will appear here along with our replies.
+                  </p>
+                  <Link className="acc-btn acc-btn--primary" to="/contact">Contact Us</Link>
+                </div>
+              )}
+              {!msgsLoading && messages.length > 0 && (
+                <div className="acc-msg-list">
+                  {messages.map((m) => (
+                    <div key={m._id} className="acc-msg-card">
+                      <div className="acc-msg-card-head">
+                        <span className="acc-msg-card-date">
+                          {new Date(m.createdAt).toLocaleDateString("en-IN", {
+                            day: "numeric", month: "short", year: "numeric",
+                          })}
+                        </span>
+                        <span className={`acc-msg-card-status acc-msg-card-status--${m.status}`}>
+                          {m.status}
+                        </span>
+                      </div>
+                      <p className="acc-msg-card-body">{m.message}</p>
+                      {m.reply ? (
+                        <div className="acc-msg-reply">
+                          <span className="acc-msg-reply-label">
+                            <IconMail /> Reply from Lumielle
+                          </span>
+                          <p className="acc-msg-reply-text">{m.reply}</p>
+                          {m.repliedAt && (
+                            <span className="acc-msg-reply-date">
+                              {new Date(m.repliedAt).toLocaleDateString("en-IN", {
+                                day: "numeric", month: "short", year: "numeric",
+                              })}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="acc-msg-pending">We'll get back to you soon.</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </section>

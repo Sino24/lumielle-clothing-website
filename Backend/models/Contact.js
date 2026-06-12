@@ -1,12 +1,14 @@
-
 const mongoose = require("mongoose");
 
 const contactSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, lowercase: true, trim: true },
-    message: { type: String, required: true, trim: true },
-    status: { type: String, enum: ["unread", "read", "replied"], default: "unread" },
+    name:      { type: String, required: true, trim: true },
+    email:     { type: String, required: true, lowercase: true, trim: true },
+    message:   { type: String, required: true, trim: true },
+    status:    { type: String, enum: ["unread", "read", "replied"], default: "unread" },
+    reply:     { type: String, default: "" },
+    repliedAt: { type: Date },
+    userId:    { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
   },
   { timestamps: true }
 );

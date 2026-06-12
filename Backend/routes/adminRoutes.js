@@ -1,24 +1,39 @@
-// routes/adminRoutes.js
-
 const express = require("express");
+const router  = express.Router();
+
 const {
-  signupAdmin,
-  loginAdmin,
-  getAdminProfile,
-  getAllAdmins,
-  deactivateAdmin,
-} = require("../controllers/adminController");
-const { protect } = require("../middleware/authMiddleware");
+  registerUser, loginUser, getMe, updateProfile,
+  changePassword, addAddress, deleteAddress, getAllUsers, deleteUser,
+} = require("../controllers/authController");
 
-const router = express.Router();
+const { protectUser } = require("../middleware/userAuthMiddleware");
+const { protect }     = require("../middleware/authMiddleware");
 
-// Public — invite code required for signup
-router.post("/signup", signupAdmin);
-router.post("/login", loginAdmin);
+const Contact = require("../models/Contact");
 
-// Protected
-router.get("/me", protect, getAdminProfile);
-router.get("/all", protect, getAllAdmins);
-router.patch("/:id/deactivate", protect, deactivateAdmin);
+// ── Public ────────────────────────────────────────────────
+router.post("/register", registerUser);
+router.post("/login",    loginUser);
+
+// ── User-protected ────────────────────────────────────────
+router.get   ("/me",                 protectUser, getMe);
+router.patch ("/profile",            protectUser, updateProfile);
+router.patch ("/password",           protectUser, changePassword);
+router.post  ("/address",            protectUser, addAddress);
+router.delete("/address/:addressId", protectUser, deleteAddress);
+
+// GET /api/auth/messages — messages submitted by the logged-in user
+router.get("/messages", protectUser, async (req, res) => {
+  try {
+    const msgs = await Contact.find({ userId: req.user.id }).sort("-createdAt");
+    res.json(msgs);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ── Admin-only ────────────────────────────────────────────
+router.get   ("/users",     protect, getAllUsers);
+router.delete("/users/:id", protect, deleteUser);
 
 module.exports = router;

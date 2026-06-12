@@ -14,7 +14,7 @@
 }
 
 .amc-page {
-    padding-top: var(--nav-height);
+  padding-top: var(--nav-height);
   min-height: 100vh;
   background: var(--lum-cream);
   font-family: var(--font-body);
@@ -71,6 +71,7 @@
 .amc-btn.ghost  { background: transparent; border: 1px solid var(--lum-border); color: var(--lum-dark); }
 .amc-btn.danger { background: var(--lum-danger); color: #fff; }
 .amc-btn.sm     { padding: 0.45rem 1rem; font-size: 0.68rem; }
+.amc-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
 /* ── Stats ── */
 .amc-stats {
@@ -121,10 +122,9 @@
 }
 
 .amc-msg:last-child { border-bottom: none; }
-
 .amc-msg--unread { background: rgba(201, 169, 110, 0.04); }
 
-/* ── Message head (clickable row) ── */
+/* ── Message head ── */
 .amc-msg-head {
   display: flex;
   align-items: center;
@@ -159,6 +159,9 @@
   font-weight: 500;
   color: var(--lum-dark);
   letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .amc-msg-email {
@@ -190,6 +193,16 @@
   letter-spacing: 0.08em;
   color: var(--lum-muted);
   white-space: nowrap;
+}
+
+/* ── Guest badge ── */
+.amc-guest-badge {
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  background: rgba(26,23,20,0.07);
+  color: var(--lum-muted);
 }
 
 /* ── Status pill ── */
@@ -244,6 +257,73 @@
   padding: 0.45rem 0.85rem;
   cursor: pointer;
   outline: none;
+}
+
+/* ── Reply bubble (existing reply preview) ── */
+.amc-reply-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.85rem 1rem;
+  background: rgba(201,169,110,0.08);
+  border-left: 2px solid var(--lum-gold);
+  margin-bottom: 1rem;
+}
+
+.amc-reply-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lum-gold);
+}
+
+.amc-reply-text {
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  color: var(--lum-dark);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.amc-reply-date {
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--lum-muted);
+}
+
+/* ── Reply composer ── */
+.amc-reply-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.amc-reply-input {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  color: var(--lum-dark);
+  background: #fff;
+  border: 1px solid var(--lum-border);
+  padding: 0.7rem 0.9rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.amc-reply-input:focus  { border-color: var(--lum-gold); }
+.amc-reply-input:disabled { opacity: 0.5; }
+
+/* ── Guest note ── */
+.amc-guest-note {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--lum-muted);
+  font-style: italic;
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px dashed var(--lum-border);
 }
 
 /* ── Loading / Empty ── */
@@ -320,7 +400,7 @@
   color: var(--lum-dark);
   margin-bottom: 0.5rem;
 }
-.amc-confirm-msg   { font-size: 0.78rem; color: var(--lum-muted); letter-spacing: 0.06em; }
+.amc-confirm-msg { font-size: 0.78rem; color: var(--lum-muted); letter-spacing: 0.06em; }
 
 .amc-modal-ft {
   padding: 1.25rem 2rem;

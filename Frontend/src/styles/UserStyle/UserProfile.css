@@ -288,11 +288,69 @@
 }
 
 /* ══════════════════════════════════════════════
+   MESSAGES TAB
+══════════════════════════════════════════════ */
+.acc-msg-list { display: flex; flex-direction: column; gap: 1rem; }
+
+.acc-msg-card {
+  border: 1px solid var(--lum-border);
+  background: #fff;
+  padding: 1.5rem;
+  transition: box-shadow .2s;
+}
+.acc-msg-card:hover { box-shadow: 0 4px 18px rgba(26,23,20,.06); }
+
+.acc-msg-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: .85rem;
+}
+.acc-msg-card-date { font-size: .66rem; letter-spacing: .1em; color: var(--lum-muted); }
+
+.acc-msg-card-status {
+  font-size: .58rem; letter-spacing: .14em; text-transform: uppercase;
+  padding: .18rem .65rem;
+}
+.acc-msg-card-status--unread  { background: rgba(201,169,110,.15); color: #9a6e1a; }
+.acc-msg-card-status--read    { background: rgba(108,158,196,.15); color: #3a6a8c; }
+.acc-msg-card-status--replied { background: rgba(44,74,62,.10);    color: #2c4a3e; }
+
+.acc-msg-card-body {
+  font-size: .82rem; letter-spacing: .03em; color: var(--lum-dark);
+  line-height: 1.7; margin: 0 0 1rem;
+  padding: .85rem 1rem;
+  background: var(--lum-bg);
+  border-left: 2px solid var(--lum-border);
+}
+
+/* Reply block */
+.acc-msg-reply {
+  display: flex; flex-direction: column; gap: .3rem;
+  padding: .85rem 1rem;
+  background: rgba(201,169,110,.06);
+  border-left: 2px solid var(--lum-gold);
+}
+.acc-msg-reply-label {
+  display: flex; align-items: center; gap: .4rem;
+  font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--lum-gold);
+}
+.acc-msg-reply-label svg { width: 11px; height: 11px; }
+.acc-msg-reply-text {
+  font-size: .8rem; letter-spacing: .03em; color: var(--lum-dark);
+  line-height: 1.65; margin: 0;
+}
+.acc-msg-reply-date { font-size: .62rem; letter-spacing: .06em; color: var(--lum-muted); }
+
+.acc-msg-pending {
+  font-size: .68rem; letter-spacing: .08em; color: var(--lum-muted);
+  font-style: italic; margin: 0;
+}
+
+/* ══════════════════════════════════════════════
    CART SECTION
 ══════════════════════════════════════════════ */
 .acc-cart { display: flex; flex-direction: column; }
 
-/* Summary bar */
 .acc-cart__bar {
   display: flex; align-items: center; justify-content: space-between;
   padding: .75rem 0 1.25rem;
@@ -316,7 +374,6 @@
 }
 .acc-cart__clear:hover { color: var(--lum-danger); }
 
-/* Items list */
 .acc-cart__list { display: flex; flex-direction: column; }
 
 .acc-cart__item {
@@ -327,7 +384,6 @@
 }
 .acc-cart__item:last-child { border-bottom: none; }
 
-/* Image */
 .acc-cart__img-wrap {
   width: 64px; height: 84px;
   flex-shrink: 0; overflow: hidden;
@@ -336,7 +392,6 @@
 }
 .acc-cart__img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* Info */
 .acc-cart__item-info { flex: 1; min-width: 0; }
 .acc-cart__item-name {
   font-family: var(--font-display);
@@ -356,13 +411,11 @@
   margin: 0;
 }
 
-/* Controls */
 .acc-cart__item-controls {
   display: flex; align-items: center; gap: 1.25rem;
   flex-shrink: 0;
 }
 
-/* Qty stepper */
 .acc-cart__qty {
   display: flex; align-items: center; gap: 0;
   border: 1px solid var(--lum-border);
@@ -387,7 +440,6 @@
   font-family: var(--font-body);
 }
 
-/* Line total */
 .acc-cart__line-total {
   font-family: var(--font-display);
   font-size: 1.05rem;
@@ -397,7 +449,6 @@
   text-align: right;
 }
 
-/* Remove btn */
 .acc-cart__remove {
   display: flex; align-items: center; justify-content: center;
   background: none; border: none; cursor: pointer;
@@ -406,7 +457,6 @@
 }
 .acc-cart__remove:hover { color: var(--lum-danger); }
 
-/* Footer */
 .acc-cart__footer {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
@@ -433,21 +483,12 @@
   display: flex; gap: .75rem; flex-wrap: wrap;
 }
 
-/* WhatsApp button */
 .acc-btn--whatsapp {
-  background: #25D366;
-  color: #fff;
-  border: none;
+  background: #25D366; color: #fff; border: none;
   display: inline-flex; align-items: center; gap: .5rem;
 }
-.acc-btn--whatsapp:hover:not(:disabled) {
-  background: #1fba59;
-  opacity: 1;
-  transform: translateY(-1px);
-}
-.acc-cart__view-btn {
-  display: inline-flex; align-items: center; gap: .4rem;
-}
+.acc-btn--whatsapp:hover:not(:disabled) { background: #1fba59; opacity: 1; transform: translateY(-1px); }
+.acc-cart__view-btn { display: inline-flex; align-items: center; gap: .4rem; }
 
 /* ══════════════════════════════════════════════
    FORMS
@@ -596,6 +637,9 @@
   .acc-cart__line-total { display: none; }
   .acc-cart__actions { flex-direction: column; }
   .acc-cart__actions .acc-btn { width: 100%; }
+
+  /* Messages mobile */
+  .acc-msg-card { padding: 1.1rem; }
 }
 
 @media (max-width: 380px) {
