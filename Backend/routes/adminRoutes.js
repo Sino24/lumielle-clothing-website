@@ -1,39 +1,25 @@
+// routes/adminRoutes.js
+
 const express = require("express");
 const router  = express.Router();
 
 const {
-  registerUser, loginUser, getMe, updateProfile,
-  changePassword, addAddress, deleteAddress, getAllUsers, deleteUser,
-} = require("../controllers/authController");
+  signupAdmin,
+  loginAdmin,
+  getAdminProfile,
+  getAllAdmins,
+  deactivateAdmin,
+} = require("../controllers/adminController");
 
-const { protectUser } = require("../middleware/userAuthMiddleware");
-const { protect }     = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/authMiddleware"); // sets req.admin
 
-const Contact = require("../models/Contact");
+// ── Public (invite code validated inside controller) ──────
+router.post("/signup", signupAdmin);
+router.post("/login",  loginAdmin);
 
-// ── Public ────────────────────────────────────────────────
-router.post("/register", registerUser);
-router.post("/login",    loginUser);
-
-// ── User-protected ────────────────────────────────────────
-router.get   ("/me",                 protectUser, getMe);
-router.patch ("/profile",            protectUser, updateProfile);
-router.patch ("/password",           protectUser, changePassword);
-router.post  ("/address",            protectUser, addAddress);
-router.delete("/address/:addressId", protectUser, deleteAddress);
-
-// GET /api/auth/messages — messages submitted by the logged-in user
-router.get("/messages", protectUser, async (req, res) => {
-  try {
-    const msgs = await Contact.find({ userId: req.user.id }).sort("-createdAt");
-    res.json(msgs);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// ── Admin-only ────────────────────────────────────────────
-router.get   ("/users",     protect, getAllUsers);
-router.delete("/users/:id", protect, deleteUser);
+// ── Admin-protected ───────────────────────────────────────
+router.get   ("/me",                protect, getAdminProfile);
+router.get   ("/all",               protect, getAllAdmins);
+router.patch ("/:id/deactivate",    protect, deactivateAdmin);
 
 module.exports = router;
