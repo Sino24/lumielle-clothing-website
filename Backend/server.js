@@ -19,6 +19,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173",
     "https://lumielle-clothing-website.vercel.app",
+    "https://sundesk-procurement.vercel.app",
   ],
   credentials: true,
 }));
