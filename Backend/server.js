@@ -47,6 +47,7 @@ app.use("/api/hero",            require("./routes/heroRoutes"));
 app.use("/api/client-projects", require("./routes/clientProjectRoutes"));
 app.use("/api/ratings",         require("./routes/ratingRoutes"));
 app.use("/api/cart",            require("./routes/cartRoutes"));
+app.use("/api/checklists",      require("./checklist/checklistRoutes"));
 
 app.get("/", (req, res) => res.send("API Running..."));
 
